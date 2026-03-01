@@ -2,14 +2,17 @@ import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import ThemeToggle from "../../components/ThemeToggle";
 import UserAvatar from "../../components/UserAvatar";
+import StudentPortalAccess from "../stdadmin/StudentPortalAccess";
+import StaffManagement from "./StaffManagement";
+import AuditLogs from "./AuditLogs";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
 
 const NAV_ITEMS = [
     { id: "dashboard", label: "Dashboard", icon: "bi-grid-1x2-fill" },
-    { id: "users", label: "User Management", icon: "bi-people-fill" },
-    { id: "system", label: "System Settings", icon: "bi-gear-fill" },
+    { id: "students", label: "Manage Students", icon: "bi-mortarboard-fill" },
+    { id: "staff", label: "Manage Staff", icon: "bi-people-fill" },
     { id: "logs", label: "Audit Logs", icon: "bi-journal-text" },
 ];
 
@@ -28,7 +31,7 @@ function WebAdminDashboard() {
 
     const handleLogout = () => {
         ["token", "user_name", "profile_image", "user_role", "is_temp_password"].forEach(k => localStorage.removeItem(k));
-        window.location.href = "/login";
+        window.location.href = "/";
     };
 
     return (
@@ -51,7 +54,7 @@ function WebAdminDashboard() {
                 </nav>
                 <div className="sidebar-footer">
                     <button className="sidebar-logout" onClick={handleLogout}>
-                        <i className="bi bi-box-arrow-left" /> Logout
+                        <i className="bi-box-arrow-left" /> Logout
                     </button>
                 </div>
             </aside>
@@ -59,7 +62,7 @@ function WebAdminDashboard() {
             <div className="dash-main">
                 <header className="dash-topbar">
                     <button className="sidebar-toggle" onClick={() => setSidebarOpen(o => !o)}>
-                        <i className="bi bi-list" />
+                        <i className="bi-list" />
                     </button>
                     <div className="topbar-right">
                         <ThemeToggle />
@@ -82,20 +85,17 @@ function WebAdminDashboard() {
                                         <i className={`bi ${item.icon} dash-card-icon`} />
                                         <div>
                                             <div className="dash-card-title">{item.label}</div>
-                                            <div className="dash-card-sub">Coming soon</div>
+                                            <div className="dash-card-sub">Access {item.label.toLowerCase()}</div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     )}
-                    {activeNav !== "dashboard" && (
-                        <div className="coming-soon">
-                            <i className={`bi ${NAV_ITEMS.find(i => i.id === activeNav)?.icon} coming-soon-icon`} />
-                            <h3>{NAV_ITEMS.find(i => i.id === activeNav)?.label}</h3>
-                            <p>This section is under development. Check back soon!</p>
-                        </div>
-                    )}
+
+                    {activeNav === "students" && <StudentPortalAccess />}
+                    {activeNav === "staff" && <StaffManagement />}
+                    {activeNav === "logs" && <AuditLogs />}
                 </main>
             </div>
         </div>
