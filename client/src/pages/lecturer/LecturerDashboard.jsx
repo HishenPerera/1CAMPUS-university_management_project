@@ -51,7 +51,7 @@ function LecturerDashboard() {
                 </nav>
                 <div className="sidebar-footer">
                     <button className="sidebar-logout" onClick={handleLogout}>
-                        <i className="bi bi-box-arrow-left" /> Logout
+                        <i className="bi bi-box-arrow-left" /> Logoutt
                     </button>
                 </div>
             </aside>
