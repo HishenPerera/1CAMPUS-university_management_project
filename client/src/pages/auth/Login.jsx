@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../../api/axiosInstance";
+import ThemeToggle from "../../components/ThemeToggle";
+import { useTheme } from "../../context/ThemeContext";
+import darkLogo from "../../assets/darkLogo.png";
+import lightLogo from "../../assets/lightLogo.png";
 import "./Login.css";
 
 function Login() {
@@ -9,27 +13,24 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  const logo = theme === "light" ? lightLogo : darkLogo;
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
       const res = await axios.post("/auth/login", { email, password });
-
       localStorage.setItem("token", res.data.token);
       const role = res.data.user.role;
-
       if (role === "student") navigate("/student");
       else if (role === "lecturer") navigate("/lecturer");
       else if (role === "admin_staff") navigate("/admin");
       else if (role === "web_admin") navigate("/webadmin");
       else setError("Unknown role. Please contact support.");
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Invalid credentials. Please try again."
-      );
+      setError(err.response?.data?.message || "Invalid credentials. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -38,10 +39,12 @@ function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-        {/* Logo / Branding */}
+        <div className="login-theme-toggle">
+          <ThemeToggle />
+        </div>
+
         <div className="login-brand">
-          <div className="login-logo">1C</div>
-          <h1 className="login-title">1CAMPUS</h1>
+          <img src={logo} alt="1CAMPUS" className="login-logo-img" />
           <p className="login-subtitle">University Management System</p>
         </div>
 
@@ -85,19 +88,11 @@ function Login() {
             className={`login-btn ${loading ? "login-btn--loading" : ""}`}
             disabled={loading}
           >
-            {loading ? (
-              <>
-                <span className="spinner" /> Signing in…
-              </>
-            ) : (
-              "Sign In"
-            )}
+            {loading ? (<><span className="spinner" /> Signing in…</>) : "Sign In"}
           </button>
         </form>
 
-        <p className="login-footer">
-          © 2026 1CAMPUS · All rights reserved
-        </p>
+        <p className="login-footer">© 2026 1CAMPUS · All rights reserved</p>
       </div>
     </div>
   );
