@@ -1,0 +1,113 @@
+/* ── UserAvatar ───────────────────────────────────────────────────── */
+.user-avatar {
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand-deep), var(--brand-primary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px rgba(26, 127, 232, 0.4),
+        0 4px 12px rgba(0, 58, 153, 0.35);
+    cursor: default;
+    transition: box-shadow 0.2s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.user-avatar--clickable {
+    cursor: pointer;
+}
+
+/* Subtle inner glow ring */
+.user-avatar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1.5px solid rgba(125, 216, 255, 0.35);
+    pointer-events: none;
+    z-index: 3;
+}
+
+.user-avatar:hover {
+    box-shadow: 0 0 0 3px rgba(26, 127, 232, 0.6),
+        0 6px 18px rgba(0, 58, 153, 0.45);
+    transform: scale(1.05);
+}
+
+/* Real photo */
+.user-avatar__photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+}
+
+/* Initials fallback */
+.user-avatar__initials {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #fff;
+    line-height: 1;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    user-select: none;
+    position: relative;
+    z-index: 1;
+}
+
+/* Upload hover overlay */
+.user-avatar__overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0, 20, 60, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 2;
+}
+
+.user-avatar--clickable:hover .user-avatar__overlay {
+    opacity: 1;
+}
+
+/* Hidden file input */
+.user-avatar__file-input {
+    display: none;
+}
+
+/* Sizes */
+.user-avatar--md {
+    width: 40px;
+    height: 40px;
+}
+
+.user-avatar--md .user-avatar__initials {
+    font-size: 0.9rem;
+}
+
+.user-avatar--sm {
+    width: 30px;
+    height: 30px;
+}
+
+.user-avatar--sm .user-avatar__initials {
+    font-size: 0.7rem;
+}
+
+/* Light mode */
+[data-theme="light"] .user-avatar {
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-deep));
+    box-shadow: 0 0 0 2px rgba(0, 58, 153, 0.25),
+        0 4px 12px rgba(0, 58, 153, 0.2);
+}
+
+[data-theme="light"] .user-avatar:hover {
+    box-shadow: 0 0 0 3px rgba(0, 58, 153, 0.4),
+        0 6px 18px rgba(0, 58, 153, 0.28);
+}

@@ -1,0 +1,207 @@
+/* ── Google Fonts ─────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* ── Reset & Base ─────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ── Brand Palette (logo-matched) ─────────────────────────────────── */
+:root {
+  --brand-deep: #003a99;
+  /* deep navy */
+  --brand-primary: #1a7fe8;
+  /* electric blue */
+  --brand-light: #7DD8FF;
+  /* sky cyan */
+  --brand-glow: rgba(26, 127, 232, 0.35);
+  --brand-glow-lg: rgba(26, 127, 232, 0.55);
+
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Dark theme (default) ─────────────────────────────────────────── */
+:root,
+[data-theme="dark"] {
+  --bg-base: #030d1c;
+  --bg-gradient: linear-gradient(135deg, #030d1c 0%, #071a38 45%, #04112a 100%);
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-hover: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.09);
+  --border-focus: var(--brand-primary);
+
+  --text-primary: #f0f6ff;
+  --text-secondary: rgba(200, 220, 255, 0.55);
+  --text-muted: rgba(180, 205, 255, 0.25);
+
+  --header-bg: rgba(3, 13, 28, 0.7);
+  --card-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(26, 127, 232, 0.08);
+}
+
+/* ── Light theme ──────────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg-base: #e8f4ff;
+  --bg-gradient: linear-gradient(135deg, #daeeff 0%, #eef7ff 50%, #d0eaff 100%);
+  --surface: rgba(255, 255, 255, 0.75);
+  --surface-hover: rgba(255, 255, 255, 0.9);
+  --border: rgba(26, 127, 232, 0.18);
+  --border-focus: var(--brand-primary);
+
+  --text-primary: #061d3c;
+  --text-secondary: rgba(6, 29, 60, 0.6);
+  --text-muted: rgba(6, 29, 60, 0.35);
+
+  --header-bg: rgba(232, 244, 255, 0.8);
+  --card-shadow: 0 25px 60px rgba(0, 58, 153, 0.15), 0 0 0 1px rgba(26, 127, 232, 0.12);
+}
+
+/* ── Smooth theme transition ──────────────────────────────────────── */
+body,
+.dashboard-page,
+.dashboard-header,
+.login-page {
+  transition: background 0.35s ease, background-color 0.35s ease, color 0.35s ease;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--bg-gradient);
+  color: var(--text-primary);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  font-weight: 500;
+  color: var(--brand-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--brand-light);
+}
+
+/* ── Shared Dashboard Styles ─────────────────────────────────────── */
+.dashboard-page {
+  min-height: 100vh;
+  background: var(--bg-gradient);
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 2rem;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.dashboard-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+/* Real logo image in the header */
+.dashboard-logo-img {
+  width: 210px;
+  height: 60px;
+  object-fit: cover;
+  object-position: 50% 50%;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 8px rgba(26, 127, 232, 0.55));
+  transition: filter 0.3s;
+}
+
+[data-theme="light"] .dashboard-logo-img {
+  filter: drop-shadow(0 0 6px rgba(0, 58, 153, 0.3));
+}
+
+.dashboard-logo-text {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Header right actions */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+/* Logout button */
+.logout-btn {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  border-radius: 8px;
+  padding: 0.42rem 1rem;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  font-family: inherit;
+}
+
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: translateY(-1px);
+}
+
+[data-theme="light"] .logout-btn {
+  color: #dc2626;
+}
+
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.dashboard-greeting {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--brand-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dashboard-desc {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0;
+}
