@@ -6,9 +6,9 @@ const {
 } = require("../controllers/adminController");
 const verifyToken = require("../middleware/authMiddleware");
 
-// Role guard — admin_staff only
+// Role guard — admin_staff or web_admin
 const requireAdmin = (req, res, next) => {
-    if (req.user?.role !== "admin_staff") {
+    if (!req.user || !["admin_staff", "web_admin"].includes(req.user.role)) {
         return res.status(403).json({ message: "Admin access required" });
     }
     next();

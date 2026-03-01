@@ -4,6 +4,7 @@ const {
     updateStudentRecord, deleteStudentFull,
 } = require("../models/studentModel");
 const { createUser } = require("../models/userModel");
+const logActivity = require("../utils/logger");
 
 /* Generate 3 random temp passwords */
 const generateTempPasswords = () => {
@@ -75,6 +76,7 @@ const addStudent = async (req, res) => {
             studying_year, semester, address, enrolled_date,
         });
 
+        await logActivity(req.user.id, "CREATE_STUDENT", `Created student profile/login for ${email} (${registration_number})`);
         res.status(201).json({ message: "Student created successfully", student });
     } catch (err) {
         console.error(err);
@@ -101,6 +103,7 @@ const editStudent = async (req, res) => {
 const removeStudent = async (req, res) => {
     try {
         await deleteStudentFull(req.params.id);
+        await logActivity(req.user.id, "DELETE_STUDENT", `Deleted student record ID ${req.params.id}`);
         res.json({ message: "Student deleted successfully" });
     } catch (err) {
         console.error(err);
