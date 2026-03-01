@@ -5,12 +5,22 @@ function StudentDashboard() {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Student Dashboard</h1>
-      <p>Welcome, Student!</p>
-      <button onClick={handleLogout}>Logout</button>
-    </div>
-  );
+        <div className="dashboard-page">
+            <header className="dashboard-header">
+                <div className="dashboard-brand">
+                    <div className="dashboard-logo">1C</div>
+                    <span className="dashboard-logo-text">1CAMPUS</span>
+                </div>
+                <button className="logout-btn" onClick={handleLogout}>
+                    Logout
+                </button>
+            </header>
+            <main className="dashboard-main">
+                <h1 className="dashboard-greeting">Welcome, Student 👋</h1>
+                <p className="dashboard-desc">Student tools are coming soon!</p>
+            </main>
+        </div>
+    );
 }
 
 export default StudentDashboard;
