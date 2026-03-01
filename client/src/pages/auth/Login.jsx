@@ -23,6 +23,8 @@ function Login() {
     try {
       const res = await axios.post("/auth/login", { email, password });
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user_name", res.data.user.full_name || "");
+      localStorage.setItem("profile_image", res.data.user.profile_image || "");
       const role = res.data.user.role;
       if (role === "student") navigate("/student");
       else if (role === "lecturer") navigate("/lecturer");
