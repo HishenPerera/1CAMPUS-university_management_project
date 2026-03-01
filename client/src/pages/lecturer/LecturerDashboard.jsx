@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import ThemeToggle from "../../components/ThemeToggle";
 import UserAvatar from "../../components/UserAvatar";
+import LecturerCourses from "./LecturerCourses";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
@@ -28,7 +29,7 @@ function LecturerDashboard() {
 
     const handleLogout = () => {
         ["token", "user_name", "profile_image", "user_role", "is_temp_password"].forEach(k => localStorage.removeItem(k));
-        window.location.href = "/login";
+        window.location.href = "/";
     };
 
     return (
@@ -89,7 +90,8 @@ function LecturerDashboard() {
                             </div>
                         </div>
                     )}
-                    {activeNav !== "dashboard" && (
+                    {activeNav === "courses" && <LecturerCourses />}
+                    {activeNav !== "dashboard" && activeNav !== "courses" && (
                         <div className="coming-soon">
                             <i className={`bi ${NAV_ITEMS.find(i => i.id === activeNav)?.icon} coming-soon-icon`} />
                             <h3>{NAV_ITEMS.find(i => i.id === activeNav)?.label}</h3>

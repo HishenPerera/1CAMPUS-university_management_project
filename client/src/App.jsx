@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
+import LandingPage from "./pages/public/LandingPage";
+import ApplicationForm from "./pages/public/ApplicationForm";
 import Login from "./pages/auth/Login";
 import ChangePassword from "./pages/auth/ChangePassword";
 import StudentDashboard from "./pages/student/StudentDashboard";
@@ -20,6 +22,8 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/apply" element={<ApplicationForm />} />
         <Route path="/login" element={<Login />} />
 
         {/* Force password change route (requires valid token) */}
@@ -65,7 +69,7 @@ function App() {
           }
         />
 
-        <Route path="/" element={<Login />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );
