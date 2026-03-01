@@ -2,14 +2,14 @@ import { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import ThemeToggle from "../../components/ThemeToggle";
 import UserAvatar from "../../components/UserAvatar";
-import StudentManagement from "./StudentManagement";
+import StudentPortalAccess from "./StudentPortalAccess";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
-import "./StdAdminDashboard.css";
+import "../../components/DashboardLayout.css";
 
 const NAV_ITEMS = [
     { id: "dashboard", label: "Dashboard", icon: "⊞" },
-    { id: "students", label: "Student Management", icon: "🎓" },
+    { id: "students", label: "Student Portal Access", icon: "🎓" },
 ];
 
 function StdAdminDashboard() {
@@ -20,31 +20,26 @@ function StdAdminDashboard() {
     const [activeNav, setActiveNav] = useState("dashboard");
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
-    const handleAvatarUpload = (newUrl) => {
-        setProfileImage(newUrl);
-        localStorage.setItem("profile_image", newUrl);
+    const handleAvatarUpload = (url) => {
+        setProfileImage(url);
+        localStorage.setItem("profile_image", url);
     };
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user_name");
-        localStorage.removeItem("profile_image");
-        localStorage.removeItem("user_role");
-        localStorage.removeItem("is_temp_password");
+        ["token", "user_name", "profile_image", "user_role", "is_temp_password"].forEach(k => localStorage.removeItem(k));
         window.location.href = "/login";
     };
 
     return (
-        <div className={`stdadmin-layout ${sidebarOpen ? "sidebar-open" : "sidebar-closed"}`}>
+        <div className={`dash-layout ${sidebarOpen ? "" : "sidebar-closed"}`}>
 
-            {/* ── Sidebar ──────────────────────────────────────────────── */}
-            <aside className="stdadmin-sidebar">
+            {/* Sidebar */}
+            <aside className="dash-sidebar">
                 <div className="sidebar-logo-wrap">
                     <img src={logo} alt="1CAMPUS" className="sidebar-logo" />
                 </div>
-
                 <nav className="sidebar-nav">
-                    {NAV_ITEMS.map((item) => (
+                    {NAV_ITEMS.map(item => (
                         <button
                             key={item.id}
                             className={`sidebar-nav-item ${activeNav === item.id ? "active" : ""}`}
@@ -55,7 +50,6 @@ function StdAdminDashboard() {
                         </button>
                     ))}
                 </nav>
-
                 <div className="sidebar-footer">
                     <button className="sidebar-logout" onClick={handleLogout}>
                         <span>⎋</span> Logout
@@ -63,25 +57,13 @@ function StdAdminDashboard() {
                 </div>
             </aside>
 
-            {/* ── Main Area ────────────────────────────────────────────── */}
-            <div className="stdadmin-main">
-
-                {/* Top bar */}
-                <header className="stdadmin-topbar">
-                    <button
-                        className="sidebar-toggle"
-                        onClick={() => setSidebarOpen((o) => !o)}
-                        title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-                    >
-                        ☰
-                    </button>
+            {/* Main */}
+            <div className="dash-main">
+                <header className="dash-topbar">
+                    <button className="sidebar-toggle" onClick={() => setSidebarOpen(o => !o)}>☰</button>
                     <div className="topbar-right">
                         <ThemeToggle />
-                        <UserAvatar
-                            name={userName}
-                            imageUrl={profileImage || undefined}
-                            onUpload={handleAvatarUpload}
-                        />
+                        <UserAvatar name={userName} imageUrl={profileImage || undefined} onUpload={handleAvatarUpload} />
                         <div className="topbar-user">
                             <span className="topbar-name">{userName || "Admin"}</span>
                             <span className="topbar-role">Admin Staff</span>
@@ -89,28 +71,25 @@ function StdAdminDashboard() {
                     </div>
                 </header>
 
-                {/* Content */}
-                <main className="stdadmin-content">
+                <main className="dash-content">
                     {activeNav === "dashboard" && (
-                        <div className="stdadmin-home">
+                        <div className="dash-home">
                             <h1 className="dash-greeting">
                                 Welcome back{userName ? `, ${userName.split(" ")[0]}` : ""} 👋
                             </h1>
                             <p className="dash-desc">Use the sidebar to manage students and administration tasks.</p>
-
                             <div className="dash-cards">
                                 <div className="dash-card" onClick={() => setActiveNav("students")}>
                                     <div className="dash-card-icon">🎓</div>
                                     <div>
-                                        <div className="dash-card-title">Student Management</div>
-                                        <div className="dash-card-sub">Add, view & remove students</div>
+                                        <div className="dash-card-title">Student Portal Access</div>
+                                        <div className="dash-card-sub">Add, view & manage student profiles</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     )}
-
-                    {activeNav === "students" && <StudentManagement />}
+                    {activeNav === "students" && <StudentPortalAccess />}
                 </main>
             </div>
         </div>

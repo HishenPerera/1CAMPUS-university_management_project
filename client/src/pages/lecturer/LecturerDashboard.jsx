@@ -4,47 +4,101 @@ import ThemeToggle from "../../components/ThemeToggle";
 import UserAvatar from "../../components/UserAvatar";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
+import "../../components/DashboardLayout.css";
+
+const NAV_ITEMS = [
+    { id: "dashboard", label: "Dashboard", icon: "⊞" },
+    { id: "courses", label: "My Courses", icon: "📚" },
+    { id: "timetable", label: "Timetable", icon: "🗓" },
+    { id: "grades", label: "Grade Entry", icon: "📝" },
+];
 
 function LecturerDashboard() {
     const { theme } = useTheme();
     const logo = theme === "light" ? lightLogo : darkLogo;
     const userName = localStorage.getItem("user_name") || "";
-    const [profileImage, setProfileImage] = useState(
-        localStorage.getItem("profile_image") || ""
-    );
+    const [profileImage, setProfileImage] = useState(localStorage.getItem("profile_image") || "");
+    const [activeNav, setActiveNav] = useState("dashboard");
+    const [sidebarOpen, setSidebarOpen] = useState(true);
 
-    const handleAvatarUpload = (newUrl) => {
-        setProfileImage(newUrl);
-        localStorage.setItem("profile_image", newUrl);
+    const handleAvatarUpload = (url) => {
+        setProfileImage(url);
+        localStorage.setItem("profile_image", url);
     };
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user_name");
-        localStorage.removeItem("profile_image");
+        ["token", "user_name", "profile_image", "user_role", "is_temp_password"].forEach(k => localStorage.removeItem(k));
         window.location.href = "/login";
     };
 
     return (
-        <div className="dashboard-page">
-            <header className="dashboard-header">
-                <div className="dashboard-brand">
-                    <img src={logo} alt="1CAMPUS" className="dashboard-logo-img" />
+        <div className={`dash-layout ${sidebarOpen ? "" : "sidebar-closed"}`}>
+
+            {/* Sidebar */}
+            <aside className="dash-sidebar">
+                <div className="sidebar-logo-wrap">
+                    <img src={logo} alt="1CAMPUS" className="sidebar-logo" />
                 </div>
-                <div className="header-actions">
-                    <ThemeToggle />
-                    <UserAvatar
-                        name={userName}
-                        imageUrl={profileImage || undefined}
-                        onUpload={handleAvatarUpload}
-                    />
-                    <button className="logout-btn" onClick={handleLogout}>Logout</button>
+                <nav className="sidebar-nav">
+                    {NAV_ITEMS.map(item => (
+                        <button
+                            key={item.id}
+                            className={`sidebar-nav-item ${activeNav === item.id ? "active" : ""}`}
+                            onClick={() => setActiveNav(item.id)}
+                        >
+                            <span className="nav-icon">{item.icon}</span>
+                            <span className="nav-label">{item.label}</span>
+                        </button>
+                    ))}
+                </nav>
+                <div className="sidebar-footer">
+                    <button className="sidebar-logout" onClick={handleLogout}>
+                        <span>⎋</span> Logout
+                    </button>
                 </div>
-            </header>
-            <main className="dashboard-main">
-                <h1 className="dashboard-greeting">Welcome back{userName ? `, ${userName.split(" ")[0]}` : ""} 👋</h1>
-                <p className="dashboard-desc">Your teaching dashboard is on its way. Stay tuned!</p>
-            </main>
+            </aside>
+
+            {/* Main */}
+            <div className="dash-main">
+                <header className="dash-topbar">
+                    <button className="sidebar-toggle" onClick={() => setSidebarOpen(o => !o)}>☰</button>
+                    <div className="topbar-right">
+                        <ThemeToggle />
+                        <UserAvatar name={userName} imageUrl={profileImage || undefined} onUpload={handleAvatarUpload} />
+                        <div className="topbar-user">
+                            <span className="topbar-name">{userName || "Lecturer"}</span>
+                            <span className="topbar-role">Lecturer</span>
+                        </div>
+                    </div>
+                </header>
+
+                <main className="dash-content">
+                    {activeNav === "dashboard" && (
+                        <div className="dash-home">
+                            <h1 className="dash-greeting">Welcome back{userName ? `, ${userName.split(" ")[0]}` : ""} 👋</h1>
+                            <p className="dash-desc">Manage your courses, grades and timetable from the sidebar.</p>
+                            <div className="dash-cards">
+                                {NAV_ITEMS.filter(i => i.id !== "dashboard").map(item => (
+                                    <div key={item.id} className="dash-card" onClick={() => setActiveNav(item.id)}>
+                                        <div className="dash-card-icon">{item.icon}</div>
+                                        <div>
+                                            <div className="dash-card-title">{item.label}</div>
+                                            <div className="dash-card-sub">Coming soon</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    {activeNav !== "dashboard" && (
+                        <div className="coming-soon">
+                            <div className="coming-soon-icon">{NAV_ITEMS.find(i => i.id === activeNav)?.icon}</div>
+                            <h3>{NAV_ITEMS.find(i => i.id === activeNav)?.label}</h3>
+                            <p>This section is under development. Check back soon!</p>
+                        </div>
+                    )}
+                </main>
+            </div>
         </div>
     );
 }
