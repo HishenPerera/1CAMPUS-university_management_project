@@ -1,0 +1,364 @@
+/* ── Landing Page Styles ────────────────────────────────────────────── */
+
+.lp-container {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+}
+
+/* ── Navigation ──────────────────────────────────────────────────────── */
+.lp-nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(var(--bg-rgb), 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+    padding: 0.75rem 2rem;
+}
+
+.lp-nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.lp-logo {
+    height: 48px;
+    width: auto;
+    object-fit: contain;
+}
+
+.lp-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.lp-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+
+.lp-link:hover {
+    color: var(--brand-primary);
+}
+
+.lp-login-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px var(--shadow);
+}
+
+.lp-login-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+    transform: translateY(-1px);
+}
+
+/* ── Hero ────────────────────────────────────────────────────────────── */
+.lp-hero {
+    padding: 10rem 2rem 6rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.lp-hero-content {
+    max-width: 760px;
+}
+
+.lp-badge {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    background: rgba(26, 127, 232, 0.1);
+    color: var(--brand-primary);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(26, 127, 232, 0.2);
+}
+
+[data-theme="dark"] .lp-badge {
+    border-color: rgba(26, 127, 232, 0.4);
+}
+
+.lp-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.15;
+    margin: 0 0 1.5rem;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, var(--brand-primary) 0%, #865fff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.lp-subtitle {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin: 0 auto 2.5rem;
+}
+
+.lp-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.lp-cta-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, var(--brand-primary), #1168c4);
+    color: rgba(255, 255, 255, 0.95);
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1.05rem;
+    box-shadow: 0 8px 24px rgba(26, 127, 232, 0.35);
+    transition: all 0.2s;
+}
+
+.lp-cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(26, 127, 232, 0.45);
+    color: white;
+}
+
+.lp-secondary-btn {
+    padding: 1rem 2rem;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    transition: all 0.2s;
+}
+
+.lp-secondary-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--text-muted);
+}
+
+/* ── Promos Grid ─────────────────────────────────────────────────────── */
+.lp-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+}
+
+.lp-section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.lp-section-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.lp-section-subtitle {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.lp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.lp-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 12px var(--shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.lp-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px var(--shadow);
+    border-color: var(--brand-primary);
+}
+
+.lp-card-img {
+    height: 180px;
+    background-size: cover;
+    background-position: center;
+}
+
+/* Placeholders for event images */
+.temp-img-1 {
+    background: linear-gradient(135deg, #1A7FE8, #0A539B);
+}
+
+.temp-img-2 {
+    background: linear-gradient(135deg, #865FFF, #5336AB);
+}
+
+.temp-img-3 {
+    background: linear-gradient(135deg, #36BC72, #1E824C);
+}
+
+.lp-card-body {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.lp-card-tag {
+    display: inline-block;
+    padding: 0.3rem 0.6rem;
+    background: rgba(26, 127, 232, 0.1);
+    color: var(--brand-primary);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    width: fit-content;
+}
+
+.lp-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+    color: var(--text-primary);
+}
+
+.lp-card-text {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0 0 1.5rem;
+    flex: 1;
+}
+
+.lp-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+/* ── Banner ──────────────────────────────────────────────────────────── */
+.lp-banner {
+    padding: 5rem 2rem;
+    margin-top: 5rem;
+    background: linear-gradient(135deg, var(--brand-primary), #0d5aa8);
+}
+
+.lp-banner-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.lp-banner h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.lp-banner p {
+    font-size: 1.15rem;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.lp-cta-btn--light {
+    background: white;
+    color: var(--brand-primary);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.lp-cta-btn--light:hover {
+    background: #f8f9fa;
+    color: var(--brand-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────── */
+.lp-footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center;
+}
+
+.lp-footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.lp-footer-logo {
+    height: 40px;
+}
+
+.lp-footer p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}

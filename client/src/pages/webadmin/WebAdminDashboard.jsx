@@ -31,7 +31,7 @@ function WebAdminDashboard() {
 
     const handleLogout = () => {
         ["token", "user_name", "profile_image", "user_role", "is_temp_password"].forEach(k => localStorage.removeItem(k));
-        window.location.href = "/login";
+        window.location.href = "/";
     };
 
     return (
