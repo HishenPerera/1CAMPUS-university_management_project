@@ -1,0 +1,306 @@
+/* ── My Profile Page ─────────────────────────────────────────────── */
+.mp-page {
+    padding: 2rem;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+/* Hero card */
+.mp-hero {
+    background: linear-gradient(135deg, rgba(0, 58, 153, 0.12), rgba(26, 127, 232, 0.08));
+    border: 1px solid rgba(26, 127, 232, 0.2);
+    border-radius: 20px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+    flex-wrap: wrap;
+}
+
+.mp-hero-avatar {
+    position: relative;
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.mp-hero-photo,
+.mp-hero-initials {
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, var(--brand-deep), var(--brand-primary));
+    box-shadow: 0 6px 24px rgba(26, 127, 232, 0.5);
+}
+
+/* Overlay the UserAvatar upload button invisibly on top of the hero avatar */
+.mp-hero-avatar-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.mp-hero-avatar:hover .mp-hero-avatar-overlay {
+    opacity: 1;
+}
+
+.mp-hero-avatar-overlay .user-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+
+.mp-hero-info {
+    flex: 1;
+}
+
+.mp-hero-name {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem;
+}
+
+.mp-hero-reg {
+    font-size: 0.82rem;
+    color: var(--brand-primary);
+    font-family: monospace;
+    margin: 0 0 0.25rem;
+}
+
+.mp-hero-degree {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.mp-hero-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.mp-tag {
+    background: rgba(26, 127, 232, 0.12);
+    color: var(--brand-primary);
+    border: 1px solid rgba(26, 127, 232, 0.2);
+    border-radius: 20px;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.mp-tag--active {
+    background: rgba(34, 197, 94, 0.12);
+    color: #4ade80;
+    border-color: rgba(34, 197, 94, 0.25);
+}
+
+.mp-tag--inactive {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* Columns */
+.mp-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (max-width: 720px) {
+    .mp-columns {
+        grid-template-columns: 1fr;
+    }
+}
+
+.mp-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mp-section-title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.mp-readonly-hint {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+/* Read-only grid */
+.mp-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.mp-info-card {
+    border-radius: 9px;
+    padding: 0.65rem 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.mp-info-card--readonly {
+    background: rgba(148, 163, 184, 0.06);
+    border: 1px solid var(--border);
+}
+
+.mp-info-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+}
+
+.mp-info-value {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Avatar upload hint */
+.mp-avatar-hint {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(26, 127, 232, 0.06);
+    border: 1px solid rgba(26, 127, 232, 0.15);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+}
+
+.mp-avatar-hint-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.2rem;
+}
+
+.mp-avatar-hint-sub {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Edit form */
+.mp-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mp-save-btn {
+    background: linear-gradient(135deg, var(--brand-deep), var(--brand-primary));
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8rem 1.6rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 14px var(--brand-glow);
+    transition: opacity 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    align-self: flex-start;
+}
+
+.mp-save-btn:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.mp-save-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* States */
+.mp-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-secondary);
+    padding: 3rem 2rem;
+    font-size: 0.9rem;
+}
+
+.mp-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--brand-primary);
+    border-radius: 50%;
+    animation: mpspin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+.mp-spinner--sm {
+    width: 14px;
+    height: 14px;
+}
+
+@keyframes mpspin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.mp-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #f87171;
+    border-radius: 8px;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.85rem;
+}
+
+.mp-error-full {
+    padding: 3rem 2rem;
+    color: #f87171;
+}
+
+.mp-success {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    color: #4ade80;
+    border-radius: 8px;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}

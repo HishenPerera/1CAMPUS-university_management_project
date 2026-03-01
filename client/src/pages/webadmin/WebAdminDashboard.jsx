@@ -7,10 +7,10 @@ import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
 
 const NAV_ITEMS = [
-    { id: "dashboard", label: "Dashboard", icon: "⊞" },
-    { id: "users", label: "User Management", icon: "👥" },
-    { id: "system", label: "System Settings", icon: "⚙️" },
-    { id: "logs", label: "Audit Logs", icon: "📋" },
+    { id: "dashboard", label: "Dashboard", icon: "bi-grid-1x2-fill" },
+    { id: "users", label: "User Management", icon: "bi-people-fill" },
+    { id: "system", label: "System Settings", icon: "bi-gear-fill" },
+    { id: "logs", label: "Audit Logs", icon: "bi-journal-text" },
 ];
 
 function WebAdminDashboard() {
@@ -33,8 +33,6 @@ function WebAdminDashboard() {
 
     return (
         <div className={`dash-layout ${sidebarOpen ? "" : "sidebar-closed"}`}>
-
-            {/* Sidebar */}
             <aside className="dash-sidebar">
                 <div className="sidebar-logo-wrap">
                     <img src={logo} alt="1CAMPUS" className="sidebar-logo" />
@@ -46,22 +44,23 @@ function WebAdminDashboard() {
                             className={`sidebar-nav-item ${activeNav === item.id ? "active" : ""}`}
                             onClick={() => setActiveNav(item.id)}
                         >
-                            <span className="nav-icon">{item.icon}</span>
+                            <i className={`bi ${item.icon} nav-icon`} />
                             <span className="nav-label">{item.label}</span>
                         </button>
                     ))}
                 </nav>
                 <div className="sidebar-footer">
                     <button className="sidebar-logout" onClick={handleLogout}>
-                        <span>⎋</span> Logout
+                        <i className="bi bi-box-arrow-left" /> Logout
                     </button>
                 </div>
             </aside>
 
-            {/* Main */}
             <div className="dash-main">
                 <header className="dash-topbar">
-                    <button className="sidebar-toggle" onClick={() => setSidebarOpen(o => !o)}>☰</button>
+                    <button className="sidebar-toggle" onClick={() => setSidebarOpen(o => !o)}>
+                        <i className="bi bi-list" />
+                    </button>
                     <div className="topbar-right">
                         <ThemeToggle />
                         <UserAvatar name={userName} imageUrl={profileImage || undefined} onUpload={handleAvatarUpload} />
@@ -80,7 +79,7 @@ function WebAdminDashboard() {
                             <div className="dash-cards">
                                 {NAV_ITEMS.filter(i => i.id !== "dashboard").map(item => (
                                     <div key={item.id} className="dash-card" onClick={() => setActiveNav(item.id)}>
-                                        <div className="dash-card-icon">{item.icon}</div>
+                                        <i className={`bi ${item.icon} dash-card-icon`} />
                                         <div>
                                             <div className="dash-card-title">{item.label}</div>
                                             <div className="dash-card-sub">Coming soon</div>
@@ -92,7 +91,7 @@ function WebAdminDashboard() {
                     )}
                     {activeNav !== "dashboard" && (
                         <div className="coming-soon">
-                            <div className="coming-soon-icon">{NAV_ITEMS.find(i => i.id === activeNav)?.icon}</div>
+                            <i className={`bi ${NAV_ITEMS.find(i => i.id === activeNav)?.icon} coming-soon-icon`} />
                             <h3>{NAV_ITEMS.find(i => i.id === activeNav)?.label}</h3>
                             <p>This section is under development. Check back soon!</p>
                         </div>

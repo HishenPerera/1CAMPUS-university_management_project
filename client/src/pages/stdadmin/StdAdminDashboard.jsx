@@ -8,8 +8,8 @@ import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
 
 const NAV_ITEMS = [
-    { id: "dashboard", label: "Dashboard", icon: "⊞" },
-    { id: "students", label: "Student Portal Access", icon: "🎓" },
+    { id: "dashboard", label: "Dashboard", icon: "bi-grid-1x2-fill" },
+    { id: "students", label: "Student Portal Access", icon: "bi-mortarboard-fill" },
 ];
 
 function StdAdminDashboard() {
@@ -32,8 +32,6 @@ function StdAdminDashboard() {
 
     return (
         <div className={`dash-layout ${sidebarOpen ? "" : "sidebar-closed"}`}>
-
-            {/* Sidebar */}
             <aside className="dash-sidebar">
                 <div className="sidebar-logo-wrap">
                     <img src={logo} alt="1CAMPUS" className="sidebar-logo" />
@@ -45,22 +43,23 @@ function StdAdminDashboard() {
                             className={`sidebar-nav-item ${activeNav === item.id ? "active" : ""}`}
                             onClick={() => setActiveNav(item.id)}
                         >
-                            <span className="nav-icon">{item.icon}</span>
+                            <i className={`bi ${item.icon} nav-icon`} />
                             <span className="nav-label">{item.label}</span>
                         </button>
                     ))}
                 </nav>
                 <div className="sidebar-footer">
                     <button className="sidebar-logout" onClick={handleLogout}>
-                        <span>⎋</span> Logout
+                        <i className="bi bi-box-arrow-left" /> Logout
                     </button>
                 </div>
             </aside>
 
-            {/* Main */}
             <div className="dash-main">
                 <header className="dash-topbar">
-                    <button className="sidebar-toggle" onClick={() => setSidebarOpen(o => !o)}>☰</button>
+                    <button className="sidebar-toggle" onClick={() => setSidebarOpen(o => !o)}>
+                        <i className="bi bi-list" />
+                    </button>
                     <div className="topbar-right">
                         <ThemeToggle />
                         <UserAvatar name={userName} imageUrl={profileImage || undefined} onUpload={handleAvatarUpload} />
@@ -74,13 +73,11 @@ function StdAdminDashboard() {
                 <main className="dash-content">
                     {activeNav === "dashboard" && (
                         <div className="dash-home">
-                            <h1 className="dash-greeting">
-                                Welcome back{userName ? `, ${userName.split(" ")[0]}` : ""} 👋
-                            </h1>
+                            <h1 className="dash-greeting">Welcome back{userName ? `, ${userName.split(" ")[0]}` : ""} 👋</h1>
                             <p className="dash-desc">Use the sidebar to manage students and administration tasks.</p>
                             <div className="dash-cards">
                                 <div className="dash-card" onClick={() => setActiveNav("students")}>
-                                    <div className="dash-card-icon">🎓</div>
+                                    <i className="bi bi-mortarboard-fill dash-card-icon" />
                                     <div>
                                         <div className="dash-card-title">Student Portal Access</div>
                                         <div className="dash-card-sub">Add, view & manage student profiles</div>
