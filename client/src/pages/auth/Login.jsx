@@ -25,6 +25,15 @@ function Login() {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user_name", res.data.user.full_name || "");
       localStorage.setItem("profile_image", res.data.user.profile_image || "");
+      localStorage.setItem("user_role", res.data.user.role || "");
+      localStorage.setItem("is_temp_password", res.data.user.is_temp_password ? "true" : "false");
+
+      // Force password change if using a temp password
+      if (res.data.user.is_temp_password) {
+        navigate("/change-password");
+        return;
+      }
+
       const role = res.data.user.role;
       if (role === "student") navigate("/student");
       else if (role === "lecturer") navigate("/lecturer");

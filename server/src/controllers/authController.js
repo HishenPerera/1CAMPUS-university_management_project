@@ -2,7 +2,12 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const path = require("path");
 const fs = require("fs");
-const { findUserByEmail, createUser, updateProfileImage } = require("../models/userModel");
+const {
+  findUserByEmail,
+  createUser,
+  updateProfileImage,
+  changePassword,
+} = require("../models/userModel");
 
 const register = async (req, res) => {
   try {
@@ -32,7 +37,6 @@ const login = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    // Build absolute URL for profile image if it exists
     const imageUrl = user.profile_image
       ? `${req.protocol}://${req.get("host")}/${user.profile_image}`
       : null;
@@ -44,6 +48,7 @@ const login = async (req, res) => {
         full_name: user.full_name,
         role: user.role,
         profile_image: imageUrl,
+        is_temp_password: user.is_temp_password ?? false,
       },
     });
   } catch (err) {
@@ -53,15 +58,11 @@ const login = async (req, res) => {
 
 const uploadProfileImage = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No image file provided" });
-    }
+    if (!req.file) return res.status(400).json({ message: "No image file provided" });
 
     const userId = req.user.id;
     const imagePath = `uploads/${req.file.filename}`;
 
-    // Fetch current profile_image to delete old file
-    const { findUserByEmail: _, ...rest } = require("../models/userModel");
     const pool = require("../config/db");
     const current = await pool.query("SELECT profile_image FROM users WHERE id = $1", [userId]);
     const oldPath = current.rows[0]?.profile_image;
@@ -76,12 +77,7 @@ const uploadProfileImage = async (req, res) => {
     res.json({
       message: "Profile image updated",
       profile_image: imageUrl,
-      user: {
-        id: updated.id,
-        full_name: updated.full_name,
-        role: updated.role,
-        profile_image: imageUrl,
-      },
+      user: { id: updated.id, full_name: updated.full_name, role: updated.role, profile_image: imageUrl },
     });
   } catch (err) {
     console.error(err);
@@ -89,4 +85,20 @@ const uploadProfileImage = async (req, res) => {
   }
 };
 
-module.exports = { register, login, uploadProfileImage };
+// PATCH /api/auth/change-password — any authenticated user
+const changeUserPassword = async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await changePassword(req.user.id, hashed);
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = { register, login, uploadProfileImage, changeUserPassword };
