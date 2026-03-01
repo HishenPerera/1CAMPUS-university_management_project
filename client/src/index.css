@@ -44,6 +44,13 @@
 
   --header-bg: rgba(3, 13, 28, 0.7);
   --card-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(26, 127, 232, 0.08);
+
+  /* ── Dashboard component aliases ── */
+  --bg: #030d1c;
+  --bg-card: rgba(255, 255, 255, 0.05);
+  --bg-hover: rgba(255, 255, 255, 0.08);
+  --shadow: rgba(0, 0, 0, 0.3);
+  --error-color: #ff4842;
 }
 
 /* ── Light theme ──────────────────────────────────────────────────── */
@@ -61,6 +68,13 @@
 
   --header-bg: rgba(232, 244, 255, 0.8);
   --card-shadow: 0 25px 60px rgba(0, 58, 153, 0.15), 0 0 0 1px rgba(26, 127, 232, 0.12);
+
+  /* ── Dashboard component aliases ── */
+  --bg: #e8f4ff;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-hover: rgba(255, 255, 255, 0.95);
+  --shadow: rgba(0, 58, 153, 0.08);
+  --error-color: #d33c37;
 }
 
 /* ── Smooth theme transition ──────────────────────────────────────── */

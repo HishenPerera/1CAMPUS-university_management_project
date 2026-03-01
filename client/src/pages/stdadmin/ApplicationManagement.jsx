@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import axios from "../../api/axiosInstance";
 import "./ApplicationManagement.css";
 
@@ -193,13 +194,17 @@ function ApplicationManagement() {
                                         <td className="am-date">
                                             {new Date(app.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                                         </td>
-                                        <td className="am-name">
-                                            {app.first_name} {app.last_name}
-                                            <div className="am-nic">NIC: {app.nic_number}</div>
+                                        <td>
+                                            <div className="am-name">
+                                                <span>{app.first_name} {app.last_name}</span>
+                                                <span className="am-nic">NIC: {app.nic_number}</span>
+                                            </div>
                                         </td>
-                                        <td className="am-contact">
-                                            <div>{app.email}</div>
-                                            <div className="am-phone">{app.phone_number}</div>
+                                        <td>
+                                            <div className="am-contact">
+                                                <span>{app.email}</span>
+                                                <span className="am-phone">{app.phone_number}</span>
+                                            </div>
                                         </td>
                                         <td className="am-degree">{app.degree_program}</td>
                                         <td>
@@ -272,8 +277,8 @@ function ApplicationManagement() {
                 </>
             )}
 
-            {/* Password Generated Modal */}
-            {showPasswordModal && (
+            {/* Password Generated Modal — rendered at body level via portal */}
+            {showPasswordModal && createPortal(
                 <div className="am-modal-backdrop" onClick={() => setShowPasswordModal(false)}>
                     <div className="am-modal" onClick={e => e.stopPropagation()}>
                         <div className="am-modal-header am-modal-header--success">
@@ -300,81 +305,114 @@ function ApplicationManagement() {
                             <button className="am-confirm-btn" onClick={() => setShowPasswordModal(false)}>Done</button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
-            {/* Approve Form Modal */}
-            {selectedApp && (
-                <div className="am-modal-backdrop" onClick={() => setSelectedApp(null)}>
-                    <div className="am-modal am-modal-large" onClick={e => e.stopPropagation()}>
-                        <div className="am-modal-header">
-                            <h3><i className="bi bi-person-lines-fill" /> Confirm Student Details</h3>
-                            <button className="am-modal-close" onClick={() => setSelectedApp(null)}>✕</button>
+            {/* Approve Form Modal — rendered at body level via portal */}
+            {selectedApp && createPortal(
+                <div className="popup-overlay" onClick={() => setSelectedApp(null)}>
+                    <div className="popup-window" onClick={e => e.stopPropagation()}>
+                        {/* Header */}
+                        <div className="popup-header">
+                            <div className="popup-header-icon">
+                                <i className="bi bi-person-lines-fill" />
+                            </div>
+                            <div>
+                                <h3 className="popup-title">Add Student to Portal</h3>
+                                <p className="popup-subtitle">Confirm details to generate Registration ID &amp; portal access</p>
+                            </div>
+                            <button className="popup-close" onClick={() => setSelectedApp(null)} title="Close">
+                                <i className="bi bi-x-lg" />
+                            </button>
                         </div>
-                        <form onSubmit={handleApproveSubmit}>
-                            <div className="am-modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
-                                <p className="am-pwd-help" style={{ marginBottom: '1rem' }}>
-                                    Review the applicant's details below. An official Registration ID will be
-                                    auto-generated securely based on the selected Degree Program.
+
+                        {/* Info Banner */}
+                        <div className="popup-banner">
+                            <i className="bi bi-info-circle-fill" />
+                            Registration ID &amp; portal email will be auto-generated from the degree program.
+                        </div>
+
+                        {/* Form */}
+                        <form onSubmit={handleApproveSubmit} autoComplete="off">
+                            <div className="popup-body">
+
+                                {/* Read-only applicant info */}
+                                <div className="popup-info-grid">
+                                    <div className="popup-info-item">
+                                        <span className="popup-label">First Name</span>
+                                        <span className="popup-info-value">{approveForm.first_name}</span>
+                                    </div>
+                                    <div className="popup-info-item">
+                                        <span className="popup-label">Last Name</span>
+                                        <span className="popup-info-value">{approveForm.last_name}</span>
+                                    </div>
+                                    <div className="popup-info-item">
+                                        <span className="popup-label">NIC Number</span>
+                                        <span className="popup-info-value popup-info-mono">{approveForm.nic_number}</span>
+                                    </div>
+                                    <div className="popup-info-item">
+                                        <span className="popup-label">Phone Number</span>
+                                        <span className="popup-info-value">{approveForm.phone_number}</span>
+                                    </div>
+                                </div>
+
+                                {approveForm.address && (
+                                    <div className="popup-info-full">
+                                        <span className="popup-label">Address</span>
+                                        <span className="popup-info-value">{approveForm.address}</span>
+                                    </div>
+                                )}
+
+                                <div className="popup-info-full">
+                                    <span className="popup-label">Degree Program</span>
+                                    <span className="popup-info-value popup-info-degree">{approveForm.degree_program}</span>
+                                </div>
+
+                                <div className="popup-divider" />
+
+                                {/* Admin-entry fields */}
+                                <p className="popup-admin-label">
+                                    <i className="bi bi-pencil-fill" /> Set enrollment details:
                                 </p>
-
-                                <div className="am-row">
-                                    <div>
-                                        <label>First Name</label>
-                                        <input required value={approveForm.first_name} onChange={e => setApproveForm({ ...approveForm, first_name: e.target.value })} />
+                                <div className="popup-row">
+                                    <div className="popup-field">
+                                        <label className="popup-label">Studying Year</label>
+                                        <input
+                                            className="popup-input"
+                                            type="number" min="1" max="5" required
+                                            value={approveForm.studying_year}
+                                            onChange={e => setApproveForm({ ...approveForm, studying_year: e.target.value })}
+                                        />
                                     </div>
-                                    <div>
-                                        <label>Last Name</label>
-                                        <input required value={approveForm.last_name} onChange={e => setApproveForm({ ...approveForm, last_name: e.target.value })} />
-                                    </div>
-                                </div>
-
-                                <div className="am-row">
-                                    <div>
-                                        <label>NIC Number</label>
-                                        <input required value={approveForm.nic_number} onChange={e => setApproveForm({ ...approveForm, nic_number: e.target.value })} />
-                                    </div>
-                                    <div>
-                                        <label>Phone Number</label>
-                                        <input required value={approveForm.phone_number} onChange={e => setApproveForm({ ...approveForm, phone_number: e.target.value })} />
-                                    </div>
-                                </div>
-
-                                <label>Address</label>
-                                <textarea value={approveForm.address} onChange={e => setApproveForm({ ...approveForm, address: e.target.value })} rows="2" />
-
-                                <label>Degree Program (Prefixes ID)</label>
-                                <select required value={approveForm.degree_program} onChange={e => setApproveForm({ ...approveForm, degree_program: e.target.value })}>
-                                    <option value="Bachelor of Science in Computer Science">Bachelor of Science in Computer Science (CS)</option>
-                                    <option value="Bachelor of Science in Information Technology">Bachelor of Science in Information Technology (IT)</option>
-                                    <option value="Bachelor of Engineering">Bachelor of Engineering (ENG)</option>
-                                    <option value="Bachelor of Business Administration">Bachelor of Business Administration (BBA)</option>
-                                    <option value="Bachelor of Science in Data Science">Bachelor of Science in Data Science (DS)</option>
-                                    <option value="Bachelor of Arts">Bachelor of Arts (BA)</option>
-                                    <option value="Master of Science in Computer Science">Master of Science in Computer Science (MCS)</option>
-                                    <option value="Master of Business Administration">Master of Business Administration (MBA)</option>
-                                </select>
-
-                                <div className="am-row">
-                                    <div>
-                                        <label>Studying Year</label>
-                                        <input type="number" min="1" max="5" required value={approveForm.studying_year} onChange={e => setApproveForm({ ...approveForm, studying_year: e.target.value })} />
-                                    </div>
-                                    <div>
-                                        <label>Semester</label>
-                                        <input type="number" min="1" max="8" required value={approveForm.semester} onChange={e => setApproveForm({ ...approveForm, semester: e.target.value })} />
+                                    <div className="popup-field">
+                                        <label className="popup-label">Semester</label>
+                                        <input
+                                            className="popup-input"
+                                            type="number" min="1" max="8" required
+                                            value={approveForm.semester}
+                                            onChange={e => setApproveForm({ ...approveForm, semester: e.target.value })}
+                                        />
                                     </div>
                                 </div>
                             </div>
-                            <div className="am-modal-actions">
-                                <button type="button" className="am-btn-cancel" onClick={() => setSelectedApp(null)}>Cancel</button>
-                                <button type="submit" className="am-confirm-btn" disabled={processingId === selectedApp.id}>
-                                    {processingId === selectedApp.id ? "Approving..." : "Approve & Generate ID"}
+
+                            {/* Footer Actions */}
+                            <div className="popup-footer">
+                                <button type="button" className="popup-btn-cancel" onClick={() => setSelectedApp(null)}>
+                                    Cancel
+                                </button>
+                                <button type="submit" className="popup-btn-submit" disabled={processingId === selectedApp.id}>
+                                    {processingId === selectedApp.id
+                                        ? <><i className="bi bi-hourglass-split" /> Creating Account…</>
+                                        : <><i className="bi bi-check2-circle" /> Approve &amp; Generate ID</>
+                                    }
                                 </button>
                             </div>
                         </form>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
