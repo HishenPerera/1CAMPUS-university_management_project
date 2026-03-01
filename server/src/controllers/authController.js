@@ -8,6 +8,7 @@ const {
   updateProfileImage,
   changePassword,
 } = require("../models/userModel");
+const logActivity = require("../utils/logger");
 
 const register = async (req, res) => {
   try {
@@ -51,6 +52,8 @@ const login = async (req, res) => {
         is_temp_password: user.is_temp_password ?? false,
       },
     });
+
+    await logActivity(user.id, "LOGIN", `User logged in`);
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
@@ -79,6 +82,8 @@ const uploadProfileImage = async (req, res) => {
       profile_image: imageUrl,
       user: { id: updated.id, full_name: updated.full_name, role: updated.role, profile_image: imageUrl },
     });
+
+    await logActivity(userId, "UPDATE_PROFILE_IMAGE", "User updated their profile photo");
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -94,6 +99,7 @@ const changeUserPassword = async (req, res) => {
     }
     const hashed = await bcrypt.hash(newPassword, 10);
     await changePassword(req.user.id, hashed);
+    await logActivity(req.user.id, "CHANGE_PASSWORD", "User successfully changed their password");
     res.json({ message: "Password updated successfully" });
   } catch (err) {
     console.error(err);

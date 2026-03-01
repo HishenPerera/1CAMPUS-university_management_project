@@ -3,13 +3,17 @@ import { useTheme } from "../../context/ThemeContext";
 import ThemeToggle from "../../components/ThemeToggle";
 import UserAvatar from "../../components/UserAvatar";
 import StudentPortalAccess from "./StudentPortalAccess";
+import ApplicationManagement from "./ApplicationManagement";
+import LecturerManagement from "./LecturerManagement";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
 
 const NAV_ITEMS = [
     { id: "dashboard", label: "Dashboard", icon: "bi-grid-1x2-fill" },
-    { id: "students", label: "Student Portal Access", icon: "bi-mortarboard-fill" },
+    { id: "applications", label: "Student Applications", icon: "bi-envelope-paper-fill" },
+    { id: "students", label: "Student Portal Access", icon: "bi-people-fill" },
+    { id: "lecturers", label: "Lecturer & Module Mgmt", icon: "bi-person-video3" },
 ];
 
 function StdAdminDashboard() {
@@ -27,7 +31,7 @@ function StdAdminDashboard() {
 
     const handleLogout = () => {
         ["token", "user_name", "profile_image", "user_role", "is_temp_password"].forEach(k => localStorage.removeItem(k));
-        window.location.href = "/login";
+        window.location.href = "/";
     };
 
     return (
@@ -76,17 +80,33 @@ function StdAdminDashboard() {
                             <h1 className="dash-greeting">Welcome back{userName ? `, ${userName.split(" ")[0]}` : ""} 👋</h1>
                             <p className="dash-desc">Use the sidebar to manage students and administration tasks.</p>
                             <div className="dash-cards">
+                                <div className="dash-card" onClick={() => setActiveNav("applications")}>
+                                    <i className="bi bi-envelope-paper-fill dash-card-icon" />
+                                    <div>
+                                        <div className="dash-card-title">Student Applications</div>
+                                        <div className="dash-card-sub">Review & approve 1CAMPUS applicants</div>
+                                    </div>
+                                </div>
                                 <div className="dash-card" onClick={() => setActiveNav("students")}>
-                                    <i className="bi bi-mortarboard-fill dash-card-icon" />
+                                    <i className="bi bi-people-fill dash-card-icon" />
                                     <div>
                                         <div className="dash-card-title">Student Portal Access</div>
                                         <div className="dash-card-sub">Add, view & manage student profiles</div>
                                     </div>
                                 </div>
+                                <div className="dash-card" onClick={() => setActiveNav("lecturers")}>
+                                    <i className="bi bi-person-video3 dash-card-icon" />
+                                    <div>
+                                        <div className="dash-card-title">Lecturer & Module Mgmt</div>
+                                        <div className="dash-card-sub">Assign subjects & lecturers</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
+                    {activeNav === "applications" && <ApplicationManagement />}
                     {activeNav === "students" && <StudentPortalAccess />}
+                    {activeNav === "lecturers" && <LecturerManagement />}
                 </main>
             </div>
         </div>

@@ -1,0 +1,208 @@
+.lc-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+.lc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.lc-title {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.lc-subtitle {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.lc-refresh-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.lc-refresh-btn:hover:not(:disabled) {
+    background: var(--bg-hover);
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+}
+
+.lc-error {
+    background: rgba(255, 72, 66, 0.1);
+    color: var(--error-color);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 72, 66, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lc-loading,
+.lc-empty {
+    background: var(--bg-card);
+    padding: 4rem 2rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    text-align: center;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.lc-empty-icon {
+    font-size: 3rem;
+    color: var(--border);
+    margin-bottom: 0.5rem;
+}
+
+.lc-empty p {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.lc-empty-sub {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.lc-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(26, 127, 232, 0.2);
+    border-top-color: var(--brand-primary);
+    border-radius: 50%;
+    animation: sm-spin 1s linear infinite;
+}
+
+.lc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+.lc-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 12px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.lc-card:hover {
+    border-color: var(--brand-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px var(--shadow);
+}
+
+.lc-card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.01);
+}
+
+[data-theme="dark"] .lc-card-header {
+    background: rgba(255, 255, 255, 0.01);
+}
+
+.lc-card-code {
+    display: inline-block;
+    padding: 0.3rem 0.6rem;
+    background: rgba(26, 127, 232, 0.1);
+    color: var(--brand-primary);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    border: 1px solid rgba(26, 127, 232, 0.2);
+}
+
+.lc-card-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+.lc-card-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.lc-info-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.lc-info-row i {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+.lc-card-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="dark"] .lc-card-footer {
+    background: rgba(255, 255, 255, 0.01);
+}
+
+.lc-btn-action {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.6rem;
+    background: var(--bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.lc-btn-action:hover {
+    background: var(--bg-hover);
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+}
