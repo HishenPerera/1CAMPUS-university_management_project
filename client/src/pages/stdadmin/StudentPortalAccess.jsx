@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { createPortal } from "react-dom";
 import axios from "../../api/axiosInstance";
+import "../webadmin/StaffManagement.css";
 import "./StudentPortalAccess.css";
 
 const DEGREES = [
@@ -12,8 +14,6 @@ const DEGREES = [
     "Master of Science in Computer Science",
     "Master of Business Administration",
 ];
-
-const PAGE_SIZE = 10;
 const SERVER_BASE = "http://localhost:5001";
 
 function PhotoAvatar({ src, name }) {
@@ -53,6 +53,7 @@ function StudentPortalAccess() {
     // DataTable state
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     // Add modal
     const [showAdd, setShowAdd] = useState(false);
@@ -101,9 +102,9 @@ function StudentPortalAccess() {
         );
     }, [students, search]);
 
-    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
     const currentPage = Math.min(page, totalPages);
-    const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
     const handleSearch = (e) => { setSearch(e.target.value); setPage(1); };
 
@@ -178,50 +179,62 @@ function StudentPortalAccess() {
     };
 
     return (
-        <div className="spa-page">
+        <div className="sm-page">
             {/* Header */}
-            <div className="spa-header">
+            <div className="sm-header">
                 <div>
-                    <h2 className="spa-title">Student Portal Access Management</h2>
-                    <p className="spa-subtitle">Manage student accounts, profiles and portal access</p>
+                    <h2 className="sm-title">Student Portal Access Management</h2>
+                    <p className="sm-subtitle">Manage student accounts, profiles and portal access</p>
                 </div>
-                <button className="spa-add-btn" onClick={openAddModal}>
-                    <i className="bi bi-plus-circle-fill" /> Add Student
+                <button className="sm-add-btn" onClick={openAddModal}>
+                    <i className="bi bi-person-plus-fill" /> Add Student
                 </button>
             </div>
 
-            {error && <div className="spa-error">{error}</div>}
+            {error && <div className="sm-error">{error}</div>}
 
             {/* DataTable toolbar */}
-            <div className="spa-toolbar">
-                <div className="spa-search-wrap">
-                    <span className="spa-search-icon"><i className="bi bi-search" /></span>
+            <div className="sm-toolbar">
+                <div className="sm-search-wrap">
+                    <span className="sm-search-icon"><i className="bi bi-search" /></span>
                     <input
                         type="text"
-                        className="spa-search"
+                        className="sm-search"
                         placeholder="Search by name, email, reg. no. or degree…"
                         value={search}
                         onChange={handleSearch}
                     />
-                    {search && <button className="spa-search-clear" onClick={() => { setSearch(""); setPage(1); }}>✕</button>}
+                    {search && <button className="sm-search-clear" onClick={() => { setSearch(""); setPage(1); }}><i className="bi bi-x" /></button>}
                 </div>
-                <div className="spa-count">
-                    {loading ? "" : `${filtered.length} student${filtered.length !== 1 ? "s" : ""}`}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                        Show:
+                        <select 
+                            value={pageSize} 
+                            onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+                            style={{ padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-primary)', outline: 'none', cursor: 'pointer' }}
+                        >
+                            {[10, 25, 50, 100].map(num => <option key={num} value={num}>{num}</option>)}
+                        </select>
+                    </div>
+                    <div className="sm-count">
+                        {loading ? "" : `${filtered.length} student${filtered.length !== 1 ? "s" : ""}`}
+                    </div>
                 </div>
             </div>
 
             {/* Table */}
             {loading ? (
-                <div className="spa-loading"><div className="spa-spinner" /> Loading students…</div>
+                <div className="sm-loading"><div className="sm-spinner" /> Loading students…</div>
             ) : filtered.length === 0 ? (
-                <div className="spa-empty">
-                    <div className="spa-empty-icon">🎓</div>
+                <div className="sm-empty">
+                    <div className="sm-empty-icon"><i className="bi bi-mortarboard-fill" /></div>
                     <p>{search ? "No students match your search." : "No students yet. Add your first student to get started."}</p>
                 </div>
             ) : (
                 <>
-                    <div className="spa-table-wrap">
-                        <table className="spa-table">
+                    <div className="sm-table-wrap">
+                        <table className="sm-table">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -238,26 +251,30 @@ function StudentPortalAccess() {
                             <tbody>
                                 {paginated.map((s, idx) => (
                                     <tr key={s.id}>
-                                        <td className="spa-num">{(currentPage - 1) * PAGE_SIZE + idx + 1}</td>
+                                        <td className="sm-num">{(currentPage - 1) * pageSize + idx + 1}</td>
                                         <td><AvatarCell src={s.profile_image} name={`${s.first_name} ${s.last_name}`} /></td>
                                         <td><code className="spa-reg">{s.registration_number}</code></td>
                                         <td>
-                                            <div className="spa-name-cell">
+                                            <div className="sm-name-cell">
                                                 <span>{s.first_name} {s.last_name}</span>
                                             </div>
                                         </td>
-                                        <td className="spa-email">{s.email}</td>
+                                        <td className="sm-email">{s.email}</td>
                                         <td className="spa-degree" title={s.degree_program}>{s.degree_program}</td>
                                         <td className="spa-yrsem">Y{s.studying_year} / S{s.semester}</td>
                                         <td>
-                                            <span className={`spa-badge ${s.is_temp_password ? "spa-badge--temp" : s.user_id ? "spa-badge--active" : "spa-badge--noaccess"}`}>
+                                            <span className={`sm-badge ${s.is_temp_password ? "sm-badge--temp" : s.user_id ? "sm-badge--active" : "spa-badge--noaccess"}`}>
                                                 {s.is_temp_password ? "Temp Password" : s.user_id ? "Active" : "No Portal"}
                                             </span>
                                         </td>
                                         <td>
-                                            <div className="spa-actions">
-                                                <button className="spa-view-btn" onClick={() => openDetail(s)}>👁 View</button>
-                                                <button className="spa-del-btn" onClick={() => setDeleteId(s.id)}>🗑</button>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                <button className="sm-del-btn" onClick={() => setDeleteId(s.id)} title="Delete Student">
+                                                    <i className="bi bi-trash3-fill" />
+                                                </button>
+                                                <button className="sm-del-btn" onClick={() => openDetail(s)} title="View Student" style={{ color: 'var(--brand-primary)' }}>
+                                                    <i className="bi bi-eye-fill" />
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -268,21 +285,21 @@ function StudentPortalAccess() {
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="spa-pagination">
-                            <button className="spa-page-btn" onClick={() => setPage(1)} disabled={currentPage === 1}>«</button>
-                            <button className="spa-page-btn" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>‹</button>
+                        <div className="sm-pagination">
+                            <button className="sm-page-btn" onClick={() => setPage(1)} disabled={currentPage === 1}>«</button>
+                            <button className="sm-page-btn" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>‹</button>
                             {pageNums().map(n => (
                                 <button
                                     key={n}
-                                    className={`spa-page-btn ${n === currentPage ? "spa-page-btn--active" : ""}`}
+                                    className={`sm-page-btn ${n === currentPage ? "sm-page-btn--active" : ""}`}
                                     onClick={() => setPage(n)}
                                 >
                                     {n}
                                 </button>
                             ))}
-                            <button className="spa-page-btn" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>›</button>
-                            <button className="spa-page-btn" onClick={() => setPage(totalPages)} disabled={currentPage === totalPages}>»</button>
-                            <span className="spa-page-info">Page {currentPage} of {totalPages}</span>
+                            <button className="sm-page-btn" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>›</button>
+                            <button className="sm-page-btn" onClick={() => setPage(totalPages)} disabled={currentPage === totalPages}>»</button>
+                            <span className="sm-page-info">Page {currentPage} of {totalPages}</span>
                         </div>
                     )}
                 </>
@@ -291,9 +308,9 @@ function StudentPortalAccess() {
             {/* ═══════════════════════════════════════════════════════════
           DETAIL POPUP MODAL
       ═══════════════════════════════════════════════════════════ */}
-            {detailStudent && (
-                <div className="spa-modal-backdrop" onClick={() => setDetailStudent(null)}>
-                    <div className="spa-modal spa-modal--detail" onClick={e => e.stopPropagation()}>
+            {detailStudent && createPortal(
+                <div className="sm-modal-backdrop" onClick={() => setDetailStudent(null)}>
+                    <div className="sm-modal spa-modal--detail" onClick={e => e.stopPropagation()}>
                         <div className="spa-detail-modal-header">
                             <div className="spa-detail-avatar-wrap">
                                 {detailStudent.profile_image ? (
@@ -315,7 +332,7 @@ function StudentPortalAccess() {
                                     {detailStudent.is_temp_password ? "Temp Password" : detailStudent.user_id ? "Portal Active" : "No Portal Account"}
                                 </span>
                             </div>
-                            <button className="spa-modal-close spa-modal-close--top" onClick={() => setDetailStudent(null)}>✕</button>
+                            <button className="spa-modal-close spa-modal-close--top" onClick={() => setDetailStudent(null)}><i className="bi bi-x" /></button>
                         </div>
 
                         {detailLoading ? (
@@ -347,7 +364,7 @@ function StudentPortalAccess() {
                                             rows={4} value={enquiryText}
                                             onChange={e => setEnquiryText(e.target.value)} required
                                         />
-                                        {enquirySuccess && <div className="spa-enquiry-success">✅ Enquiry submitted successfully!</div>}
+                                        {enquirySuccess && <div className="spa-enquiry-success"><i className="bi bi-check-circle-fill" /> Enquiry submitted successfully!</div>}
                                         <button type="submit" className="spa-enquiry-btn"><i className="bi bi-send-fill" /> Submit Enquiry</button>
                                     </form>
                                 </div>
@@ -355,19 +372,19 @@ function StudentPortalAccess() {
                         )}
                     </div>
                 </div>
-            )}
+            , document.body)}
 
             {/* ═══════════════════════════════════════════════════════════
           ADD STUDENT MODAL
       ═══════════════════════════════════════════════════════════ */}
-            {showAdd && (
-                <div className="spa-modal-backdrop" onClick={() => setShowAdd(false)}>
-                    <div className="spa-modal" onClick={e => e.stopPropagation()}>
-                        <div className="spa-modal-header">
+            {showAdd && createPortal(
+                <div className="sm-modal-backdrop" onClick={() => setShowAdd(false)}>
+                    <div className="sm-modal" onClick={e => e.stopPropagation()}>
+                        <div className="sm-modal-header">
                             <h3>Add New Student</h3>
-                            <button className="spa-modal-close" onClick={() => setShowAdd(false)}>✕</button>
+                            <button className="sm-modal-close" onClick={() => setShowAdd(false)}><i className="bi bi-x" /></button>
                         </div>
-                        <form className="spa-modal-form" onSubmit={handleAdd}>
+                        <form className="sm-modal-form" onSubmit={handleAdd}>
                             <div className="spa-form-row">
                                 <div className="form-group"><label>First Name *</label><input name="first_name" value={form.first_name} onChange={handleFormChange} required placeholder="Alice" /></div>
                                 <div className="form-group"><label>Last Name *</label><input name="last_name" value={form.last_name} onChange={handleFormChange} required placeholder="Johnson" /></div>
@@ -388,45 +405,45 @@ function StudentPortalAccess() {
                             </div>
                             <div className="form-group"><label>Address</label><textarea name="address" value={form.address} onChange={handleFormChange} rows={2} placeholder="123 Main Street, Colombo" /></div>
                             <div className="form-group">
-                                <label>Temporary Password * <span className="spa-label-hint">— student must change on first login</span></label>
-                                {pwdLoading ? <div className="spa-pwd-loading">Generating passwords…</div> : (
-                                    <div className="spa-pwd-options">
+                                <label>Temporary Password * <span className="sm-label-hint">— student must change on first login</span></label>
+                                {pwdLoading ? <div className="sm-pwd-loading">Generating passwords…</div> : (
+                                    <div className="sm-pwd-options">
                                         {tempPwds.map((pwd, i) => (
-                                            <label key={i} className={`spa-pwd-card ${chosenPwd === pwd ? "spa-pwd-card--selected" : ""}`}>
+                                            <label key={i} className={`sm-pwd-card ${chosenPwd === pwd ? "sm-pwd-card--selected" : ""}`}>
                                                 <input type="radio" name="tempPwd" value={pwd} checked={chosenPwd === pwd} onChange={() => setChosenPwd(pwd)} />
-                                                <code className="spa-pwd-text">{pwd}</code>
-                                                {chosenPwd === pwd && <span className="spa-pwd-check">✓</span>}
+                                                <code className="sm-pwd-text">{pwd}</code>
+                                                {chosenPwd === pwd && <i className="bi bi-check-circle-fill sm-pwd-check" />}
                                             </label>
                                         ))}
                                     </div>
                                 )}
                             </div>
-                            {addError && <div className="spa-error">{addError}</div>}
-                            <div className="spa-modal-actions">
-                                <button type="button" className="spa-cancel-btn" onClick={() => setShowAdd(false)}>Cancel</button>
-                                <button type="submit" className="spa-confirm-btn" disabled={addLoading}>{addLoading ? "Creating…" : "Create Student"}</button>
+                            {addError && <div className="sm-error">{addError}</div>}
+                            <div className="sm-modal-actions">
+                                <button type="button" className="sm-cancel-btn" onClick={() => setShowAdd(false)}>Cancel</button>
+                                <button type="submit" className="sm-confirm-btn" disabled={addLoading}>{addLoading ? "Creating…" : "Create Student"}</button>
                             </div>
                         </form>
                     </div>
                 </div>
-            )}
+            , document.body)}
 
             {/* Delete Confirm */}
-            {deleteId && (
-                <div className="spa-modal-backdrop" onClick={() => setDeleteId(null)}>
-                    <div className="spa-modal spa-modal--sm" onClick={e => e.stopPropagation()}>
-                        <div className="spa-modal-header">
+            {deleteId && createPortal(
+                <div className="sm-modal-backdrop" onClick={() => setDeleteId(null)}>
+                    <div className="sm-modal sm-modal--sm" onClick={e => e.stopPropagation()}>
+                        <div className="sm-modal-header sm-modal-header--danger">
                             <h3>Delete Student</h3>
-                            <button className="spa-modal-close" onClick={() => setDeleteId(null)}>✕</button>
+                            <button className="sm-modal-close" onClick={() => setDeleteId(null)}><i className="bi bi-x" /></button>
                         </div>
-                        <p className="spa-confirm-text">This will permanently remove the student's profile and portal login.</p>
-                        <div className="spa-modal-actions">
-                            <button className="spa-cancel-btn" onClick={() => setDeleteId(null)}>Cancel</button>
-                            <button className="spa-delete-btn" onClick={() => handleDelete(deleteId)} disabled={deleting}>{deleting ? "Deleting…" : "Yes, Delete"}</button>
+                        <p className="sm-confirm-text">This will permanently remove the student's profile and portal login.</p>
+                        <div className="sm-modal-actions">
+                            <button className="sm-cancel-btn" onClick={() => setDeleteId(null)}>Cancel</button>
+                            <button className="sm-delete-btn" onClick={() => handleDelete(deleteId)} disabled={deleting}>{deleting ? "Deleting…" : "Yes, Delete"}</button>
                         </div>
                     </div>
                 </div>
-            )}
+            , document.body)}
         </div>
     );
 }

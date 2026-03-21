@@ -158,7 +158,7 @@ function MyProfile() {
                         </div>
 
                         {error && <div className="mp-error">{error}</div>}
-                        {saved && <div className="mp-success">✅ Changes saved successfully!</div>}
+                        {saved && <div className="mp-success"><i className="bi bi-check-circle-fill" /> Changes saved successfully!</div>}
 
                         <button type="submit" className="mp-save-btn" disabled={saving}>
                             {saving ? <><span className="mp-spinner mp-spinner--sm" /> Saving…</> : "Save Changes"}

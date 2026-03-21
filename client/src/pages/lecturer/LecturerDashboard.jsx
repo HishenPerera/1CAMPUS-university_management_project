@@ -3,6 +3,7 @@ import { useTheme } from "../../context/ThemeContext";
 import ThemeToggle from "../../components/ThemeToggle";
 import UserAvatar from "../../components/UserAvatar";
 import LecturerCourses from "./LecturerCourses";
+import LecturerCourseMaterials from "./LecturerCourseMaterials";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
@@ -20,6 +21,7 @@ function LecturerDashboard() {
     const userName = localStorage.getItem("user_name") || "";
     const [profileImage, setProfileImage] = useState(localStorage.getItem("profile_image") || "");
     const [activeNav, setActiveNav] = useState("dashboard");
+    const [activeCourse, setActiveCourse] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     const handleAvatarUpload = (url) => {
@@ -75,7 +77,7 @@ function LecturerDashboard() {
                 <main className="dash-content">
                     {activeNav === "dashboard" && (
                         <div className="dash-home">
-                            <h1 className="dash-greeting">Welcome back{userName ? `, ${userName.split(" ")[0]}` : ""} 👋</h1>
+                            <h1 className="dash-greeting">Welcome back{userName ? `, ${userName.split(" ")[0]}` : ""} <i className="bi bi-hand-wave-fill" /></h1>
                             <p className="dash-desc">Manage your courses, grades and timetable from the sidebar.</p>
                             <div className="dash-cards">
                                 {NAV_ITEMS.filter(i => i.id !== "dashboard").map(item => (
@@ -90,11 +92,12 @@ function LecturerDashboard() {
                             </div>
                         </div>
                     )}
-                    {activeNav === "courses" && <LecturerCourses />}
-                    {activeNav !== "dashboard" && activeNav !== "courses" && (
+                    {activeNav === "courses" && <LecturerCourses onNavigate={(nav, course) => { setActiveNav(nav); setActiveCourse(course); }} />}
+                    {activeNav === "course-materials" && <LecturerCourseMaterials course={activeCourse} onBack={() => setActiveNav("courses")} />}
+                    {activeNav !== "dashboard" && activeNav !== "courses" && activeNav !== "course-materials" && (
                         <div className="coming-soon">
-                            <i className={`bi ${NAV_ITEMS.find(i => i.id === activeNav)?.icon} coming-soon-icon`} />
-                            <h3>{NAV_ITEMS.find(i => i.id === activeNav)?.label}</h3>
+                            <i className={`bi ${NAV_ITEMS.find(i => i.id === activeNav)?.icon || 'bi-cone-striped'} coming-soon-icon`} />
+                            <h3>{NAV_ITEMS.find(i => i.id === activeNav)?.label || 'Under Construction'}</h3>
                             <p>This section is under development. Check back soon!</p>
                         </div>
                     )}

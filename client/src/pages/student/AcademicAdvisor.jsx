@@ -34,7 +34,7 @@ function AcademicAdvisor() {
         {
             role: "assistant",
             content:
-                "👋 Hi! I'm your **AI Academic Advisor**. I already know your degree program, year, semester, and enrolled modules — so I can give you personalised guidance.\n\nWhat would you like help with today?",
+                "Hi! I'm your **AI Academic Advisor**. I already know your degree program, year, semester, and enrolled modules — so I can give you personalised guidance.\n\nWhat would you like help with today?",
         },
     ]);
     const [input, setInput] = useState("");
@@ -68,7 +68,7 @@ function AcademicAdvisor() {
                 ...newMessages,
                 {
                     role: "assistant",
-                    content: `⚠️ ${err.response?.data?.message || "Something went wrong. Please try again."}`,
+                    content: `[Error] ${err.response?.data?.message || "Something went wrong. Please try again."}`,
                     isError: true,
                 },
             ]);

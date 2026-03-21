@@ -5,6 +5,7 @@ import UserAvatar from "../../components/UserAvatar";
 import MyProfile from "./MyProfile";
 import MyModules from "./MyModules";
 import AcademicAdvisor from "./AcademicAdvisor";
+import StudentCourseMaterials from "./StudentCourseMaterials";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
@@ -22,6 +23,7 @@ function StudentDashboard() {
     const userName = localStorage.getItem("user_name") || "";
     const [profileImage, setProfileImage] = useState(localStorage.getItem("profile_image") || "");
     const [activeNav, setActiveNav] = useState("dashboard");
+    const [activeCourse, setActiveCourse] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     const handleAvatarUpload = (url) => {
@@ -77,7 +79,7 @@ function StudentDashboard() {
                 <main className="dash-content">
                     {activeNav === "dashboard" && (
                         <div className="dash-home">
-                            <h1 className="dash-greeting">Welcome{userName ? `, ${userName.split(" ")[0]}` : ""} 👋</h1>
+                            <h1 className="dash-greeting">Welcome{userName ? `, ${userName.split(" ")[0]}` : ""} <i className="bi bi-hand-wave-fill" /></h1>
                             <p className="dash-desc">Your student portal is ready. Use the sidebar to navigate.</p>
                             <div className="dash-cards">
                                 <div className="dash-card" onClick={() => setActiveNav("advisor")}>
@@ -104,9 +106,10 @@ function StudentDashboard() {
                             </div>
                         </div>
                     )}
-                    {activeNav === "modules" && <MyModules />}
+                    {activeNav === "modules" && <MyModules onNavigate={(nav, course) => { setActiveNav(nav); setActiveCourse(course); }} />}
                     {activeNav === "advisor" && <AcademicAdvisor />}
                     {activeNav === "profile" && <MyProfile />}
+                    {activeNav === "course-materials" && <StudentCourseMaterials course={activeCourse} onBack={() => setActiveNav("modules")} />}
                 </main>
             </div>
         </div>
