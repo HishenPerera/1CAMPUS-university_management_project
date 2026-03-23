@@ -2,6 +2,10 @@ const bcrypt = require("bcrypt");
 const pool = require("../config/db");
 const { createUser } = require("../models/userModel");
 const logActivity = require("../utils/logger");
+const fs = require('fs');
+const path = require('path');
+const { backupDatabase } = require('../../cronJobs');
+
 
 // Password generator
 const generateTempPasswords = () => {
@@ -105,10 +109,42 @@ const deleteStaff = async (req, res) => {
     }
 };
 
+// --- database backup ---
+const createBackup = async (req, res) => {
+    try {
+        await backupDatabase();
+        res.status(200).json({ message: "Backup initiated successfully" });
+    } catch (error) {
+        res.status(500).json({ error: "Failed to create backup" });
+    }
+};
+
+const getBackups = async (req, res) => {
+    const backupDir = path.join(__dirname, '../../backups');
+    if (!fs.existsSync(backupDir)) return res.json([]);
+
+    const files = fs.readdirSync(backupDir)
+        .filter(file => file.endsWith('.sql'))
+        .map(file => {
+            const stats = fs.statSync(path.join(backupDir, file));
+            return {
+                name: file,
+                size: (stats.size / 1024).toFixed(2) + " KB",
+                createdAt: stats.birthtime
+            };
+        });
+    res.json(files);
+};
+
+
 module.exports = {
     getAuditLogs,
     getStaff,
     getStaffTempPasswords,
     createStaff,
-    deleteStaff
+    deleteStaff,
+    createBackup,
+    getBackups
+
+
 };

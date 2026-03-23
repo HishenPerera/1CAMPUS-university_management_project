@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const verifyToken = require("../middleware/authMiddleware");
+const webAdminController = require('../controllers/webAdminController');
+
 
 // Role checker for web admin
 const checkWebAdmin = (req, res, next) => {
@@ -28,5 +30,10 @@ router.get("/staff", getStaff);
 router.get("/temp-passwords", getStaffTempPasswords);
 router.post("/staff", createStaff);
 router.delete("/staff/:id", deleteStaff);
+
+// Database Backup Routes
+router.post('/backup', webAdminController.createBackup);
+router.get('/backups', webAdminController.getBackups);
+
 
 module.exports = router;
