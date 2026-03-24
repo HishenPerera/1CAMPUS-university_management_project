@@ -13,6 +13,9 @@ function StudentManagement() {
     // Add student form state
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
+    const [emailError, setEmailError] = useState("");
+    const [phone, setPhone] = useState("");
+    const [phoneError, setPhoneError] = useState("");
     const [tempPwds, setTempPwds] = useState([]);
     const [chosenPwd, setChosenPwd] = useState("");
     const [addLoading, setAddLoading] = useState(false);
@@ -33,8 +36,47 @@ function StudentManagement() {
 
     useEffect(() => { fetchStudents(); }, [fetchStudents]);
 
+    const handleEmailChange = (e) => {
+        const value = e.target.value;
+        setEmail(value);
+        if (value && !value.includes("@")) {
+            setEmailError("Email address must include '@' symbol.");
+        } else {
+            setEmailError("");
+        }
+    };
+
+
+    //phone number validation error
+    const handlePhoneKeyDown = (e) => {
+        // Allow ctrl/cmd key combinations for copy/paste/select all
+        if (e.ctrlKey || e.metaKey) return;
+
+        // Allow control keys
+        if (["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab", "Enter"].includes(e.key)) return;
+
+        // Block any key that is not a digit
+        if (!/^[0-9]$/.test(e.key)) {
+            e.preventDefault();
+        }
+    };
+
+    const handlePhoneChange = (e) => {
+        // Fallback to strip out all non-digits in case of a dirty paste
+        const value = e.target.value.replace(/\D/g, '');
+        if (value.length > 10) return; // Enforce max length
+
+        setPhone(value);
+        if (value.length > 0 && value.length !== 10) {
+            setPhoneError("Phone number must be exactly 10 digits.");
+        } else {
+            setPhoneError("");
+        }
+    };  //
+
     const openAddModal = async () => {
-        setFullName(""); setEmail(""); setAddError("");
+        setFullName(""); setEmail(""); setPhone(""); setAddError("");
+        setEmailError(""); setPhoneError("");
         setTempPwds([]); setChosenPwd("");
         setShowModal(true);
         setPwdLoading(true);
@@ -51,12 +93,25 @@ function StudentManagement() {
 
     const handleAdd = async (e) => {
         e.preventDefault();
+
+        let hasError = false;
+        if (!email.includes("@")) {
+            setEmailError("Email address must include '@' symbol.");
+            hasError = true;
+        }
+        if (phone.length !== 10) {
+            setPhoneError("Phone number must be exactly 10 digits.");
+            hasError = true;
+        }
+        if (hasError) return;
+
         if (!chosenPwd) return setAddError("Please select a temporary password.");
         setAddLoading(true); setAddError("");
         try {
             await axios.post("/admin/students", {
                 full_name: fullName,
                 email,
+                phone_number: phone,
                 chosen_password: chosenPwd,
             });
             setShowModal(false);
@@ -179,10 +234,28 @@ function StudentManagement() {
                                     type="email"
                                     placeholder="student@university.edu"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    onChange={handleEmailChange}
                                     required
                                     disabled={addLoading}
+                                    style={emailError ? { borderColor: "red", outlineColor: "red" } : {}}
                                 />
+                                {emailError && <div style={{ color: "red", fontSize: "0.85rem", marginTop: "4px" }}>{emailError}</div>}
+                            </div>
+
+                            <div className="form-group">
+                                <label>Phone Number</label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. 0712345678"
+                                    value={phone}
+                                    onChange={handlePhoneChange}
+                                    onKeyDown={handlePhoneKeyDown}
+                                    required
+                                    maxLength="10"
+                                    disabled={addLoading}
+                                    style={phoneError ? { borderColor: "red", outlineColor: "red" } : {}}
+                                />
+                                {phoneError && <div style={{ color: "red", fontSize: "0.85rem", marginTop: "4px" }}>{phoneError}</div>}
                             </div>
 
                             {/* Temp Password Selection */}

@@ -31,6 +31,7 @@ function StaffManagement() {
     const [staff, setStaff] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [emailValidError, setEmailValidError] = useState(""); // email
 
     // DataTable state
     const [search, setSearch] = useState("");
@@ -60,6 +61,19 @@ function StaffManagement() {
     };
 
     useEffect(() => { fetchStaff(); }, []);
+
+    //email validation logic ────────────────────────────────────────────────
+    const handleEmailChange = (e) => {
+        const value = e.target.value;
+        setForm({ ...form, email: value });
+
+
+        if (value && !value.includes("@")) {
+            setEmailValidError("Email address must include '@' symbol.");
+        } else {
+            setEmailValidError("");
+        }
+    };
 
     // ── Filtering & Pagination ────────────────────────────────────────────────
     const filtered = useMemo(() => {
@@ -94,6 +108,12 @@ function StaffManagement() {
 
     const handleAddSubmit = async (e) => {
         e.preventDefault();
+
+        if (!form.email.includes("@")) {
+            setEmailValidError("Email address must include '@' symbol.");
+            return;
+        }
+
         if (!chosenPwd) return setAddError("Please select a temporary password.");
         setAddLoading(true); setAddError("");
         try {
@@ -259,10 +279,16 @@ function StaffManagement() {
                                     type="email"
                                     name="email"
                                     value={form.email}
-                                    onChange={e => setForm({ ...form, email: e.target.value })}
+                                    onChange={handleEmailChange}
                                     required
                                     placeholder="john.doe@1campus.edu"
+                                    style={emailValidError ? { borderColor: "red", outlineColor: "red" } : {}}
                                 />
+                                {emailValidError && (
+                                    <div style={{ color: "red", fontSize: "0.85rem", marginTop: "4px" }}>
+                                        {emailValidError}
+                                    </div>
+                                )}
                             </div>
                             <div className="form-group">
                                 <label>System Role *</label>

@@ -33,6 +33,35 @@ const MaintenancePage = () => {
         fetchBackups();
     }, []);
 
+    const downloadReport = () => {
+        if (backups.length === 0) return;
+
+        const headers = ["File Name", "Size", "Creation Date"];
+        const csvRows = [headers.join(",")];
+
+        backups.forEach(b => {
+            const name = `"${b.name}"`;
+            const size = `"${b.size}"`;
+            const creationDate = `"${new Date(b.createdAt).toLocaleString("en-GB", { 
+                day: "2-digit", month: "short", year: "numeric", 
+                hour: "2-digit", minute: "2-digit" 
+            }).replace(/"/g, '""')}"`;
+
+            csvRows.push([name, size, creationDate].join(","));
+        });
+
+        const csvString = csvRows.join("\n");
+        const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Backup_List_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="al-page">
             <div className="al-header">
@@ -43,6 +72,9 @@ const MaintenancePage = () => {
                 <div style={{ display: "flex", gap: "10px" }}>
                     <button className="al-refresh-btn" onClick={fetchBackups}>
                         <i className="bi bi-arrow-clockwise" /> Refresh
+                    </button>
+                    <button className="al-refresh-btn" onClick={downloadReport} disabled={loading || backups.length === 0}>
+                        <i className="bi bi-download" /> Download Backup List
                     </button>
                     <button className="al-refresh-btn" style={{ background: "var(--color-primary)", color: "#fff", border: "none" }} onClick={handleBackup} disabled={loading}>
                         {loading ? <><div className="al-spinner" style={{ width: 14, height: 14, margin: 0 }} /> Creating...</> : <><i className="bi bi-database-add" /> Create Backup</>}
