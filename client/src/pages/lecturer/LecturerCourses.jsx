@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "../../api/axiosInstance";
 import "./LecturerCourses.css";
 
-function LecturerCourses() {
+function LecturerCourses({ onNavigate }) {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -64,7 +64,9 @@ function LecturerCourses() {
                                 </div>
                             </div>
                             <div className="lc-card-footer">
-                                <button className="lc-btn-action"><i className="bi bi-folder2-open" /> View Materials</button>
+                                <button className="lc-btn-action" onClick={() => onNavigate && onNavigate("course-materials", c)}>
+                                    <i className="bi bi-folder2-open" /> View Materials
+                                </button>
                                 <button className="lc-btn-action"><i className="bi bi-people" /> Students</button>
                             </div>
                         </div>

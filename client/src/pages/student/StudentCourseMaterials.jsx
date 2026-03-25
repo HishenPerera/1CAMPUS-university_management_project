@@ -1,0 +1,156 @@
+import { useState, useEffect } from "react";
+import axiosInstance from "../../api/axiosInstance";
+import "./StudentCourseMaterials.css";
+
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const SERVER_BASE = "http://localhost:5001";
+
+function getWeeksInMonth(year, monthIndex) {
+    const weeks = [];
+    let current = new Date(year, monthIndex, 1);
+    let dayOfWeek = current.getDay();
+    let diff = current.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); 
+    current = new Date(current.setDate(diff));
+
+    while (true) {
+        let weekStart = new Date(current);
+        let weekEnd = new Date(current);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+
+        if (weekStart.getFullYear() > year || (weekStart.getFullYear() === year && weekStart.getMonth() > monthIndex)) {
+            break;
+        }
+
+        const startM = MONTH_NAMES[weekStart.getMonth()];
+        const endM = MONTH_NAMES[weekEnd.getMonth()];
+        const label = `${startM} ${weekStart.getDate()} - ${endM} ${weekEnd.getDate()}`;
+        weeks.push(label);
+
+        current.setDate(current.getDate() + 7);
+    }
+    return weeks;
+}
+
+function StudentCourseMaterials({ course, onBack }) {
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth();
+
+    const [year, setYear] = useState(currentYear);
+    const [activeMonth, setActiveMonth] = useState(currentMonth);
+    const [materials, setMaterials] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    const fetchMaterials = async () => {
+        if (!course) return;
+        setLoading(true);
+        setError("");
+        try {
+            const res = await axiosInstance.get(`/student/modules/${course.id}/materials?year=${year}`);
+            setMaterials(res.data);
+        } catch (err) {
+            setError(err.response?.data?.message || "Failed to fetch module materials. You might not have access.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchMaterials();
+    }, [course, year]);
+
+    const weeks = getWeeksInMonth(year, activeMonth);
+
+    const getFileIcon = (fileUrl, fileType) => {
+        if (fileType === "link") return "bi-link-45deg";
+        if (fileUrl.endsWith(".pdf")) return "bi-file-earmark-pdf-fill";
+        if (fileUrl.match(/\.(ppt|pptx)$/i)) return "bi-file-earmark-slides-fill";
+        if (fileUrl.match(/\.(doc|docx)$/i)) return "bi-file-earmark-word-fill";
+        if (fileUrl.match(/\.(zip|rar)$/i)) return "bi-file-earmark-zip-fill";
+        return "bi-file-earmark-text-fill";
+    };
+
+    if (!course) return null;
+
+    return (
+        <div className="scm-page">
+            <div className="scm-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <button className="scm-back-btn" onClick={onBack}>
+                        <i className="bi bi-arrow-left" /> Back
+                    </button>
+                    <div>
+                        <h2 className="scm-title">{course.module_name}</h2>
+                        <p className="scm-subtitle">{course.module_code} • Course Materials</p>
+                    </div>
+                </div>
+                <div className="scm-year-select">
+                    <label>Academic Year:</label>
+                    <select value={year} onChange={e => setYear(Number(e.target.value))}>
+                        {[currentYear - 2, currentYear - 1, currentYear, currentYear + 1].map(y => (
+                            <option key={y} value={y}>{y}</option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
+            <div className="scm-months-scroll">
+                {SHORT_MONTHS.map((m, idx) => (
+                    <button 
+                        key={m} 
+                        className={`scm-month-tab ${activeMonth === idx ? "scm-month-tab--active" : ""}`}
+                        onClick={() => setActiveMonth(idx)}
+                    >
+                        {m}
+                    </button>
+                ))}
+            </div>
+
+            {error && <div className="scm-error"><i className="bi bi-exclamation-triangle-fill" /> {error}</div>}
+
+            {loading ? (
+                <div className="scm-loading"><div className="scm-spinner" /> Loading materials...</div>
+            ) : (
+                <div className="scm-weeks-container">
+                    {weeks.map(weekLabel => {
+                        const weekMaterials = materials.filter(m => m.month === activeMonth && m.week_label === weekLabel);
+                        
+                        return (
+                            <div key={weekLabel} className="scm-week-card">
+                                <div className="scm-week-header">
+                                    <h4 className="scm-week-title"><i className="bi bi-calendar2-week" /> {weekLabel}</h4>
+                                </div>
+                                <div className="scm-week-body">
+                                    {weekMaterials.length === 0 ? (
+                                        <div className="scm-week-empty">No materials uploaded for this week yet.</div>
+                                    ) : (
+                                        <ul className="scm-materials-list">
+                                            {weekMaterials.map(mat => (
+                                                <li key={mat.id} className="scm-material-item">
+                                                    <div className="scm-material-info">
+                                                        <i className={`bi ${getFileIcon(mat.file_url, mat.file_type)} scm-material-icon`} />
+                                                        <a 
+                                                            href={mat.file_type === 'link' ? mat.file_url : `${SERVER_BASE}${mat.file_url}`} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer"
+                                                            className="scm-material-link"
+                                                        >
+                                                            {mat.file_name}
+                                                        </a>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
+
+export default StudentCourseMaterials;

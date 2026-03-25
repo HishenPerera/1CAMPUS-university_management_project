@@ -4,6 +4,7 @@ import ThemeToggle from "../../components/ThemeToggle";
 import UserAvatar from "../../components/UserAvatar";
 import StudentPortalAccess from "../stdadmin/StudentPortalAccess";
 import StaffManagement from "./StaffManagement";
+import WebAdminManagement from "./WebAdminManagement";
 import AuditLogs from "./AuditLogs";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
@@ -13,6 +14,7 @@ const NAV_ITEMS = [
     { id: "dashboard", label: "Dashboard", icon: "bi-grid-1x2-fill" },
     { id: "students", label: "Manage Students", icon: "bi-mortarboard-fill" },
     { id: "staff", label: "Manage Staff", icon: "bi-people-fill" },
+    { id: "webadmins", label: "Manage Web Admins", icon: "bi-person-badge-fill" },
     { id: "logs", label: "Audit Logs", icon: "bi-journal-text" },
 ];
 
@@ -77,7 +79,7 @@ function WebAdminDashboard() {
                 <main className="dash-content">
                     {activeNav === "dashboard" && (
                         <div className="dash-home">
-                            <h1 className="dash-greeting">Welcome back{userName ? `, ${userName.split(" ")[0]}` : ""} 👋</h1>
+                            <h1 className="dash-greeting">Welcome back{userName ? `, ${userName.split(" ")[0]}` : ""} <i className="bi bi-hand-wave-fill" /></h1>
                             <p className="dash-desc">System-wide administration tools are available from the sidebar.</p>
                             <div className="dash-cards">
                                 {NAV_ITEMS.filter(i => i.id !== "dashboard").map(item => (
@@ -95,6 +97,7 @@ function WebAdminDashboard() {
 
                     {activeNav === "students" && <StudentPortalAccess />}
                     {activeNav === "staff" && <StaffManagement />}
+                    {activeNav === "webadmins" && <WebAdminManagement />}
                     {activeNav === "logs" && <AuditLogs />}
                 </main>
             </div>

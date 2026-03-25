@@ -197,7 +197,7 @@ function AcademicAdvisor() {
                 ...newMessages,
                 {
                     role: "assistant",
-                    content: `⚠️ ${err.response?.data?.message || "Something went wrong. Please try again."}`,
+                    content: `[Error] ${err.response?.data?.message || "Something went wrong. Please try again."}`,
                     isError: true,
                     time: new Date(),
                 },

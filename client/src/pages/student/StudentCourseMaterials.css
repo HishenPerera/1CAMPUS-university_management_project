@@ -1,0 +1,229 @@
+.scm-page {
+    animation: fadeIn 0.3s ease;
+}
+
+.scm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.scm-back-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.scm-back-btn:hover {
+    background: var(--surface-hover);
+    transform: translateX(-2px);
+}
+
+.scm-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.scm-subtitle {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.scm-year-select {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.scm-year-select select {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+}
+
+/* Month Tabs System */
+.scm-months-scroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 0.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+}
+
+.scm-months-scroll::-webkit-scrollbar {
+    height: 6px;
+}
+.scm-months-scroll::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 4px;
+}
+
+.scm-month-tab {
+    padding: 0.6rem 1.2rem;
+    border-radius: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.scm-month-tab--active {
+    background: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+/* Week Cards Layout */
+.scm-weeks-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.scm-week-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.scm-week-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.02);
+    display: flex;
+    align-items: center;
+}
+
+[data-theme="dark"] .scm-week-header {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.scm-week-title {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.scm-week-title i {
+    color: var(--brand-primary);
+}
+
+.scm-week-body {
+    padding: 1.5rem;
+}
+
+.scm-week-empty {
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: 0.95rem;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.scm-materials-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.scm-material-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: var(--bg);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+}
+
+.scm-material-item:hover {
+    border-color: var(--brand-primary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.scm-material-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.scm-material-icon {
+    font-size: 1.25rem;
+    color: var(--brand-primary);
+}
+
+.scm-material-link {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.scm-material-link:hover {
+    color: var(--brand-primary);
+    text-decoration: underline;
+}
+
+.scm-error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.scm-spinner {
+    border: 3px solid rgba(0,0,0,0.1);
+    border-top: 3px solid var(--brand-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    width: 30px;
+    height: 30px;
+    margin-bottom: 1rem;
+}
+
+.scm-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 0;
+    color: var(--text-secondary);
+}

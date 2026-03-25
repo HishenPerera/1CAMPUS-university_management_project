@@ -2,9 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import axios from "../../api/axiosInstance";
 import "./ApplicationManagement.css";
-
-const PAGE_SIZE = 10;
-
 function ApplicationManagement() {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -12,6 +9,7 @@ function ApplicationManagement() {
 
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
     const [statusFilter, setStatusFilter] = useState("all");
 
     const [processingId, setProcessingId] = useState(null);
@@ -73,9 +71,9 @@ function ApplicationManagement() {
         return result;
     }, [applications, search, statusFilter]);
 
-    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
     const currentPage = Math.min(page, totalPages);
-    const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
     const handleSearch = (e) => { setSearch(e.target.value); setPage(1); };
     const handleFilter = (e) => { setStatusFilter(e.target.value); setPage(1); };
@@ -150,7 +148,7 @@ function ApplicationManagement() {
                         value={search}
                         onChange={handleSearch}
                     />
-                    {search && <button className="am-search-clear" onClick={() => { setSearch(""); setPage(1); }}>✕</button>}
+                    {search && <button className="am-search-clear" onClick={() => { setSearch(""); setPage(1); }}><i className="bi bi-x" /></button>}
                 </div>
 
                 <div className="am-filters">
@@ -161,6 +159,16 @@ function ApplicationManagement() {
                         <option value="enrolled">Enrolled in Portal</option>
                         <option value="rejected">Rejected</option>
                     </select>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                        Show:
+                        <select 
+                            value={pageSize} 
+                            onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+                            style={{ padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-primary)', outline: 'none', cursor: 'pointer' }}
+                        >
+                            {[10, 25, 50, 100].map(num => <option key={num} value={num}>{num}</option>)}
+                        </select>
+                    </div>
                     <div className="am-count">
                         {loading ? "" : `${filtered.length} application${filtered.length !== 1 ? "s" : ""}`}
                     </div>
@@ -283,7 +291,7 @@ function ApplicationManagement() {
                     <div className="am-modal" onClick={e => e.stopPropagation()}>
                         <div className="am-modal-header am-modal-header--success">
                             <h3><i className="bi bi-check-circle-fill" /> Application Approved</h3>
-                            <button className="am-modal-close" onClick={() => setShowPasswordModal(false)}>✕</button>
+                            <button className="am-modal-close" onClick={() => setShowPasswordModal(false)}><i className="bi bi-x" /></button>
                         </div>
                         <div className="am-modal-body">
                             <p>The student's portal account and official profile have been created successfully.</p>

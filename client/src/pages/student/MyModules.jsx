@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import "./MyModules.css";
 
-function MyModules() {
+function MyModules({ onNavigate }) {
     const [data, setData] = useState(null);   // { degree_program, studying_year, semester, modules[] }
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -91,6 +91,15 @@ function MyModules() {
                                     ) : (
                                         <span className="module-lect-tba">Lecturer TBA</span>
                                     )}
+                                </div>
+                                <div style={{ marginTop: '1.25rem' }}>
+                                    <button 
+                                        className="btn btn-primary w-100" 
+                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: 'var(--brand-primary)', color: 'white', border: 'none', padding: '0.6rem', borderRadius: '8px', fontWeight: '500', transition: 'all 0.2s', cursor: 'pointer' }}
+                                        onClick={() => onNavigate && onNavigate("course-materials", mod)}
+                                    >
+                                        <i className="bi bi-folder2-open" /> View Materials
+                                    </button>
                                 </div>
                             </div>
                         </div>

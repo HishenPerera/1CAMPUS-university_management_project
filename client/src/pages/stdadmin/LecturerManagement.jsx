@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import axios from "../../api/axiosInstance";
 import "./LecturerManagement.css";
 
@@ -148,7 +149,7 @@ function LecturerManagement() {
                                             <li key={lect.id} className="lm-assign-item">
                                                 <span><i className="bi bi-person-video3" /> {lect.name}</span>
                                                 <button className="lm-remove-assign" onClick={() => handleRemoveAssignment(m.id, lect.id, lect.name)}>
-                                                    ✕
+                                                    <i className="bi bi-x" />
                                                 </button>
                                             </li>
                                         ))}
@@ -185,12 +186,12 @@ function LecturerManagement() {
             )}
 
             {/* ── Add Module Modal ──────────────────────────────────────────────── */}
-            {showAddModal && (
+            {showAddModal && createPortal(
                 <div className="lm-modal-backdrop" onClick={() => setShowAddModal(false)}>
                     <div className="lm-modal" onClick={e => e.stopPropagation()}>
                         <div className="lm-modal-header">
                             <h3><i className="bi bi-journal-plus" /> Create New Module</h3>
-                            <button className="lm-modal-close" onClick={() => setShowAddModal(false)}>✕</button>
+                            <button className="lm-modal-close" onClick={() => setShowAddModal(false)}><i className="bi bi-x" /></button>
                         </div>
                         <form onSubmit={handleAddModule}>
                             <div className="lm-modal-body form-group">
@@ -223,7 +224,7 @@ function LecturerManagement() {
                         </form>
                     </div>
                 </div>
-            )}
+            , document.body)}
         </div>
     );
 }

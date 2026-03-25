@@ -129,6 +129,61 @@ const getMyModules = async (req, res) => {
     }
 };
 
+// GET /api/student/modules/:id/materials — fetch materials for a specific module safely
+const getStudentModuleMaterials = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { year } = req.query;
+        
+        // 1. Get student's email
+        const userResult = await pool.query(
+            "SELECT email FROM users WHERE id = $1",
+            [req.user.id]
+        );
+        if (!userResult.rows[0]) return res.status(404).json({ message: "User not found" });
+        const email = userResult.rows[0].email;
+
+        // 2. Fetch student's profile info to verify enrollment
+        const studentResult = await pool.query(
+            "SELECT degree_program, studying_year, semester FROM students WHERE email = $1",
+            [email]
+        );
+        if (!studentResult.rows[0]) return res.status(404).json({ message: "Student record not found" });
+        const st = studentResult.rows[0];
+
+        // 3. Check if the module belongs to this student's current enrollment
+        const moduleCheck = await pool.query(
+            `SELECT 1 FROM modules 
+             WHERE id = $1 
+               AND degree_program = $2 
+               AND studying_year = $3 
+               AND semester = $4`,
+            [id, st.degree_program, st.studying_year, st.semester]
+        );
+
+        if (moduleCheck.rowCount === 0) {
+            return res.status(403).json({ message: "Unauthorized: You are not enrolled in this module." });
+        }
+
+        // 4. Fetch the materials
+        let query = "SELECT * FROM module_materials WHERE module_id = $1";
+        const params = [id];
+
+        if (year) {
+            query += " AND year = $2";
+            params.push(year);
+        }
+
+        query += " ORDER BY month ASC, week_label ASC, created_at DESC";
+
+        const materialResult = await pool.query(query, params);
+        res.json(materialResult.rows);
+    } catch (err) {
+        console.error("Error fetching student materials:", err);
+        res.status(500).json({ message: "Server error fetching module materials" });
+    }
+};
+
 // POST /api/student/ai-advisor — AI academic advisor chatbot
 const aiAdvisor = async (req, res) => {
     try {
@@ -215,4 +270,4 @@ Keep responses concise, friendly, and actionable. Use bullet points and clear fo
     }
 };
 
-module.exports = { getMyProfile, updateMyProfile, getMyModules, aiAdvisor };
+module.exports = { getMyProfile, updateMyProfile, getMyModules, getStudentModuleMaterials, aiAdvisor };
