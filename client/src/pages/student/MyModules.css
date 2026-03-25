@@ -106,6 +106,18 @@
     background: rgba(26, 127, 232, 0.09);
 }
 
+/* Intake pill - distinct teal accent */
+.modules-pill--intake {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #059669;
+}
+
+[data-theme="dark"] .modules-pill--intake {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+}
+
 /* ── Section header ── */
 .modules-section-header {
     display: flex;

@@ -27,7 +27,7 @@ function LecturerCourses({ onNavigate }) {
         <div className="lc-page">
             <div className="lc-header">
                 <div>
-                    <h2 className="lc-title">My Courses</h2>
+                    <h2 className="lc-title">My Modules</h2>
                     <p className="lc-subtitle">Modules assigned to you for the current academic year.</p>
                 </div>
                 <button className="lc-refresh-btn" onClick={fetchCourses} disabled={loading}>

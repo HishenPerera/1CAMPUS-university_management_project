@@ -22,7 +22,7 @@ function LecturerManagement() {
 
     const [showAddModal, setShowAddModal] = useState(false);
     const [newModule, setNewModule] = useState({
-        module_code: "", module_name: "", degree_program: DEGREES[0], semester: 1, studying_year: 1
+        module_code: "", module_name: "", degree_program: DEGREES[0], semester: 1, studying_year: 1, intake: "Jan-Jun"
     });
 
     const [assigningModule, setAssigningModule] = useState(null); // module_id
@@ -51,7 +51,7 @@ function LecturerManagement() {
         try {
             await axios.post("/admin/modules", newModule);
             setShowAddModal(false);
-            setNewModule({ module_code: "", module_name: "", degree_program: DEGREES[0], semester: 1, studying_year: 1 });
+            setNewModule({ module_code: "", module_name: "", degree_program: DEGREES[0], semester: 1, studying_year: 1, intake: "Jan-Jun" });
             fetchData();
         } catch (err) {
             setError(err.response?.data?.message || "Failed to create module.");
@@ -137,6 +137,7 @@ function LecturerManagement() {
 
                             <div className="lm-card-meta">
                                 <span><i className="bi bi-mortarboard" /> Year {m.studying_year} • Sem {m.semester}</span>
+                                {m.intake && <span className="lm-meta-intake">{m.intake}</span>}
                                 <span className="lm-meta-degree">{m.degree_program}</span>
                             </div>
 
@@ -216,6 +217,12 @@ function LecturerManagement() {
                                         <input type="number" min="1" max="8" required value={newModule.semester} onChange={e => setNewModule({ ...newModule, semester: e.target.value })} />
                                     </div>
                                 </div>
+
+                                <label>Intake</label>
+                                <select required value={newModule.intake} onChange={e => setNewModule({ ...newModule, intake: e.target.value })}>
+                                    <option value="Jan-Jun">January Intake (Jan–Jun)</option>
+                                    <option value="Jul-Dec">July Intake (Jul–Dec)</option>
+                                </select>
                             </div>
                             <div className="lm-modal-actions">
                                 <button type="button" className="lm-btn-cancel" onClick={() => setShowAddModal(false)}>Cancel</button>

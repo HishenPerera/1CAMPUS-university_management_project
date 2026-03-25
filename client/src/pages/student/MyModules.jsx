@@ -3,7 +3,7 @@ import axiosInstance from "../../api/axiosInstance";
 import "./MyModules.css";
 
 function MyModules({ onNavigate }) {
-    const [data, setData] = useState(null);   // { degree_program, studying_year, semester, modules[] }
+    const [data, setData] = useState(null);   // { degree_program, studying_year, semester, intake, modules[] }
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -36,8 +36,9 @@ function MyModules({ onNavigate }) {
         );
     }
 
-    const { degree_program, studying_year, semester, modules } = data;
+    const { degree_program, studying_year, semester, intake, modules } = data;
     const ordinalYear = ["", "1st", "2nd", "3rd", "4th"][studying_year] || `${studying_year}th`;
+    const intakeLabel = intake === 'Jan-Jun' ? 'January Intake (Jan–Jun)' : intake === 'Jul-Dec' ? 'July Intake (Jul–Dec)' : null;
 
     return (
         <div className="modules-page">
@@ -55,6 +56,11 @@ function MyModules({ onNavigate }) {
                         <span className="modules-pill">
                             <i className="bi bi-bookmark-fill" /> Semester {semester}
                         </span>
+                        {intakeLabel && (
+                            <span className="modules-pill modules-pill--intake">
+                                <i className="bi bi-calendar2-range-fill" /> {intakeLabel}
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>

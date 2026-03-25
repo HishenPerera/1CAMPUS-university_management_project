@@ -200,6 +200,22 @@
     background: rgba(255, 255, 255, 0.02);
 }
 
+.lm-meta-intake {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #059669;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 6px;
+    margin: 0 0.5rem;
+}
+
+[data-theme="dark"] .lm-meta-intake {
+    color: #34d399;
+}
+
 .lm-meta-degree {
     max-width: 150px;
     white-space: nowrap;

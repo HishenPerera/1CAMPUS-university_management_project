@@ -22,7 +22,7 @@ function ApplicationForm() {
     const logo = theme === "light" ? lightLogo : darkLogo;
 
     const [form, setForm] = useState({
-        first_name: "", last_name: "", email: "", nic_number: "", phone_number: "", address: "", degree_program: DEGREES[0]
+        first_name: "", last_name: "", email: "", nic_number: "", phone_number: "", address: "", degree_program: DEGREES[0], intake: "Jan-Jun"
     });
 
     const [submitting, setSubmitting] = useState(false);
@@ -39,7 +39,7 @@ function ApplicationForm() {
             await axios.post("/public/apply", form);
             setSuccess(true);
             setForm({
-                first_name: "", last_name: "", email: "", nic_number: "", phone_number: "", address: "", degree_program: DEGREES[0]
+                first_name: "", last_name: "", email: "", nic_number: "", phone_number: "", address: "", degree_program: DEGREES[0], intake: "Jan-Jun"
             });
         } catch (err) {
             setError(err.response?.data?.message || "Failed to submit application. Please try again.");
@@ -112,6 +112,16 @@ function ApplicationForm() {
                                 <div className="sm-select-wrap">
                                     <select name="degree_program" value={form.degree_program} onChange={handleChange} required>
                                         {DEGREES.map(d => <option key={d} value={d}>{d}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="ap-form-group">
+                                <label>Intake *</label>
+                                <div className="sm-select-wrap">
+                                    <select name="intake" value={form.intake} onChange={handleChange} required>
+                                        <option value="Jan-Jun">January Intake (Jan – Jun)</option>
+                                        <option value="Jul-Dec">July Intake (Jul – Dec)</option>
                                     </select>
                                 </div>
                             </div>

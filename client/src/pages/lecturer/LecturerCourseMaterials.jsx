@@ -37,8 +37,15 @@ function LecturerCourseMaterials({ course, onBack }) {
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth();
 
+    // Determine which months are relevant for this course's intake
+    const intake = course?.intake || null;
+    const janMonths = [0, 1, 2, 3, 4, 5];    // Jan–Jun
+    const julMonths = [6, 7, 8, 9, 10, 11];   // Jul–Dec
+    const allowedMonths = intake === 'Jan-Jun' ? janMonths : intake === 'Jul-Dec' ? julMonths : null;
+    const defaultMonth = intake === 'Jan-Jun' ? 0 : intake === 'Jul-Dec' ? 6 : currentMonth;
+
     const [year, setYear] = useState(currentYear);
-    const [activeMonth, setActiveMonth] = useState(currentMonth);
+    const [activeMonth, setActiveMonth] = useState(defaultMonth);
     const [materials, setMaterials] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -176,15 +183,20 @@ function LecturerCourseMaterials({ course, onBack }) {
             </div>
 
             <div className="lcm-months-scroll">
-                {SHORT_MONTHS.map((m, idx) => (
-                    <button 
-                        key={m} 
-                        className={`lcm-month-tab ${activeMonth === idx ? "lcm-month-tab--active" : ""}`}
-                        onClick={() => setActiveMonth(idx)}
-                    >
-                        {m}
-                    </button>
-                ))}
+                {SHORT_MONTHS.map((m, idx) => {
+                    const isDisabled = allowedMonths && !allowedMonths.includes(idx);
+                    return (
+                        <button 
+                            key={m} 
+                            className={`lcm-month-tab ${activeMonth === idx ? "lcm-month-tab--active" : ""} ${isDisabled ? "lcm-month-tab--disabled" : ""}`}
+                            onClick={() => !isDisabled && setActiveMonth(idx)}
+                            disabled={isDisabled}
+                            title={isDisabled ? `Not part of ${intake} intake window` : ''}
+                        >
+                            {m}
+                        </button>
+                    );
+                })}
             </div>
 
             {error && <div className="lcm-error"><i className="bi bi-exclamation-triangle-fill" /> {error}</div>}
@@ -219,7 +231,7 @@ function LecturerCourseMaterials({ course, onBack }) {
                                                             rel="noopener noreferrer"
                                                             className="lcm-material-link"
                                                         >
-                                                            {mat.file_name}
+                                                            {mat.material_name || mat.file_name}
                                                         </a>
                                                     </div>
                                                     <button className="lcm-material-del" onClick={() => handleDelete(mat.id)} title="Delete material">

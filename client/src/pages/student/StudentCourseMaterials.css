@@ -99,6 +99,14 @@
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
 }
 
+.scm-month-tab--disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+    background: var(--surface);
+    color: var(--text-muted);
+}
+
 /* Week Cards Layout */
 .scm-weeks-container {
     display: flex;

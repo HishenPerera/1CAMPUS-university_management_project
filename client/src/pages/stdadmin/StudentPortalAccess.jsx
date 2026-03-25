@@ -67,6 +67,7 @@ function StudentPortalAccess() {
         registration_number: "", degree_program: DEGREES[0], studying_year: 1,
         semester: 1, nic_number: "", phone_number: "",
         address: "", enrolled_date: new Date().toISOString().split("T")[0],
+        intake: "Jan-Jun",
     });
 
     // Detail modal
@@ -114,7 +115,8 @@ function StudentPortalAccess() {
             first_name: "", last_name: "", email: "", registration_number: "",
             degree_program: DEGREES[0], studying_year: 1, semester: 1,
             nic_number: "", phone_number: "", address: "",
-            enrolled_date: new Date().toISOString().split("T")[0]
+            enrolled_date: new Date().toISOString().split("T")[0],
+            intake: "Jan-Jun",
         });
         setAddError(""); setChosenPwd(""); setTempPwds([]);
         setShowAdd(true); setPwdLoading(true);
@@ -261,7 +263,10 @@ function StudentPortalAccess() {
                                         </td>
                                         <td className="sm-email">{s.email}</td>
                                         <td className="spa-degree" title={s.degree_program}>{s.degree_program}</td>
-                                        <td className="spa-yrsem">Y{s.studying_year} / S{s.semester}</td>
+                                        <td className="spa-yrsem">
+                                            Y{s.studying_year} / S{s.semester}
+                                            {s.intake && <><br/><span className="spa-intake-badge">{s.intake}</span></>}
+                                        </td>
                                         <td>
                                             <span className={`sm-badge ${s.is_temp_password ? "sm-badge--temp" : s.user_id ? "sm-badge--active" : "spa-badge--noaccess"}`}>
                                                 {s.is_temp_password ? "Temp Password" : s.user_id ? "Active" : "No Portal"}
@@ -348,6 +353,7 @@ function StudentPortalAccess() {
                                         <DetailCard label="Degree Program" value={detailStudent.degree_program} full />
                                         <DetailCard label="Studying Year" value={`Year ${detailStudent.studying_year}`} />
                                         <DetailCard label="Semester" value={`Semester ${detailStudent.semester}`} />
+                                        <DetailCard label="Intake" value={detailStudent.intake === 'Jan-Jun' ? 'January Intake (Jan–Jun)' : detailStudent.intake === 'Jul-Dec' ? 'July Intake (Jul–Dec)' : '—'} />
                                         <DetailCard label="Enrolled Date" value={detailStudent.enrolled_date ? new Date(detailStudent.enrolled_date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "—"} />
                                         <DetailCard label="Status" value={detailStudent.status || "active"} />
                                         <DetailCard label="Address" value={detailStudent.address || "—"} full />
@@ -398,6 +404,13 @@ function StudentPortalAccess() {
                                 <div className="form-group"><label>Year *</label><select name="studying_year" value={form.studying_year} onChange={handleFormChange}>{[1, 2, 3, 4].map(y => <option key={y} value={y}>Year {y}</option>)}</select></div>
                                 <div className="form-group"><label>Semester *</label><select name="semester" value={form.semester} onChange={handleFormChange}>{[1, 2].map(s => <option key={s} value={s}>Semester {s}</option>)}</select></div>
                                 <div className="form-group"><label>Enrolled Date</label><input name="enrolled_date" type="date" value={form.enrolled_date} onChange={handleFormChange} /></div>
+                            </div>
+                            <div className="form-group">
+                                <label>Intake *</label>
+                                <select name="intake" value={form.intake} onChange={handleFormChange} required>
+                                    <option value="Jan-Jun">January Intake (Jan–Jun)</option>
+                                    <option value="Jul-Dec">July Intake (Jul–Dec)</option>
+                                </select>
                             </div>
                             <div className="spa-form-row">
                                 <div className="form-group"><label>NIC Number</label><input name="nic_number" value={form.nic_number} onChange={handleFormChange} placeholder="200012345678" /></div>

@@ -21,7 +21,7 @@ function ApplicationManagement() {
     const [selectedApp, setSelectedApp] = useState(null);
     const [approveForm, setApproveForm] = useState({
         first_name: "", last_name: "", nic_number: "", phone_number: "",
-        address: "", degree_program: "", studying_year: 1, semester: 1
+        address: "", degree_program: "", studying_year: 1, semester: 1, intake: "Jan-Jun"
     });
 
     const openApproveModal = (app) => {
@@ -33,7 +33,8 @@ function ApplicationManagement() {
             address: app.address || "",
             degree_program: app.degree_program || "",
             studying_year: 1,
-            semester: 1
+            semester: 1,
+            intake: app.intake || "Jan-Jun"
         });
         setSelectedApp(app);
     };
@@ -192,6 +193,7 @@ function ApplicationManagement() {
                                     <th>Applicant Name</th>
                                     <th>Email & Contact</th>
                                     <th>Intended Degree</th>
+                                    <th>Intake</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -215,6 +217,11 @@ function ApplicationManagement() {
                                             </div>
                                         </td>
                                         <td className="am-degree">{app.degree_program}</td>
+                                        <td>
+                                            <span className={`am-status am-status--${app.intake === 'Jan-Jun' ? 'jan' : 'jul'}`}>
+                                                {app.intake === 'Jan-Jun' ? '🗓 Jan–Jun' : app.intake === 'Jul-Dec' ? '🗓 Jul–Dec' : '—'}
+                                            </span>
+                                        </td>
                                         <td>
                                             <span className={`am-status am-status--${app.status}`}>
                                                 {app.status}
@@ -401,6 +408,20 @@ function ApplicationManagement() {
                                             value={approveForm.semester}
                                             onChange={e => setApproveForm({ ...approveForm, semester: e.target.value })}
                                         />
+                                    </div>
+                                </div>
+                                <div className="popup-row">
+                                    <div className="popup-field">
+                                        <label className="popup-label">Intake</label>
+                                        <select
+                                            className="popup-input"
+                                            value={approveForm.intake}
+                                            onChange={e => setApproveForm({ ...approveForm, intake: e.target.value })}
+                                            required
+                                        >
+                                            <option value="Jan-Jun">January Intake (Jan–Jun)</option>
+                                            <option value="Jul-Dec">July Intake (Jul–Dec)</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>

@@ -75,7 +75,7 @@ const uploadModuleMaterial = async (req, res) => {
 
         if (req.file) {
             finalUrl = "/uploads/materials/" + req.file.filename;
-            finalName = req.file.originalname;
+            finalName = file_name || req.file.originalname;
         }
 
         if (!finalUrl || !finalName) {
