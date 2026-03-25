@@ -10,7 +10,7 @@ import "../../components/DashboardLayout.css";
 
 const NAV_ITEMS = [
     { id: "dashboard", label: "Dashboard", icon: "bi-grid-1x2-fill" },
-    { id: "courses", label: "My Courses", icon: "bi-book-fill" },
+    { id: "courses", label: "My Modules", icon: "bi-book-fill" },
     { id: "timetable", label: "Timetable", icon: "bi-calendar3" },
     { id: "grades", label: "Grade Entry", icon: "bi-pencil-square" },
 ];
