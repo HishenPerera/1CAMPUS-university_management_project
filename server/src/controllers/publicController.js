@@ -6,11 +6,16 @@ const submitApplication = async (req, res) => {
         const {
             first_name, last_name, email,
             nic_number, phone_number, address,
-            degree_program
+            degree_program, intake
         } = req.body;
 
-        if (!first_name || !last_name || !email || !nic_number || !degree_program) {
+        if (!first_name || !last_name || !email || !nic_number || !degree_program || !intake) {
             return res.status(400).json({ message: "Missing required fields for application" });
+        }
+
+        // Validate intake value
+        if (!['Jan-Jun', 'Jul-Dec'].includes(intake)) {
+            return res.status(400).json({ message: "Invalid intake. Must be 'Jan-Jun' or 'Jul-Dec'." });
         }
 
         // Check if application already exists for this email
@@ -27,9 +32,9 @@ const submitApplication = async (req, res) => {
 
         await pool.query(
             `INSERT INTO student_applications 
-             (first_name, last_name, email, nic_number, phone_number, address, degree_program, status) 
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-            [first_name, last_name, email, nic_number, phone_number, address, degree_program, 'pending']
+             (first_name, last_name, email, nic_number, phone_number, address, degree_program, intake, status) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+            [first_name, last_name, email, nic_number, phone_number, address, degree_program, intake, 'pending']
         );
 
         res.status(201).json({ message: "Application submitted successfully" });

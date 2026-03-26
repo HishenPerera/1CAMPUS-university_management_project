@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import axios from "../../api/axiosInstance";
 import "./StudentManagement.css";
 
@@ -9,6 +10,10 @@ function StudentManagement() {
     const [showModal, setShowModal] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
     const [deleting, setDeleting] = useState(false);
+
+    // Pagination
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     // Add student form state
     const [fullName, setFullName] = useState("");
@@ -32,6 +37,18 @@ function StudentManagement() {
     }, []);
 
     useEffect(() => { fetchStudents(); }, [fetchStudents]);
+
+    const totalPages = Math.max(1, Math.ceil(students.length / pageSize));
+    const currentPage = Math.min(page, totalPages);
+    const paginated = students.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+    const pageNums = () => {
+        const nums = [];
+        const start = Math.max(1, currentPage - 2);
+        const end = Math.min(totalPages, currentPage + 2);
+        for (let i = start; i <= end; i++) nums.push(i);
+        return nums;
+    };
 
     const openAddModal = async () => {
         setFullName(""); setEmail(""); setAddError("");
@@ -97,6 +114,22 @@ function StudentManagement() {
             {/* Error banner */}
             {error && <div className="sm-error">{error}</div>}
 
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', padding: '0.75rem 1.25rem', background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border)', boxShadow: '0 4px 12px var(--shadow)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                    Show:
+                    <select 
+                        value={pageSize} 
+                        onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+                        style={{ padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-primary)', outline: 'none', cursor: 'pointer' }}
+                    >
+                        {[10, 25, 50, 100].map(num => <option key={num} value={num}>{num}</option>)}
+                    </select>
+                </div>
+                <div className="sm-count">
+                    {loading ? "" : `${students.length} student${students.length !== 1 ? "s" : ""}`}
+                </div>
+            </div>
+
             {/* Table */}
             {loading ? (
                 <div className="sm-loading">
@@ -104,7 +137,7 @@ function StudentManagement() {
                 </div>
             ) : students.length === 0 ? (
                 <div className="sm-empty">
-                    <div className="sm-empty-icon">🎓</div>
+                    <div className="sm-empty-icon"><i className="bi bi-mortarboard-fill" /></div>
                     <p>No students found. Add your first student to get started.</p>
                 </div>
             ) : (
@@ -120,9 +153,9 @@ function StudentManagement() {
                             </tr>
                         </thead>
                         <tbody>
-                            {students.map((s, i) => (
+                            {paginated.map((s, i) => (
                                 <tr key={s.id}>
-                                    <td className="sm-num">{i + 1}</td>
+                                    <td className="sm-num">{(currentPage - 1) * pageSize + i + 1}</td>
                                     <td>
                                         <div className="sm-name-cell">
                                             <div className="sm-avatar">{s.full_name.charAt(0).toUpperCase()}</div>
@@ -141,7 +174,7 @@ function StudentManagement() {
                                             onClick={() => setDeleteId(s.id)}
                                             title="Delete student"
                                         >
-                                            🗑 Delete
+                                            <i className="bi bi-trash3-fill" /> Delete
                                         </button>
                                     </td>
                                 </tr>
@@ -151,13 +184,27 @@ function StudentManagement() {
                 </div>
             )}
 
+            {totalPages > 1 && (
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}>
+                    <button onClick={() => setPage(1)} disabled={currentPage === 1} style={{ width: '36px', height: '36px', border: '1px solid var(--border)', background: 'var(--bg-card)', borderRadius: '8px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', color: 'var(--text-primary)' }}>«</button>
+                    <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} style={{ width: '36px', height: '36px', border: '1px solid var(--border)', background: 'var(--bg-card)', borderRadius: '8px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', color: 'var(--text-primary)' }}>‹</button>
+                    {pageNums().map(n => (
+                        <button key={n} onClick={() => setPage(n)} style={{ width: '36px', height: '36px', border: '1px solid var(--border)', borderRadius: '8px', cursor: 'pointer', background: n === currentPage ? 'var(--brand-primary)' : 'var(--bg-card)', color: n === currentPage ? 'white' : 'var(--text-primary)' }}>
+                            {n}
+                        </button>
+                    ))}
+                    <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} style={{ width: '36px', height: '36px', border: '1px solid var(--border)', background: 'var(--bg-card)', borderRadius: '8px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', color: 'var(--text-primary)' }}>›</button>
+                    <button onClick={() => setPage(totalPages)} disabled={currentPage === totalPages} style={{ width: '36px', height: '36px', border: '1px solid var(--border)', background: 'var(--bg-card)', borderRadius: '8px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', color: 'var(--text-primary)' }}>»</button>
+                </div>
+            )}
+
             {/* ── Add Student Modal ─────────────────────────────────────── */}
-            {showModal && (
+            {showModal && createPortal(
                 <div className="sm-modal-backdrop" onClick={() => setShowModal(false)}>
                     <div className="sm-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="sm-modal-header">
                             <h3>Add New Student</h3>
-                            <button className="sm-modal-close" onClick={() => setShowModal(false)}>✕</button>
+                            <button className="sm-modal-close" onClick={() => setShowModal(false)}><i className="bi bi-x" /></button>
                         </div>
 
                         <form className="sm-modal-form" onSubmit={handleAdd}>
@@ -205,7 +252,7 @@ function StudentManagement() {
                                                     onChange={() => setChosenPwd(pwd)}
                                                 />
                                                 <code className="sm-pwd-text">{pwd}</code>
-                                                {chosenPwd === pwd && <span className="sm-pwd-check">✓</span>}
+                                                {chosenPwd === pwd && <i className="bi bi-check-circle-fill sm-pwd-check" />}
                                             </label>
                                         ))}
                                     </div>
@@ -225,15 +272,15 @@ function StudentManagement() {
                         </form>
                     </div>
                 </div>
-            )}
+            , document.body)}
 
             {/* ── Delete Confirm Modal ──────────────────────────────────── */}
-            {deleteId && (
+            {deleteId && createPortal(
                 <div className="sm-modal-backdrop" onClick={() => setDeleteId(null)}>
                     <div className="sm-modal sm-modal--sm" onClick={(e) => e.stopPropagation()}>
                         <div className="sm-modal-header">
                             <h3>Delete Student</h3>
-                            <button className="sm-modal-close" onClick={() => setDeleteId(null)}>✕</button>
+                            <button className="sm-modal-close" onClick={() => setDeleteId(null)}><i className="bi bi-x" /></button>
                         </div>
                         <p className="sm-confirm-text">Are you sure you want to permanently delete this student? This action cannot be undone.</p>
                         <div className="sm-modal-actions">
@@ -248,7 +295,7 @@ function StudentManagement() {
                         </div>
                     </div>
                 </div>
-            )}
+            , document.body)}
         </div>
     );
 }

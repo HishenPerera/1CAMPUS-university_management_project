@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import axios from "../../api/axiosInstance";
 import "./AuditLogs.css";
 
-const PAGE_SIZE = 15;
 
 function AuditLogs() {
     const [logs, setLogs] = useState([]);
@@ -11,6 +10,7 @@ function AuditLogs() {
 
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     const fetchLogs = async () => {
         setLoading(true);
@@ -36,9 +36,9 @@ function AuditLogs() {
         );
     }, [logs, search]);
 
-    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
     const currentPage = Math.min(page, totalPages);
-    const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
     const handleSearch = (e) => { setSearch(e.target.value); setPage(1); };
 
@@ -74,10 +74,22 @@ function AuditLogs() {
                         value={search}
                         onChange={handleSearch}
                     />
-                    {search && <button className="al-search-clear" onClick={() => { setSearch(""); setPage(1); }}>✕</button>}
+                    {search && <button className="al-search-clear" onClick={() => { setSearch(""); setPage(1); }}><i className="bi bi-x" /></button>}
                 </div>
-                <div className="al-count">
-                    {loading ? "" : `Showing ${filtered.length} log${filtered.length !== 1 ? "s" : ""}`}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                        Show:
+                        <select 
+                            value={pageSize} 
+                            onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+                            style={{ padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-primary)', outline: 'none', cursor: 'pointer' }}
+                        >
+                            {[10, 25, 50, 100].map(num => <option key={num} value={num}>{num}</option>)}
+                        </select>
+                    </div>
+                    <div className="al-count">
+                        {loading ? "" : `Showing ${filtered.length} log${filtered.length !== 1 ? "s" : ""}`}
+                    </div>
                 </div>
             </div>
 

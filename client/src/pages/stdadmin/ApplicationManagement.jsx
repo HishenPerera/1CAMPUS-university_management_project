@@ -2,9 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import axios from "../../api/axiosInstance";
 import "./ApplicationManagement.css";
-
-const PAGE_SIZE = 10;
-
 function ApplicationManagement() {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -12,6 +9,7 @@ function ApplicationManagement() {
 
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
     const [statusFilter, setStatusFilter] = useState("all");
 
     const [processingId, setProcessingId] = useState(null);
@@ -23,7 +21,7 @@ function ApplicationManagement() {
     const [selectedApp, setSelectedApp] = useState(null);
     const [approveForm, setApproveForm] = useState({
         first_name: "", last_name: "", nic_number: "", phone_number: "",
-        address: "", degree_program: "", studying_year: 1, semester: 1
+        address: "", degree_program: "", studying_year: 1, semester: 1, intake: "Jan-Jun"
     });
 
     const openApproveModal = (app) => {
@@ -35,7 +33,8 @@ function ApplicationManagement() {
             address: app.address || "",
             degree_program: app.degree_program || "",
             studying_year: 1,
-            semester: 1
+            semester: 1,
+            intake: app.intake || "Jan-Jun"
         });
         setSelectedApp(app);
     };
@@ -73,9 +72,9 @@ function ApplicationManagement() {
         return result;
     }, [applications, search, statusFilter]);
 
-    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
     const currentPage = Math.min(page, totalPages);
-    const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
     const handleSearch = (e) => { setSearch(e.target.value); setPage(1); };
     const handleFilter = (e) => { setStatusFilter(e.target.value); setPage(1); };
@@ -150,7 +149,7 @@ function ApplicationManagement() {
                         value={search}
                         onChange={handleSearch}
                     />
-                    {search && <button className="am-search-clear" onClick={() => { setSearch(""); setPage(1); }}>✕</button>}
+                    {search && <button className="am-search-clear" onClick={() => { setSearch(""); setPage(1); }}><i className="bi bi-x" /></button>}
                 </div>
 
                 <div className="am-filters">
@@ -161,6 +160,16 @@ function ApplicationManagement() {
                         <option value="enrolled">Enrolled in Portal</option>
                         <option value="rejected">Rejected</option>
                     </select>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                        Show:
+                        <select 
+                            value={pageSize} 
+                            onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+                            style={{ padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-primary)', outline: 'none', cursor: 'pointer' }}
+                        >
+                            {[10, 25, 50, 100].map(num => <option key={num} value={num}>{num}</option>)}
+                        </select>
+                    </div>
                     <div className="am-count">
                         {loading ? "" : `${filtered.length} application${filtered.length !== 1 ? "s" : ""}`}
                     </div>
@@ -184,6 +193,7 @@ function ApplicationManagement() {
                                     <th>Applicant Name</th>
                                     <th>Email & Contact</th>
                                     <th>Intended Degree</th>
+                                    <th>Intake</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -207,6 +217,11 @@ function ApplicationManagement() {
                                             </div>
                                         </td>
                                         <td className="am-degree">{app.degree_program}</td>
+                                        <td>
+                                            <span className={`am-status am-status--${app.intake === 'Jan-Jun' ? 'jan' : 'jul'}`}>
+                                                {app.intake === 'Jan-Jun' ? '🗓 Jan–Jun' : app.intake === 'Jul-Dec' ? '🗓 Jul–Dec' : '—'}
+                                            </span>
+                                        </td>
                                         <td>
                                             <span className={`am-status am-status--${app.status}`}>
                                                 {app.status}
@@ -283,7 +298,7 @@ function ApplicationManagement() {
                     <div className="am-modal" onClick={e => e.stopPropagation()}>
                         <div className="am-modal-header am-modal-header--success">
                             <h3><i className="bi bi-check-circle-fill" /> Application Approved</h3>
-                            <button className="am-modal-close" onClick={() => setShowPasswordModal(false)}>✕</button>
+                            <button className="am-modal-close" onClick={() => setShowPasswordModal(false)}><i className="bi bi-x" /></button>
                         </div>
                         <div className="am-modal-body">
                             <p>The student's portal account and official profile have been created successfully.</p>
@@ -393,6 +408,20 @@ function ApplicationManagement() {
                                             value={approveForm.semester}
                                             onChange={e => setApproveForm({ ...approveForm, semester: e.target.value })}
                                         />
+                                    </div>
+                                </div>
+                                <div className="popup-row">
+                                    <div className="popup-field">
+                                        <label className="popup-label">Intake</label>
+                                        <select
+                                            className="popup-input"
+                                            value={approveForm.intake}
+                                            onChange={e => setApproveForm({ ...approveForm, intake: e.target.value })}
+                                            required
+                                        >
+                                            <option value="Jan-Jun">January Intake (Jan–Jun)</option>
+                                            <option value="Jul-Dec">July Intake (Jul–Dec)</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>

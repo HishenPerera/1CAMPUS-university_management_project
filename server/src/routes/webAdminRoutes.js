@@ -16,7 +16,10 @@ const {
     getStaff,
     getStaffTempPasswords,
     createStaff,
-    deleteStaff
+    deleteStaff,
+    getWebAdmins,
+    createWebAdmin,
+    deleteWebAdmin
 } = require("../controllers/webAdminController");
 
 // Secure all routes
@@ -28,5 +31,9 @@ router.get("/staff", getStaff);
 router.get("/temp-passwords", getStaffTempPasswords);
 router.post("/staff", createStaff);
 router.delete("/staff/:id", deleteStaff);
+
+router.get("/admins", getWebAdmins);
+router.post("/admins", createWebAdmin);
+router.delete("/admins/:id", deleteWebAdmin);
 
 module.exports = router;

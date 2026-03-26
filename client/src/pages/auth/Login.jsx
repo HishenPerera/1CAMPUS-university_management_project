@@ -90,7 +90,7 @@ function Login() {
 
           {error && (
             <div className="login-error" role="alert">
-              <span className="error-icon">⚠</span> {error}
+              <span className="error-icon"><i className="bi bi-exclamation-triangle-fill" /></span> {error}
             </div>
           )}
 
