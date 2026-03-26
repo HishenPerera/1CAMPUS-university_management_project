@@ -1,0 +1,413 @@
+/* ── Student Management ───────────────────────────────────────────── */
+.sm-page {
+    padding: 2rem;
+    max-width: 1000px;
+}
+
+.sm-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.sm-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem;
+}
+
+.sm-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.sm-add-btn {
+    background: linear-gradient(135deg, var(--brand-deep), var(--brand-primary));
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.7rem 1.4rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    box-shadow: 0 4px 14px var(--brand-glow);
+    transition: opacity 0.2s, transform 0.15s;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.sm-add-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* ── Table ────────────────────────────────────────────────────────── */
+.sm-table-wrap {
+    overflow-x: auto;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.sm-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.sm-table thead tr {
+    background: rgba(26, 127, 232, 0.08);
+    border-bottom: 1px solid var(--border);
+}
+
+.sm-table th {
+    padding: 0.85rem 1.1rem;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+}
+
+.sm-table td {
+    padding: 0.9rem 1.1rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border);
+}
+
+.sm-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.sm-table tbody tr {
+    background: var(--surface);
+    transition: background 0.15s;
+}
+
+.sm-table tbody tr:hover {
+    background: rgba(26, 127, 232, 0.04);
+}
+
+.sm-num {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.sm-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+}
+
+.sm-avatar {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--brand-deep), var(--brand-primary));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.sm-email {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+}
+
+.sm-badge {
+    display: inline-block;
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.sm-badge--active {
+    background: rgba(34, 197, 94, 0.12);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.sm-badge--temp {
+    background: rgba(251, 146, 60, 0.12);
+    color: #fb923c;
+    border: 1px solid rgba(251, 146, 60, 0.25);
+}
+
+.sm-del-btn {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 7px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.sm-del-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+/* ── States ───────────────────────────────────────────────────────── */
+.sm-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-secondary);
+    padding: 3rem 0;
+    font-size: 0.9rem;
+}
+
+.sm-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--brand-primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.sm-empty {
+    text-align: center;
+    padding: 4rem 0;
+    color: var(--text-secondary);
+}
+
+.sm-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+}
+
+.sm-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    color: #f87171;
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+/* ── Modal ────────────────────────────────────────────────────────── */
+.sm-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.sm-modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.75rem;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+    animation: slideUp 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sm-modal--sm {
+    max-width: 380px;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sm-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.sm-modal-header h3 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.sm-modal-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+.sm-modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.sm-label-hint {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+/* ── Temp password option cards ─────────────────────────────────── */
+.sm-pwd-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.sm-pwd-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.sm-pwd-card input[type="radio"] {
+    display: none;
+}
+
+.sm-pwd-card--selected {
+    border-color: var(--brand-primary);
+    background: rgba(26, 127, 232, 0.08);
+}
+
+.sm-pwd-text {
+    font-family: 'JetBrains Mono', 'Fira Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    letter-spacing: 0.05em;
+    flex: 1;
+}
+
+.sm-pwd-check {
+    color: var(--brand-primary);
+    font-weight: 800;
+    font-size: 1rem;
+}
+
+.sm-pwd-loading {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    padding: 0.5rem 0;
+}
+
+/* ── Modal Actions ───────────────────────────────────────────────── */
+.sm-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.sm-cancel-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 0.65rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+}
+
+.sm-cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.sm-confirm-btn {
+    background: linear-gradient(135deg, var(--brand-deep), var(--brand-primary));
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.65rem 1.4rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.15s;
+}
+
+.sm-confirm-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.sm-delete-confirm-btn {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.65rem 1.4rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.15s;
+}
+
+.sm-delete-confirm-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.sm-confirm-text {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin: 0 0 1.5rem;
+}
