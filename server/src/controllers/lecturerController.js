@@ -1,5 +1,6 @@
 const pool = require("../config/db");
 
+
 // GET /api/lecturer/modules
 const getMyModules = async (req, res) => {
     try {
@@ -131,9 +132,92 @@ const deleteModuleMaterial = async (req, res) => {
     }
 };
 
+// POST /api/lecturer/modules/:id/ai-assessment
+const generateAIAssessment = async (req, res) => {
+    const { id } = req.params;
+    const lecturerId = req.user.id;
+    const { topic, difficulty, type } = req.body;
+
+    if (!topic || !difficulty || !type) {
+        return res.status(400).json({ message: "Missing required fields (topic, difficulty, type)." });
+    }
+
+    try {
+        // 1. Verify lecturer owns module and get module details
+        const moduleQuery = await pool.query(`
+            SELECT m.module_name, m.degree_program, m.studying_year, m.semester 
+            FROM module_materials mm
+            RIGHT JOIN modules m ON m.id = $1
+            JOIN lecturer_modules lm ON m.id = lm.module_id
+            WHERE lm.lecturer_id = $2 AND lm.module_id = $1
+            LIMIT 1
+        `, [id, lecturerId]);
+
+        if (moduleQuery.rowCount === 0) {
+            return res.status(403).json({ message: "Not authorized to generate content for this module." });
+        }
+
+        const mod = moduleQuery.rows[0];
+
+        // 2. Build the System Prompt
+        const systemPrompt = `
+You are an expert university professor and an AI teaching assistant.
+Your task is to generate high-quality academic assessments.
+Module Details:
+- Name: ${mod.module_name}
+- Degree: ${mod.degree_program}
+- Year/Semester: Year ${mod.studying_year}, Semester ${mod.semester}
+
+Task: Generate a ${difficulty} level ${type} focusing on the topic: "${topic}".
+Instructions:
+- If generating a Multiple Choice Quiz (MCQ), provide exactly 10 questions. Ensure the 4 options for each question are formatted cleanly as a bulleted or numbered list on separate lines. Provide an Answer Key at the very end.
+- If generating Short Answer Questions, provide 5 thought-provoking questions.
+- If generating an Assignment Idea, provide a clear title, objective, structured rubric, and submission guidelines.
+- ALWAYS respond in clean GitHub-flavored Markdown. Do not include markdown code blocks \`\`\` around your entire response.
+`;
+
+        // 3. Call Groq
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "llama-3.3-70b-versatile",
+                temperature: 0.7,
+                max_tokens: 2000,
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: "Please generate the assessment exactly as requested." }
+                ]
+            })
+        });
+
+        if (!response.ok) {
+            const errBody = await response.text();
+            throw new Error(`OpenRouter Error: ${response.status} - ${errBody}`);
+        }
+
+        const completion = await response.json();
+        const markdownContent = completion.choices?.[0]?.message?.content;
+
+        if (!markdownContent) {
+            throw new Error("AI returned empty response");
+        }
+
+        res.json({ content: markdownContent });
+
+    } catch (err) {
+        console.error("AI Generation Error:", err);
+        res.status(500).json({ message: "Failed to generate assessment. Ensure your Groq API key is valid. Details: " + err.message });
+    }
+};
+
 module.exports = {
     getMyModules,
     getModuleMaterials,
     uploadModuleMaterial,
-    deleteModuleMaterial
+    deleteModuleMaterial,
+    generateAIAssessment
 };

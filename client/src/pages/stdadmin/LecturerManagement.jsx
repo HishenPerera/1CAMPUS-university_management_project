@@ -20,6 +20,13 @@ function LecturerManagement() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    // Filters
+    const [searchQuery, setSearchQuery] = useState("");
+    const [filterDegree, setFilterDegree] = useState("");
+    const [filterYear, setFilterYear] = useState("");
+    const [filterSemester, setFilterSemester] = useState("");
+    const [filterIntake, setFilterIntake] = useState("");
+
     const [showAddModal, setShowAddModal] = useState(false);
     const [newModule, setNewModule] = useState({
         module_code: "", module_name: "", degree_program: DEGREES[0], semester: 1, studying_year: 1, intake: "Jan-Jun"
@@ -90,6 +97,18 @@ function LecturerManagement() {
         }
     };
 
+    const filteredModules = modules.filter(m => {
+        const matchesSearch = !searchQuery || 
+            m.module_code.toLowerCase().includes(searchQuery.toLowerCase()) || 
+            m.module_name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesDegree = !filterDegree || m.degree_program === filterDegree;
+        const matchesYear = !filterYear || m.studying_year.toString() === filterYear;
+        const matchesSemester = !filterSemester || m.semester.toString() === filterSemester;
+        const matchesIntake = !filterIntake || m.intake === filterIntake;
+
+        return matchesSearch && matchesDegree && matchesYear && matchesSemester && matchesIntake;
+    });
+
     return (
         <div className="lm-page">
             <div className="lm-header">
@@ -118,8 +137,60 @@ function LecturerManagement() {
                     <button className="lm-add-btn" onClick={() => setShowAddModal(true)}>Create First Module</button>
                 </div>
             ) : (
-                <div className="lm-grid">
-                    {modules.map((m) => (
+                <>
+                    <div className="lm-toolbar">
+                        <div className="lm-search-wrap">
+                            <i className="bi bi-search lm-search-icon" />
+                            <input 
+                                type="text" 
+                                className="lm-search" 
+                                placeholder="Search by module code or name..." 
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                            />
+                            {searchQuery && (
+                                <button className="lm-search-clear" onClick={() => setSearchQuery("")}>
+                                    <i className="bi bi-x-circle-fill" />
+                                </button>
+                            )}
+                        </div>
+                        
+                        <div className="lm-filters">
+                            <select className="lm-filter-select" value={filterDegree} onChange={e => setFilterDegree(e.target.value)}>
+                                <option value="">All Degrees</option>
+                                {DEGREES.map(d => <option key={d} value={d}>{d}</option>)}
+                            </select>
+                            
+                            <select className="lm-filter-select" value={filterYear} onChange={e => setFilterYear(e.target.value)}>
+                                <option value="">All Years</option>
+                                {[1,2,3,4,5].map(y => <option key={y} value={y}>Year {y}</option>)}
+                            </select>
+                            
+                            <select className="lm-filter-select" value={filterSemester} onChange={e => setFilterSemester(e.target.value)}>
+                                <option value="">All Semesters</option>
+                                <option value="1">Sem 1</option>
+                                <option value="2">Sem 2</option>
+                            </select>
+                            
+                            <select className="lm-filter-select" value={filterIntake} onChange={e => setFilterIntake(e.target.value)}>
+                                <option value="">All Intakes</option>
+                                <option value="Jan-Jun">Jan-Jun</option>
+                                <option value="Jul-Dec">Jul-Dec</option>
+                            </select>
+                        </div>
+                    </div>
+                
+                    {filteredModules.length === 0 ? (
+                        <div className="lm-empty">
+                            <i className="bi bi-funnel lm-empty-icon" />
+                            <p>No modules match your current filters.</p>
+                            <button className="lm-btn-cancel" onClick={() => {
+                                setSearchQuery(""); setFilterDegree(""); setFilterYear(""); setFilterSemester(""); setFilterIntake("");
+                            }}>Clear Filters</button>
+                        </div>
+                    ) : (
+                        <div className="lm-grid">
+                            {filteredModules.map((m) => (
                         <div key={m.id} className="lm-card">
                             <div className="lm-card-header">
                                 <div>
@@ -184,6 +255,8 @@ function LecturerManagement() {
                         </div>
                     ))}
                 </div>
+                )}
+                </>
             )}
 
             {/* ── Add Module Modal ──────────────────────────────────────────────── */}

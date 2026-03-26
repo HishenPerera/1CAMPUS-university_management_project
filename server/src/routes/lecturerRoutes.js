@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getMyModules, getModuleMaterials, uploadModuleMaterial, deleteModuleMaterial } = require("../controllers/lecturerController");
+const { getMyModules, getModuleMaterials, uploadModuleMaterial, deleteModuleMaterial, generateAIAssessment } = require("../controllers/lecturerController");
 const verifyToken = require("../middleware/authMiddleware");
 const uploadMaterial = require("../middleware/uploadMaterial");
 
@@ -20,5 +20,8 @@ router.get("/modules", getMyModules);
 router.get("/modules/:id/materials", getModuleMaterials);
 router.post("/modules/:id/materials", uploadMaterial.single("material"), uploadModuleMaterial);
 router.delete("/modules/materials/:material_id", deleteModuleMaterial);
+
+// AI Tools
+router.post("/modules/:id/ai-assessment", generateAIAssessment);
 
 module.exports = router;

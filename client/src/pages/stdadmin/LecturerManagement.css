@@ -111,6 +111,100 @@
     animation: sm-spin 1s linear infinite;
 }
 
+/* ── Toolbar ─────────────────────────────────────────────────────────── */
+.lm-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    background: var(--bg-card);
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+}
+
+.lm-search-wrap {
+    flex: 1;
+    min-width: 250px;
+    position: relative;
+}
+
+.lm-search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+.lm-search {
+    width: 100%;
+    padding: 0.65rem 2.5rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.lm-search:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 3px rgba(26, 127, 232, 0.1);
+}
+
+.lm-search-clear {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.2rem;
+    transition: color 0.15s;
+}
+
+.lm-search-clear:hover {
+    color: var(--error-color);
+}
+
+.lm-filters {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.lm-filter-select {
+    padding: 0.65rem 2rem 0.65rem 1rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.8rem center;
+}
+
+.lm-filter-select option {
+    background: var(--surface);
+    color: var(--text-primary);
+}
+
+.lm-filter-select:focus {
+    border-color: var(--brand-primary);
+}
+
 /* ── Grid ────────────────────────────────────────────────────────────── */
 .lm-grid {
     display: grid;

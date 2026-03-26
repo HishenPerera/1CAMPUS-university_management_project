@@ -1,5 +1,4 @@
 const pool = require("../config/db");
-const Groq = require("groq-sdk");
 
 // GET /api/student/profile — fetch own profile from students table
 const getMyProfile = async (req, res) => {
@@ -270,23 +269,34 @@ Your role is to:
 
 Keep responses concise, friendly, and actionable. Use bullet points and clear formatting where helpful. Address the student by their first name.`;
 
-        // Build messages for Groq (OpenAI-compatible format)
-        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
+        // Build messages for Groq
         const messages = [
             { role: "system", content: systemPrompt },
             ...history.map(h => ({ role: h.role === "user" ? "user" : "assistant", content: h.content })),
             { role: "user", content: message },
         ];
 
-        const completion = await groq.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
-            messages,
-            max_tokens: 1024,
-            temperature: 0.7,
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "llama-3.3-70b-versatile",
+                messages,
+                max_tokens: 1024,
+                temperature: 0.7
+            })
         });
 
-        const reply = completion.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
+        if (!response.ok) {
+            const errBody = await response.text();
+            throw new Error(`Groq Error: ${response.status} - ${errBody}`);
+        }
+
+        const completion = await response.json();
+        const reply = completion.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
         res.json({ reply });
     } catch (err) {
         console.error("AI Advisor error:", err?.message || err);
