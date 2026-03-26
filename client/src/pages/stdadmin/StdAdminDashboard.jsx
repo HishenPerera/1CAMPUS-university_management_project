@@ -77,7 +77,7 @@ function StdAdminDashboard() {
                 <main className="dash-content">
                     {activeNav === "dashboard" && (
                         <div className="dash-home">
-                            <h1 className="dash-greeting">Welcome back{userName ? `, ${userName.split(" ")[0]}` : ""} 👋</h1>
+                            <h1 className="dash-greeting">Welcome back{userName ? `, ${userName.split(" ")[0]}` : ""} <i className="bi bi-hand-wave-fill" /></h1>
                             <p className="dash-desc">Use the sidebar to manage students and administration tasks.</p>
                             <div className="dash-cards">
                                 <div className="dash-card" onClick={() => setActiveNav("applications")}>

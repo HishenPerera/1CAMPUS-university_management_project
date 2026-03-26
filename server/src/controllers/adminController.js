@@ -59,7 +59,7 @@ const addStudent = async (req, res) => {
             first_name, last_name, email,
             registration_number, degree_program, studying_year, semester,
             nic_number, phone_number, address, enrolled_date,
-            chosen_password,
+            chosen_password, intake,
         } = req.body;
 
         if (!first_name || !last_name || !email || !registration_number || !degree_program || !studying_year || !semester || !chosen_password) {
@@ -78,7 +78,7 @@ const addStudent = async (req, res) => {
         const student = await createStudentRecord({
             registration_number, first_name, last_name, email,
             nic_number, phone_number, degree_program,
-            studying_year, semester, address, enrolled_date,
+            studying_year, semester, address, enrolled_date, intake: intake || null,
         });
 
         await logActivity(req.user.id, "CREATE_STUDENT", `Created student profile/login for ${email} (${registration_number})`);
@@ -151,7 +151,7 @@ const acceptApplication = async (req, res) => {
 
 const approveApplication = async (req, res) => {
     const { id } = req.params;
-    const { first_name, last_name, nic_number, phone_number, address, degree_program, studying_year, semester } = req.body;
+    const { first_name, last_name, nic_number, phone_number, address, degree_program, studying_year, semester, intake } = req.body;
 
     try {
         // 1. Fetch application
@@ -204,7 +204,8 @@ const approveApplication = async (req, res) => {
             degree_program,
             studying_year: studying_year || 1,
             semester: semester || 1,
-            address: address || null
+            address: address || null,
+            intake: intake || null
         });
 
         await logActivity(req.user.id, "APPROVE_APPLICATION", `Created student portal account for ${portalEmail} (${regNumber})`);
@@ -274,17 +275,25 @@ const getLecturers = async (req, res) => {
 };
 
 const addModule = async (req, res) => {
-    const { module_code, module_name, degree_program, semester, studying_year } = req.body;
-    if (!module_code || !module_name || !degree_program || !semester || !studying_year) {
+    const { module_code, module_name, degree_program, semester, studying_year, intake } = req.body;
+    if (!module_code || !module_name || !degree_program || !semester || !studying_year || !intake) {
         return res.status(400).json({ message: "Missing required module fields" });
     }
 
+    if (!['Jan-Jun', 'Jul-Dec'].includes(intake)) {
+        return res.status(400).json({ message: "Invalid intake. Must be 'Jan-Jun' or 'Jul-Dec'." });
+    }
+
+    // Auto-suffix the module code with -Jan or -Jul
+    const intakeSuffix = intake === 'Jan-Jun' ? 'Jan' : 'Jul';
+    const qualifiedCode = `${module_code}-${intakeSuffix}`;
+
     try {
         const result = await pool.query(
-            "INSERT INTO modules (module_code, module_name, degree_program, semester, studying_year) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-            [module_code, module_name, degree_program, semester, studying_year]
+            "INSERT INTO modules (module_code, module_name, degree_program, semester, studying_year, intake) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+            [qualifiedCode, module_name, degree_program, semester, studying_year, intake]
         );
-        await logActivity(req.user.id, "CREATE_MODULE", `Created module ${module_code} - ${module_name}`);
+        await logActivity(req.user.id, "CREATE_MODULE", `Created module ${qualifiedCode} - ${module_name} (${intake})`);
         res.status(201).json({ message: "Module created", module: result.rows[0] });
     } catch (err) {
         if (err.code === "23505") return res.status(409).json({ message: "Module code already exists" });

@@ -58,7 +58,7 @@ function ChangePassword() {
                 </div>
 
                 <div className="cp-header">
-                    <div className="cp-icon">🔐</div>
+                    <div className="cp-icon"><i className="bi bi-lock-fill" /></div>
                     <h1 className="cp-title">Set Your Password</h1>
                     <p className="cp-subtitle">
                         You are using a temporary password. Please set a new password to continue.
@@ -66,8 +66,8 @@ function ChangePassword() {
                 </div>
 
                 {success ? (
-                    <div className="cp-success">
-                        <span>✅</span> Password updated! Redirecting…
+                        <div className="cp-success">
+                        <i className="bi bi-check-circle-fill" /> Password updated! Redirecting…
                     </div>
                 ) : (
                     <form className="cp-form" onSubmit={handleSubmit}>
@@ -99,7 +99,7 @@ function ChangePassword() {
 
                         {error && (
                             <div className="cp-error">
-                                <span>⚠</span> {error}
+                                <span><i className="bi bi-exclamation-triangle-fill" /></span> {error}
                             </div>
                         )}
 
