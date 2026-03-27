@@ -1,12 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import axios from "../../api/axiosInstance";
-import "./StaffManagement.css";
-
-const ROLES = [
-    { value: "lecturer", label: "Lecturer" },
-    { value: "admin_staff", label: "Administrative Staff" }
-];
+import "./StaffManagement.css"; // Reuse styling from StaffManagement
 
 const SERVER_BASE = "http://localhost:5001";
 
@@ -27,8 +22,8 @@ function AvatarCell({ src, name }) {
     );
 }
 
-function StaffManagement() {
-    const [staff, setStaff] = useState([]);
+function WebAdminManagement() {
+    const [admins, setAdmins] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -44,34 +39,34 @@ function StaffManagement() {
     const [tempPwds, setTempPwds] = useState([]);
     const [chosenPwd, setChosenPwd] = useState("");
     const [pwdLoading, setPwdLoading] = useState(false);
-    const [form, setForm] = useState({ full_name: "", email: "", role: "lecturer" });
+    const [form, setForm] = useState({ full_name: "", email: "", role: "web_admin" });
 
     // Delete modal
     const [deleteId, setDeleteId] = useState(null);
     const [deleting, setDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState("");
 
-    const fetchStaff = async () => {
+    const fetchAdmins = async () => {
         setLoading(true);
         try {
-            const res = await axios.get("/webadmin/staff");
-            setStaff(res.data);
+            const res = await axios.get("/webadmin/admins");
+            setAdmins(res.data);
         } catch {
-            setError("Failed to load staff list.");
+            setError("Failed to load web administrators list.");
         } finally { setLoading(false); }
     };
 
-    useEffect(() => { fetchStaff(); }, []);
+    useEffect(() => { fetchAdmins(); }, []);
 
     // ── Filtering & Pagination ────────────────────────────────────────────────
     const filtered = useMemo(() => {
         const q = search.toLowerCase();
-        if (!q) return staff;
-        return staff.filter(s =>
-            (s.full_name || "").toLowerCase().includes(q) ||
-            (s.email || "").toLowerCase().includes(q) ||
-            s.role.toLowerCase().includes(q)
+        if (!q) return admins;
+        return admins.filter(a =>
+            (a.full_name || "").toLowerCase().includes(q) ||
+            (a.email || "").toLowerCase().includes(q)
         );
-    }, [staff, search]);
+    }, [admins, search]);
 
     const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
     const currentPage = Math.min(page, totalPages);
@@ -81,7 +76,7 @@ function StaffManagement() {
 
     // ── Add Modal logic ───────────────────────────────────────────────────────
     const openAddModal = async () => {
-        setForm({ full_name: "", email: "", role: "lecturer" });
+        setForm({ full_name: "", email: "", role: "web_admin" });
         setAddError(""); setChosenPwd(""); setTempPwds([]);
         setShowAdd(true); setPwdLoading(true);
         try {
@@ -98,23 +93,24 @@ function StaffManagement() {
         if (!chosenPwd) return setAddError("Please select a temporary password.");
         setAddLoading(true); setAddError("");
         try {
-            await axios.post("/webadmin/staff", { ...form, chosen_password: chosenPwd });
+            await axios.post("/webadmin/admins", { ...form, chosen_password: chosenPwd });
             setShowAdd(false);
-            fetchStaff();
+            fetchAdmins();
         } catch (err) {
-            setAddError(err.response?.data?.message || "Failed to create staff account.");
+            setAddError(err.response?.data?.message || "Failed to create web admin account.");
         } finally { setAddLoading(false); }
     };
 
     // ── Delete logic ─────────────────────────────────────────────────────────
     const handleDelete = async (id) => {
         setDeleting(true);
+        setDeleteError("");
         try {
-            await axios.delete(`/webadmin/staff/${id}`);
+            await axios.delete(`/webadmin/admins/${id}`);
             setDeleteId(null);
-            fetchStaff();
+            fetchAdmins();
         } catch (err) {
-            setError(err.response?.data?.message || "Failed to delete staff member.");
+            setDeleteError(err.response?.data?.message || "Failed to delete web admin member.");
         } finally { setDeleting(false); }
     };
 
@@ -131,11 +127,11 @@ function StaffManagement() {
             {/* Header */}
             <div className="sm-header">
                 <div>
-                    <h2 className="sm-title">Staff Management</h2>
-                    <p className="sm-subtitle">Manage system access for Lecturers and Administrative Staff</p>
+                    <h2 className="sm-title">Web Administrators</h2>
+                    <p className="sm-subtitle">Manage system access for Web Administrators</p>
                 </div>
                 <button className="sm-add-btn" onClick={openAddModal}>
-                    <i className="bi bi-person-plus-fill" /> Add Staff Member
+                    <i className="bi bi-person-plus-fill" /> Add Web Admin
                 </button>
             </div>
 
@@ -148,7 +144,7 @@ function StaffManagement() {
                     <input
                         type="text"
                         className="sm-search"
-                        placeholder="Search by name, email, or role…"
+                        placeholder="Search by name or email…"
                         value={search}
                         onChange={handleSearch}
                     />
@@ -166,18 +162,18 @@ function StaffManagement() {
                         </select>
                     </div>
                     <div className="sm-count">
-                        {loading ? "" : `${filtered.length} staff member${filtered.length !== 1 ? "s" : ""}`}
+                        {loading ? "" : `${filtered.length} web admin${filtered.length !== 1 ? "s" : ""}`}
                     </div>
                 </div>
             </div>
 
             {/* Table grid */}
             {loading ? (
-                <div className="sm-loading"><div className="sm-spinner" /> Loading staff…</div>
+                <div className="sm-loading"><div className="sm-spinner" /> Loading admins…</div>
             ) : filtered.length === 0 ? (
                 <div className="sm-empty">
-                    <div className="sm-empty-icon"><i className="bi bi-people" /></div>
-                    <p>{search ? "No staff match your search." : "No staff members yet. Add your first staff member to get started."}</p>
+                    <div className="sm-empty-icon"><i className="bi bi-person-badge" /></div>
+                    <p>{search ? "No administrators match your search." : "No administrators yet."}</p>
                 </div>
             ) : (
                 <>
@@ -189,34 +185,28 @@ function StaffManagement() {
                                     <th>Photo</th>
                                     <th>Full Name</th>
                                     <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Portal Status</th>
+                                    <th>Status</th>
                                     <th>Created</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {paginated.map((s, idx) => (
-                                    <tr key={s.id}>
+                                {paginated.map((a, idx) => (
+                                    <tr key={a.id}>
                                         <td className="sm-num">{(currentPage - 1) * pageSize + idx + 1}</td>
-                                        <td><AvatarCell src={s.profile_image} name={s.full_name} /></td>
-                                        <td className="sm-name">{s.full_name}</td>
-                                        <td className="sm-email">{s.email}</td>
+                                        <td><AvatarCell src={a.profile_image} name={a.full_name} /></td>
+                                        <td className="sm-name">{a.full_name}</td>
+                                        <td className="sm-email">{a.email}</td>
                                         <td>
-                                            <span className={`sm-role-badge sm-role--${s.role}`}>
-                                                {s.role === 'admin_staff' ? 'Admin Staff' : 'Lecturer'}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span className={`sm-badge ${s.is_temp_password ? "sm-badge--temp" : "sm-badge--active"}`}>
-                                                {s.is_temp_password ? "Temp Password" : "Active"}
+                                            <span className={`sm-badge ${a.is_temp_password ? "sm-badge--temp" : "sm-badge--active"}`}>
+                                                {a.is_temp_password ? "Temp Password" : "Active"}
                                             </span>
                                         </td>
                                         <td className="sm-date">
-                                            {new Date(s.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                                            {new Date(a.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                                         </td>
                                         <td>
-                                            <button className="sm-del-btn" onClick={() => setDeleteId(s.id)} title="Delete Staff Member">
+                                            <button className="sm-del-btn" onClick={() => { setDeleteId(a.id); setDeleteError(""); }} title="Delete Administrator">
                                                 <i className="bi bi-trash3-fill" />
                                             </button>
                                         </td>
@@ -252,7 +242,7 @@ function StaffManagement() {
                 <div className="sm-modal-backdrop" onClick={() => setShowAdd(false)}>
                     <div className="sm-modal" onClick={e => e.stopPropagation()}>
                         <div className="sm-modal-header">
-                            <h3><i className="bi bi-person-plus-fill" /> Add New Staff Member</h3>
+                            <h3><i className="bi bi-person-plus-fill" /> Add New Web Administrator</h3>
                             <button className="sm-modal-close" onClick={() => setShowAdd(false)}><i className="bi bi-x" /></button>
                         </div>
                         <form className="sm-modal-form" onSubmit={handleAddSubmit}>
@@ -263,7 +253,7 @@ function StaffManagement() {
                                     value={form.full_name}
                                     onChange={e => setForm({ ...form, full_name: e.target.value })}
                                     required
-                                    placeholder="e.g. Dr. John Doe"
+                                    placeholder="e.g. Admin User"
                                 />
                             </div>
                             <div className="form-group">
@@ -274,21 +264,8 @@ function StaffManagement() {
                                     value={form.email}
                                     onChange={e => setForm({ ...form, email: e.target.value })}
                                     required
-                                    placeholder="john.doe@1campus.edu"
+                                    placeholder="admin@1campus.edu"
                                 />
-                            </div>
-                            <div className="form-group">
-                                <label>System Role *</label>
-                                <div className="sm-select-wrap">
-                                    <select
-                                        name="role"
-                                        value={form.role}
-                                        onChange={e => setForm({ ...form, role: e.target.value })}
-                                        required
-                                    >
-                                        {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-                                    </select>
-                                </div>
                             </div>
 
                             <div className="form-group sm-pwd-group">
@@ -311,7 +288,7 @@ function StaffManagement() {
                             <div className="sm-modal-actions">
                                 <button type="button" className="sm-cancel-btn" onClick={() => setShowAdd(false)}>Cancel</button>
                                 <button type="submit" className="sm-confirm-btn" disabled={addLoading}>
-                                    {addLoading ? <><span className="sm-spinner sm-spinner--sm" /> Creating…</> : "Create Staff Account"}
+                                    {addLoading ? <><span className="sm-spinner sm-spinner--sm" /> Creating…</> : "Create Admin Account"}
                                 </button>
                             </div>
                         </form>
@@ -324,12 +301,13 @@ function StaffManagement() {
                 <div className="sm-modal-backdrop" onClick={() => setDeleteId(null)}>
                     <div className="sm-modal sm-modal--sm" onClick={e => e.stopPropagation()}>
                         <div className="sm-modal-header sm-modal-header--danger">
-                            <h3><i className="bi bi-exclamation-triangle-fill" /> Delete Staff</h3>
+                            <h3><i className="bi bi-exclamation-triangle-fill" /> Delete Administrator</h3>
                             <button className="sm-modal-close" onClick={() => setDeleteId(null)}><i className="bi bi-x" /></button>
                         </div>
                         <p className="sm-confirm-text">
-                            Are you sure you want to permanently delete this staff member's account? They will lose all access to the system.
+                            Are you sure you want to permanently delete this web administrator's account? They will lose all access to the system.
                         </p>
+                        {deleteError && <div className="sm-error sm-error--add" style={{margin: '0 2rem'}}>{deleteError}</div>}
                         <div className="sm-modal-actions">
                             <button className="sm-cancel-btn" onClick={() => setDeleteId(null)}>Cancel</button>
                             <button className="sm-delete-btn" onClick={() => handleDelete(deleteId)} disabled={deleting}>
@@ -343,4 +321,4 @@ function StaffManagement() {
     );
 }
 
-export default StaffManagement;
+export default WebAdminManagement;

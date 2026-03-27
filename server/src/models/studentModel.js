@@ -60,20 +60,21 @@ const getStudentById = async (id) => {
 const createStudentRecord = async ({
     registration_number, first_name, last_name, email,
     nic_number, phone_number, degree_program, studying_year,
-    semester, address, enrolled_date
+    semester, address, enrolled_date, intake
 }) => {
     const result = await pool.query(`
     INSERT INTO students
       (registration_number, first_name, last_name, email,
        nic_number, phone_number, degree_program, studying_year,
-       semester, address, enrolled_date)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+       semester, address, enrolled_date, intake)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
     RETURNING *
   `, [
         registration_number, first_name, last_name, email,
         nic_number || null, phone_number || null, degree_program,
         studying_year, semester, address || null,
-        enrolled_date || new Date().toISOString().split("T")[0]
+        enrolled_date || new Date().toISOString().split("T")[0],
+        intake || null
     ]);
     return result.rows[0];
 };
@@ -82,7 +83,7 @@ const createStudentRecord = async ({
 const updateStudentRecord = async (id, fields) => {
     const {
         first_name, last_name, nic_number, phone_number,
-        degree_program, studying_year, semester, address, status
+        degree_program, studying_year, semester, address, status, intake
     } = fields;
     const result = await pool.query(`
     UPDATE students SET
@@ -94,11 +95,12 @@ const updateStudentRecord = async (id, fields) => {
       studying_year  = COALESCE($6, studying_year),
       semester       = COALESCE($7, semester),
       address        = COALESCE($8, address),
-      status         = COALESCE($9, status)
-    WHERE id = $10
+      status         = COALESCE($9, status),
+      intake         = COALESCE($10, intake)
+    WHERE id = $11
     RETURNING *
   `, [first_name, last_name, nic_number, phone_number,
-        degree_program, studying_year, semester, address, status, id]);
+        degree_program, studying_year, semester, address, status, intake || null, id]);
     return result.rows[0];
 };
 

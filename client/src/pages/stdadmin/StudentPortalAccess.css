@@ -259,6 +259,22 @@
     white-space: nowrap;
 }
 
+.spa-intake-badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #059669;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 10px;
+    padding: 0.1rem 0.45rem;
+    margin-top: 0.15rem;
+}
+
+[data-theme="dark"] .spa-intake-badge {
+    color: #34d399;
+}
+
 .spa-name-cell {
     display: flex;
     align-items: center;

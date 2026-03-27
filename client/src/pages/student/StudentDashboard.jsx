@@ -3,12 +3,17 @@ import { useTheme } from "../../context/ThemeContext";
 import ThemeToggle from "../../components/ThemeToggle";
 import UserAvatar from "../../components/UserAvatar";
 import MyProfile from "./MyProfile";
+import MyModules from "./MyModules";
+import AcademicAdvisor from "./AcademicAdvisor";
+import StudentCourseMaterials from "./StudentCourseMaterials";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
 
 const NAV_ITEMS = [
     { id: "dashboard", label: "Dashboard", icon: "bi-grid-1x2-fill" },
+    { id: "modules", label: "My Modules", icon: "bi-journal-bookmark-fill" },
+    { id: "advisor", label: "AI Advisor", icon: "bi-robot" },
     { id: "profile", label: "My Profile", icon: "bi-person-circle" },
 ];
 
@@ -18,6 +23,7 @@ function StudentDashboard() {
     const userName = localStorage.getItem("user_name") || "";
     const [profileImage, setProfileImage] = useState(localStorage.getItem("profile_image") || "");
     const [activeNav, setActiveNav] = useState("dashboard");
+    const [activeCourse, setActiveCourse] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     const handleAvatarUpload = (url) => {
@@ -73,9 +79,23 @@ function StudentDashboard() {
                 <main className="dash-content">
                     {activeNav === "dashboard" && (
                         <div className="dash-home">
-                            <h1 className="dash-greeting">Welcome{userName ? `, ${userName.split(" ")[0]}` : ""} 👋</h1>
+                            <h1 className="dash-greeting">Welcome{userName ? `, ${userName.split(" ")[0]}` : ""} <i className="bi bi-hand-wave-fill" /></h1>
                             <p className="dash-desc">Your student portal is ready. Use the sidebar to navigate.</p>
                             <div className="dash-cards">
+                                <div className="dash-card" onClick={() => setActiveNav("advisor")}>
+                                    <i className="bi bi-robot dash-card-icon" style={{ color: "#818cf8" }} />
+                                    <div>
+                                        <div className="dash-card-title">AI Advisor</div>
+                                        <div className="dash-card-sub">Get personalised academic guidance</div>
+                                    </div>
+                                </div>
+                                <div className="dash-card" onClick={() => setActiveNav("modules")}>
+                                    <i className="bi bi-journal-bookmark-fill dash-card-icon" />
+                                    <div>
+                                        <div className="dash-card-title">My Modules</div>
+                                        <div className="dash-card-sub">View your enrolled modules</div>
+                                    </div>
+                                </div>
                                 <div className="dash-card" onClick={() => setActiveNav("profile")}>
                                     <i className="bi bi-person-circle dash-card-icon" />
                                     <div>
@@ -86,7 +106,10 @@ function StudentDashboard() {
                             </div>
                         </div>
                     )}
+                    {activeNav === "modules" && <MyModules onNavigate={(nav, course) => { setActiveNav(nav); setActiveCourse(course); }} />}
+                    {activeNav === "advisor" && <AcademicAdvisor />}
                     {activeNav === "profile" && <MyProfile />}
+                    {activeNav === "course-materials" && <StudentCourseMaterials course={activeCourse} onBack={() => setActiveNav("modules")} />}
                 </main>
             </div>
         </div>

@@ -210,7 +210,8 @@
 
 /* ── Dashboard home cards ────────────────────────────────────────── */
 .stdadmin-home {
-    max-width: 800px;
+    /* Removed max-width to allow cards to fit full screen */
+    width: 100%;
 }
 
 .dash-greeting {
@@ -228,7 +229,7 @@
 
 .dash-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 1.25rem;
 }
 
