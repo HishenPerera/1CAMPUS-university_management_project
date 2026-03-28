@@ -9,6 +9,7 @@ import AuditLogs from "./AuditLogs";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
+import MaintenancePage from './MaintenancePage';
 
 const NAV_ITEMS = [
     { id: "dashboard", label: "Dashboard", icon: "bi-grid-1x2-fill" },
@@ -16,6 +17,7 @@ const NAV_ITEMS = [
     { id: "staff", label: "Manage Staff", icon: "bi-people-fill" },
     { id: "webadmins", label: "Manage Web Admins", icon: "bi-person-badge-fill" },
     { id: "logs", label: "Audit Logs", icon: "bi-journal-text" },
+    { id: 'maintenance', label: 'Database Maintenance', icon: "bi-database-fill-gear" },
 ];
 
 function WebAdminDashboard() {
@@ -99,6 +101,7 @@ function WebAdminDashboard() {
                     {activeNav === "staff" && <StaffManagement />}
                     {activeNav === "webadmins" && <WebAdminManagement />}
                     {activeNav === "logs" && <AuditLogs />}
+                    {activeNav === "maintenance" && <MaintenancePage />}
                 </main>
             </div>
         </div>
