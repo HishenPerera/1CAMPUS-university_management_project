@@ -2,6 +2,7 @@ require("dotenv").config();
 const http = require("http");
 const pool = require("./src/config/db");
 const app = require("./src/app");
+const cronJobs = require('./cronJobs');
 
 const PORT = process.env.PORT || 5001;
 
