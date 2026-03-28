@@ -6,6 +6,7 @@ import MyProfile from "./MyProfile";
 import MyModules from "./MyModules";
 import AcademicAdvisor from "./AcademicAdvisor";
 import StudentCourseMaterials from "./StudentCourseMaterials";
+import OnlineEbooks from "./OnlineEbooks";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
@@ -14,6 +15,7 @@ const NAV_ITEMS = [
     { id: "dashboard", label: "Dashboard", icon: "bi-grid-1x2-fill" },
     { id: "modules", label: "My Modules", icon: "bi-journal-bookmark-fill" },
     { id: "advisor", label: "AI Advisor", icon: "bi-robot" },
+    { id: "ebooks", label: "E-Books", icon: "bi-book-half" },
     { id: "profile", label: "My Profile", icon: "bi-person-circle" },
 ];
 
@@ -103,11 +105,20 @@ function StudentDashboard() {
                                         <div className="dash-card-sub">View and update your details</div>
                                     </div>
                                 </div>
+                                <div className="dash-card" onClick={() => setActiveNav("ebooks")}>
+                                    <i className="bi bi-book-half dash-card-icon" style={{ color: "#f59e0b" }} />
+                                    <div>
+                                        <div className="dash-card-title">E-Books</div>
+                                        <div className="dash-card-sub">Search and read online e-books</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
                     {activeNav === "modules" && <MyModules onNavigate={(nav, course) => { setActiveNav(nav); setActiveCourse(course); }} />}
                     {activeNav === "advisor" && <AcademicAdvisor />}
+                    {activeNav === "ebooks" && <OnlineEbooks />}
+                    {activeNav === "ebooks" && <OnlineEbooks />}
                     {activeNav === "profile" && <MyProfile />}
                     {activeNav === "course-materials" && <StudentCourseMaterials course={activeCourse} onBack={() => setActiveNav("modules")} />}
                 </main>
