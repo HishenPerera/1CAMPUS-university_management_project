@@ -170,10 +170,21 @@ Module Details:
 
 Task: Generate a ${difficulty} level ${type} focusing on the topic: "${topic}".
 Instructions:
-- If generating a Multiple Choice Quiz (MCQ), provide exactly 10 questions. Ensure the 4 options for each question are formatted cleanly as a bulleted or numbered list on separate lines. Provide an Answer Key at the very end.
-- If generating Short Answer Questions, provide 5 thought-provoking questions.
-- If generating an Assignment Idea, provide a clear title, objective, structured rubric, and submission guidelines.
-- ALWAYS respond in clean GitHub-flavored Markdown. Do not include markdown code blocks \`\`\` around your entire response.
+- If generating a Multiple Choice Quiz (MCQ), you MUST respond with a valid JSON object. DO NOT include any markdown formatting, text, or explanations outside the JSON. The JSON structure should be:
+  {
+    "title": "Quiz Title",
+    "questions": [
+      {
+        "question": "Question text?",
+        "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+        "correct_answer_index": 0
+      }
+    ]
+  }
+  Provide exactly 10 questions for MCQs.
+- If generating Short Answer Questions, provide exactly 5 questions in clean Markdown format.
+- If generating an Assignment Idea, provide a clear title, objective, structured rubric, and submission guidelines in clean Markdown format.
+- For non-MCQ types, ALWAYS respond in clean GitHub-flavored Markdown. Do not include markdown code blocks \`\`\` around your entire response.
 `;
 
         // 3. Call Groq
@@ -200,17 +211,141 @@ Instructions:
         }
 
         const completion = await response.json();
-        const markdownContent = completion.choices?.[0]?.message?.content;
+        let content = completion.choices?.[0]?.message?.content;
 
-        if (!markdownContent) {
+        if (!content) {
             throw new Error("AI returned empty response");
         }
 
-        res.json({ content: markdownContent });
+        // Standardize: if it's MCQ, try to ensure it's valid JSON (remove markdown blocks if AI ignored instructions)
+        if (type === "Multiple Choice Quiz") {
+            content = content.trim();
+            if (content.startsWith("```json")) {
+                content = content.replace(/^```json/, "").replace(/```$/, "").trim();
+            } else if (content.startsWith("```")) {
+                content = content.replace(/^```/, "").replace(/```$/, "").trim();
+            }
+        }
+
+        res.json({ content, is_json: type === "Multiple Choice Quiz" });
 
     } catch (err) {
         console.error("AI Generation Error:", err);
-        res.status(500).json({ message: "Failed to generate assessment. Ensure your Groq API key is valid. Details: " + err.message });
+        res.status(500).json({ message: "Failed to generate assessment. Details: " + err.message });
+    }
+};
+
+// POST /api/lecturer/modules/:id/quizzes (Publish)
+const publishQuiz = async (req, res) => {
+    const { id: moduleId } = req.params;
+    const lecturerId = req.user.id;
+    const { title, topic, difficulty, questions, timer_minutes } = req.body;
+
+    if (!title || !questions || !Array.isArray(questions)) {
+        return res.status(400).json({ message: "Invalid quiz data." });
+    }
+
+    const client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+
+        // 1. Insert Quiz Metadata
+        const quizRes = await client.query(`
+            INSERT INTO quizzes (module_id, lecturer_id, title, topic, difficulty, timer_minutes)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id
+        `, [moduleId, lecturerId, title, topic, difficulty, timer_minutes || 0]);
+
+        const quizId = quizRes.rows[0].id;
+
+        // 2. Insert Questions
+        for (const q of questions) {
+            await client.query(`
+                INSERT INTO quiz_questions (quiz_id, question_text, options, correct_option_index)
+                VALUES ($1, $2, $3, $4)
+            `, [quizId, q.question, JSON.stringify(q.options), q.correct_answer_index]);
+        }
+
+        await client.query("COMMIT");
+        res.status(201).json({ message: "Quiz published successfully!", quizId });
+    } catch (err) {
+        await client.query("ROLLBACK");
+        console.error("Error publishing quiz:", err);
+        res.status(500).json({ message: "Failed to publish quiz." });
+    } finally {
+        client.release();
+    }
+};
+
+// GET /api/lecturer/quizzes — fetch all quizzes published by lecturer
+const getPublishedQuizzes = async (req, res) => {
+    try {
+        const lecturerId = req.user.id;
+        const result = await pool.query(`
+            SELECT q.*, m.module_code, m.module_name,
+                   (SELECT COUNT(*) FROM quiz_submissions WHERE quiz_id = q.id) as total_submissions
+            FROM quizzes q
+            JOIN modules m ON q.module_id = m.id
+            WHERE q.lecturer_id = $1
+            ORDER BY q.created_at DESC
+        `, [lecturerId]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Error fetching published quizzes:", err);
+        res.status(500).json({ message: "Server error fetching quizzes" });
+    }
+};
+
+// GET /api/lecturer/quizzes/:id/submissions — fetch student marks for a quiz
+const getQuizSubmissions = async (req, res) => {
+    try {
+        const { id: quizId } = req.params;
+        const lecturerId = req.user.id;
+
+        // Verify ownership
+        const ownershipCheck = await pool.query(
+            "SELECT 1 FROM quizzes WHERE id = $1 AND lecturer_id = $2",
+            [quizId, lecturerId]
+        );
+        if (ownershipCheck.rowCount === 0) {
+            return res.status(403).json({ message: "Unauthorized access to this quiz." });
+        }
+
+        const result = await pool.query(`
+            SELECT qs.*, u.full_name as student_name, s.registration_number
+            FROM quiz_submissions qs
+            JOIN users u ON qs.student_id = u.id
+            LEFT JOIN students s ON u.email = s.email
+            WHERE qs.quiz_id = $1
+            ORDER BY qs.score DESC
+        `, [quizId]);
+
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Error fetching quiz submissions:", err);
+        res.status(500).json({ message: "Server error fetching submissions" });
+    }
+};
+
+// DELETE /api/lecturer/quizzes/:id — delete a quiz
+const deleteQuiz = async (req, res) => {
+    try {
+        const { id: quizId } = req.params;
+        const lecturerId = req.user.id;
+
+        const deleteResult = await pool.query(
+            "DELETE FROM quizzes WHERE id = $1 AND lecturer_id = $2",
+            [quizId, lecturerId]
+        );
+
+        if (deleteResult.rowCount === 0) {
+            return res.status(404).json({ message: "Quiz not found or unauthorized." });
+        }
+
+        res.json({ message: "Quiz deleted successfully." });
+    } catch (err) {
+        console.error("Error deleting quiz:", err);
+        res.status(500).json({ message: "Server error deleting quiz" });
     }
 };
 
@@ -219,5 +354,9 @@ module.exports = {
     getModuleMaterials,
     uploadModuleMaterial,
     deleteModuleMaterial,
-    generateAIAssessment
+    generateAIAssessment,
+    publishQuiz,
+    getPublishedQuizzes,
+    getQuizSubmissions,
+    deleteQuiz
 };
