@@ -1,16 +1,18 @@
 const nodemailer = require("nodemailer");
 
-// Brevo (Sendinblue) SMTP transporter
-// Free plan: 300 emails/day, works on localhost, no domain needed
-// Sign up at https://app.brevo.com → SMTP & API → Generate SMTP credentials
+// SendGrid SMTP transporter
+// Free: 100 emails/day — works on localhost — sends to ANY real email
+// Setup: https://sendgrid.com → Create API Key → Verify a single sender email
+// SMTP username is ALWAYS the literal word "apikey" (not your email)
+// SMTP password is your SendGrid API key (starts with SG.)
 const transporter = nodemailer.createTransport({
-    host: "smtp-relay.brevo.com",
-    port: 587,
-    secure: false,
-    auth: {
-        user: process.env.BREVO_SMTP_USER,   // Your Brevo login email
-        pass: process.env.BREVO_SMTP_KEY,    // SMTP key from Brevo dashboard (not your password)
-    },
+  host: "smtp.sendgrid.net",
+  port: 587,
+  secure: false,
+  auth: {
+    user: "apikey",                         // ALWAYS this literal string
+    pass: process.env.SENDGRID_API_KEY,     // Your SG.xxxx key from SendGrid dashboard
+  },
 });
 
 /**
@@ -25,16 +27,16 @@ const transporter = nodemailer.createTransport({
  * @param {string} params.degreeProgram    - Degree programme name
  */
 const sendEnrollmentEmail = async ({
-    toEmail,
-    studentName,
-    portalEmail,
-    tempPassword,
-    regNumber,
-    degreeProgram,
+  toEmail,
+  studentName,
+  portalEmail,
+  tempPassword,
+  regNumber,
+  degreeProgram,
 }) => {
-    const year = new Date().getFullYear();
+  const year = new Date().getFullYear();
 
-    const html = `
+  const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -152,15 +154,15 @@ const sendEnrollmentEmail = async ({
 </html>
 `;
 
-    const info = await transporter.sendMail({
-        from: `"1CAMPUS University" <${process.env.BREVO_SMTP_USER}>`,
-        to: toEmail,
-        subject: `🎓 Welcome to 1CAMPUS – Your Portal Credentials (${regNumber})`,
-        html,
-    });
+  const info = await transporter.sendMail({
+    from: `"1CAMPUS University" <${process.env.SENDGRID_FROM_EMAIL}>`,
+    to: toEmail,
+    subject: `🎓 Welcome to 1CAMPUS – Your Portal Credentials (${regNumber})`,
+    html,
+  });
 
-    console.log(`[EMAIL] Message sent: ${info.messageId}`);
-    return info;
+  console.log(`[EMAIL] Message sent: ${info.messageId}`);
+  return info;
 };
 
 module.exports = { sendEnrollmentEmail };
