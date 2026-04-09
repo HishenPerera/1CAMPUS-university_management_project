@@ -15,11 +15,11 @@ import "../../components/DashboardLayout.css";
 
 const NAV_ITEMS = [
     { id: "dashboard", label: "Dashboard", icon: "bi-grid-1x2-fill" },
+    { id: "profile", label: "My Profile", icon: "bi-person-circle" },
     { id: "modules", label: "My Modules", icon: "bi-journal-bookmark-fill" },
     { id: "quizzes", label: "AI Quizzes", icon: "bi-cpu-fill" },
     { id: "ebooks", label: "E-Books", icon: "bi-book-half" },
     { id: "tickets", label: "Support Tickets", icon: "bi-ticket-detailed-fill" },
-    { id: "profile", label: "My Profile", icon: "bi-person-circle" },
 ];
 
 function StudentDashboard() {

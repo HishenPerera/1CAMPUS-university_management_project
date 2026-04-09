@@ -20,7 +20,10 @@ const {
     deleteStaff,
     getWebAdmins,
     createWebAdmin,
-    deleteWebAdmin
+    deleteWebAdmin,
+    listTables,
+    getTableData,
+    deleteTableRow,
 } = require("../controllers/webAdminController");
 
 // Secure all routes
@@ -41,4 +44,10 @@ router.delete("/admins/:id", deleteWebAdmin);
 router.post('/backup', webAdminController.createBackup);
 router.get('/backups', webAdminController.getBackups);
 
+// Database Management Routes
+router.get('/db/tables', listTables);
+router.get('/db/tables/:table', getTableData);
+router.delete('/db/tables/:table/:id', deleteTableRow);
+
 module.exports = router;
+
