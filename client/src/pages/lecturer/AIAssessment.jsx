@@ -13,11 +13,15 @@ function AIAssessment() {
     const [selectedModule, setSelectedModule] = useState("");
     const [topic, setTopic] = useState("");
     const [difficulty, setDifficulty] = useState("Intermediate");
+    const [duration, setDuration] = useState("0");
     const [type, setType] = useState("Multiple Choice Quiz");
 
     const [generating, setGenerating] = useState(false);
+    const [publishing, setPublishing] = useState(false);
     const [result, setResult] = useState("");
+    const [isJson, setIsJson] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [publishMessage, setPublishMessage] = useState("");
 
     useEffect(() => {
         const fetchModules = async () => {
@@ -41,6 +45,8 @@ function AIAssessment() {
         e.preventDefault();
         setError("");
         setResult("");
+        setIsJson(false);
+        setPublishMessage("");
         setGenerating(true);
         setCopied(false);
 
@@ -57,11 +63,38 @@ function AIAssessment() {
                 type
             });
             setResult(res.data.content);
+            setIsJson(res.data.is_json);
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.message || "Failed to generate assessment. Please try again.");
         } finally {
             setGenerating(false);
+        }
+    };
+
+    const handlePublish = async () => {
+        if (!isJson || !result) return;
+        setPublishing(true);
+        setError("");
+        setPublishMessage("");
+
+        try {
+            const quizData = JSON.parse(result);
+            await axios.post(`/lecturer/modules/${selectedModule}/quizzes`, {
+                title: quizData.title,
+                topic: topic.trim(),
+                difficulty,
+                timer_minutes: parseInt(duration),
+                questions: quizData.questions
+            });
+            setPublishMessage("Quiz published successfully to the module!");
+            setResult("");
+            setIsJson(false);
+        } catch (err) {
+            console.error(err);
+            setError("Failed to publish quiz. Ensure the AI generated valid JSON.");
+        } finally {
+            setPublishing(false);
         }
     };
 
@@ -83,6 +116,7 @@ function AIAssessment() {
             </div>
 
             {error && <div className="aia-error"><i className="bi bi-exclamation-triangle-fill" /> {error}</div>}
+            {publishMessage && <div className="aia-success"><i className="bi bi-check-circle-fill" /> {publishMessage}</div>}
 
             <div className="aia-content">
                 <div className="aia-sidebar">
@@ -128,6 +162,19 @@ function AIAssessment() {
                         </div>
 
                         <div className="aia-form-group">
+                            <label>Quiz Duration</label>
+                            <select className="aia-select" value={duration} onChange={e => setDuration(e.target.value)}>
+                                <option value="0">Unlimited Time</option>
+                                <option value="5">5 Minutes</option>
+                                <option value="10">10 Minutes</option>
+                                <option value="15">15 Minutes</option>
+                                <option value="30">30 Minutes</option>
+                                <option value="45">45 Minutes</option>
+                                <option value="60">60 Minutes</option>
+                            </select>
+                        </div>
+
+                        <div className="aia-form-group">
                             <label>Topic / Concept</label>
                             <input 
                                 type="text" 
@@ -157,11 +204,18 @@ function AIAssessment() {
                     <div className="aia-result-box">
                         <div className="aia-result-header">
                             <h3><i className="bi bi-file-earmark-text" /> Generated Output</h3>
-                            {result && (
-                                <button className={`aia-btn-copy ${copied ? 'copied' : ''}`} onClick={handleCopy} title="Copy to clipboard">
-                                    {copied ? <><i className="bi bi-check-lg" /> Copied!</> : <><i className="bi bi-clipboard" /> Copy</>}
-                                </button>
-                            )}
+                            <div className="aia-result-actions">
+                                {result && !isJson && (
+                                    <button className={`aia-btn-copy ${copied ? 'copied' : ''}`} onClick={handleCopy} title="Copy to clipboard">
+                                        {copied ? <><i className="bi bi-check-lg" /> Copied!</> : <><i className="bi bi-clipboard" /> Copy</>}
+                                    </button>
+                                )}
+                                {result && isJson && (
+                                    <button className="aia-btn-publish" onClick={handlePublish} disabled={publishing}>
+                                        {publishing ? "Publishing..." : <><i className="bi bi-cloud-upload" /> Publish to Module</>}
+                                    </button>
+                                )}
+                            </div>
                         </div>
                         
                         <div className="aia-result-body">
@@ -173,7 +227,36 @@ function AIAssessment() {
                                 </div>
                             ) : result ? (
                                 <div className="aia-result-text markdown-body">
-                                    <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{result}</ReactMarkdown>
+                                    {isJson ? (
+                                        <div className="aia-quiz-preview">
+                                            {(() => {
+                                                try {
+                                                    const data = JSON.parse(result);
+                                                    return (
+                                                        <>
+                                                            <h4 className="quiz-preview-title">{data.title}</h4>
+                                                            {data.questions.map((q, idx) => (
+                                                                <div key={idx} className="quiz-preview-item">
+                                                                    <p className="quiz-preview-q"><strong>{idx + 1}. {q.question}</strong></p>
+                                                                    <ul className="quiz-preview-options">
+                                                                        {q.options.map((opt, oIdx) => (
+                                                                            <li key={oIdx} className={oIdx === q.correct_answer_index ? "correct" : ""}>
+                                                                                {opt} {oIdx === q.correct_answer_index && <i className="bi bi-check-circle-fill" />}
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
+                                                                </div>
+                                                            ))}
+                                                        </>
+                                                    );
+                                                } catch (e) {
+                                                    return <pre>{result}</pre>;
+                                                }
+                                            })()}
+                                        </div>
+                                    ) : (
+                                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>{result}</ReactMarkdown>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="aia-empty-state">

@@ -306,4 +306,187 @@ Keep responses concise, friendly, and actionable. Use bullet points and clear fo
     }
 };
 
-module.exports = { getMyProfile, updateMyProfile, getMyModules, getStudentModuleMaterials, aiAdvisor };
+// GET /api/student/quizzes — fetch available quizzes for student's modules
+const getAvailableQuizzes = async (req, res) => {
+    try {
+        const studentId = req.user.id;
+
+        // 1. Get student's email
+        const userResult = await pool.query("SELECT email FROM users WHERE id = $1", [studentId]);
+        const email = userResult.rows[0].email;
+
+        // 2. Get student enrollment info
+        const studentResult = await pool.query(
+            "SELECT degree_program, studying_year, semester, intake FROM students WHERE email = $1",
+            [email]
+        );
+        const st = studentResult.rows[0];
+
+        // 3. Fetch quizzes for modules matching student's enrollment
+        const params = [st.degree_program, st.studying_year, st.semester];
+        let intakeFilter = '';
+        if (st.intake) {
+            intakeFilter = ' AND m.intake = $4';
+            params.push(st.intake);
+        }
+
+        const quizzesResult = await pool.query(`
+            SELECT 
+                q.*, 
+                m.module_code, 
+                m.module_name,
+                u.full_name as lecturer_name,
+                qs.score,
+                qs.total_questions as submitted_total,
+                (qs.id IS NOT NULL) as is_submitted
+            FROM quizzes q
+            JOIN modules m ON q.module_id = m.id
+            JOIN users u ON q.lecturer_id = u.id
+            LEFT JOIN quiz_submissions qs ON q.id = qs.quiz_id AND qs.student_id = $1
+            WHERE m.degree_program = $2
+              AND m.studying_year  = $3
+              AND m.semester       = $4
+              ${intakeFilter}
+            ORDER BY q.created_at DESC
+        `, [studentId, ...params]);
+
+        res.json(quizzesResult.rows);
+    } catch (err) {
+        console.error("Error fetching available quizzes:", err);
+        res.status(500).json({ message: "Server error fetching quizzes" });
+    }
+};
+
+// GET /api/student/quizzes/:id — fetch quiz questions (only if unauthorized or not submitted)
+const getQuizQuestions = async (req, res) => {
+    try {
+        const { id: quizId } = req.params;
+        const studentId = req.user.id;
+
+        // Check if already submitted
+        const subCheck = await pool.query(
+            "SELECT 1 FROM quiz_submissions WHERE quiz_id = $1 AND student_id = $2",
+            [quizId, studentId]
+        );
+        if (subCheck.rowCount > 0) {
+            return res.status(403).json({ message: "You have already submitted this quiz." });
+        }
+
+        const questionsResult = await pool.query(`
+            SELECT id, question_text, options
+            FROM quiz_questions
+            WHERE quiz_id = $1
+            ORDER BY id ASC
+        `, [quizId]);
+
+        res.json(questionsResult.rows);
+    } catch (err) {
+        console.error("Error fetching quiz questions:", err);
+        res.status(500).json({ message: "Server error fetching quiz content" });
+    }
+};
+
+// POST /api/student/quizzes/:id/start — initiate a quiz attempt
+const startQuizAttempt = async (req, res) => {
+    try {
+        const { id: quizId } = req.params;
+        const studentId = req.user.id;
+
+        // Check if already submitted or in-progress
+        const subCheck = await pool.query(
+            "SELECT 1 FROM quiz_submissions WHERE quiz_id = $1 AND student_id = $2",
+            [quizId, studentId]
+        );
+        if (subCheck.rowCount > 0) {
+            return res.status(403).json({ message: "You have already started or submitted this quiz. No more attempts allowed." });
+        }
+
+        // 1. Fetch questions first
+        const questionsResult = await pool.query(`
+            SELECT id, question_text, options
+            FROM quiz_questions
+            WHERE quiz_id = $1
+            ORDER BY id ASC
+        `, [quizId]);
+
+        if (questionsResult.rowCount === 0) {
+            return res.status(404).json({ message: "Quiz not found or has no questions." });
+        }
+
+        // 2. Create a pending submission record
+        await pool.query(`
+            INSERT INTO quiz_submissions (quiz_id, student_id, score, total_questions, answers)
+            VALUES ($1, $2, NULL, NULL, NULL)
+        `, [quizId, studentId]);
+
+        res.status(201).json({ 
+            message: "Quiz started! Good luck.",
+            questions: questionsResult.rows 
+        });
+    } catch (err) {
+        console.error("Error starting quiz attempt:", err);
+        res.status(500).json({ message: "Server error starting quiz" });
+    }
+};
+
+// POST /api/student/quizzes/:id/submit — submit quiz attempt
+const submitQuizAttempt = async (req, res) => {
+    try {
+        const { id: quizId } = req.params;
+        const studentId = req.user.id;
+        const { answers } = req.body; // Map of question_id -> selected_index
+
+        if (!answers || typeof answers !== 'object') {
+            return res.status(400).json({ message: "Invalid answers format." });
+        }
+
+        // 1. Fetch correct answers
+        const questionsResult = await pool.query(
+            "SELECT id, correct_option_index FROM quiz_questions WHERE quiz_id = $1",
+            [quizId]
+        );
+        const questions = questionsResult.rows;
+
+        if (questions.length === 0) {
+            return res.status(404).json({ message: "Quiz not found or has no questions." });
+        }
+
+        // 2. Calculate score
+        let score = 0;
+        const total_questions = questions.length;
+        
+        questions.forEach(q => {
+            if (answers[q.id] === q.correct_option_index) {
+                score++;
+            }
+        });
+
+        // 3. Update existing submission record (created in startQuizAttempt)
+        await pool.query(`
+            UPDATE quiz_submissions 
+            SET score = $3, total_questions = $4, answers = $5, submitted_at = CURRENT_TIMESTAMP
+            WHERE quiz_id = $1 AND student_id = $2
+        `, [quizId, studentId, score, total_questions, JSON.stringify(answers)]);
+
+        res.status(200).json({ 
+            message: "Quiz submitted successfully!",
+            score,
+            total_questions
+        });
+    } catch (err) {
+        console.error("Error submitting quiz:", err);
+        res.status(500).json({ message: "Server error submitting quiz" });
+    }
+};
+
+module.exports = { 
+    getMyProfile, 
+    updateMyProfile, 
+    getMyModules, 
+    getStudentModuleMaterials, 
+    aiAdvisor,
+    getAvailableQuizzes,
+    getQuizQuestions,
+    startQuizAttempt,
+    submitQuizAttempt
+};
