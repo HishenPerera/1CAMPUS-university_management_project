@@ -204,11 +204,26 @@ const approveApplication = async (req, res) => {
         };
         const prefix = map[degree_program] || "STU";
 
-        // Find next sequential registration number FOR THIS PREFIX
-        const countRes = await pool.query("SELECT COUNT(*) FROM students WHERE degree_program = $1", [degree_program]);
-        const nextNum = parseInt(countRes.rows[0].count, 10) + 1;
+        // Find highest sequential registration number for this prefix and year
         const shortYear = String(new Date().getFullYear()).slice(-2);
-        const regNumber = `${prefix}${shortYear}${String(nextNum).padStart(4, '0')}`;
+        const prefixYear = `${prefix}${shortYear}`;
+        
+        const lastRegRes = await pool.query(
+            "SELECT registration_number FROM students WHERE registration_number LIKE $1 ORDER BY registration_number DESC LIMIT 1",
+            [`${prefixYear}%`]
+        );
+
+        let nextNum = 1;
+        if (lastRegRes.rowCount > 0) {
+            const lastReg = lastRegRes.rows[0].registration_number;
+            const lastNumStr = lastReg.replace(prefixYear, "");
+            const lastNum = parseInt(lastNumStr, 10);
+            if (!isNaN(lastNum)) {
+                nextNum = lastNum + 1;
+            }
+        }
+        
+        const regNumber = `${prefixYear}${String(nextNum).padStart(4, '0')}`;
         const portalEmail = `${regNumber.toLowerCase()}@1campus.edu`;
 
         // 3. Begin transaction
@@ -392,8 +407,61 @@ const removeModuleAssignment = async (req, res) => {
     }
 };
 
+const generateLetter = async (req, res) => {
+    try {
+        const { studentId, letterType, context } = req.body;
+        
+        let studentInfo = "";
+        if (studentId) {
+            const studentResult = await pool.query(
+                `SELECT first_name, last_name, registration_number, degree_program, studying_year, semester 
+                 FROM students WHERE id = $1`, [studentId]
+            );
+            if (studentResult.rowCount > 0) {
+                const st = studentResult.rows[0];
+                studentInfo = `\nStudent Details:\n- Name: ${st.first_name} ${st.last_name}\n- Registration Number: ${st.registration_number}\n- Degree: ${st.degree_program}\n- Year: ${st.studying_year}, Semester: ${st.semester}\n`;
+            }
+        }
+
+        const systemPrompt = `You are a highly professional university administrator at 1CAMPUS University. Your task is to generate official university letters based on the provided details. Use formal, professional, and empathetic tone when required. Format the response clearly with paragraphs. Do not use placeholders that the user must fill; invent reasonable generic details or rely entirely on the provided context. Ensure the letter is ready to be printed or emailed immediately. Sign the letter as '1CAMPUS Administration'.`;
+        
+        const prompt = `Generate a ${letterType} letter. \n${studentInfo}\nAdditional Context/Reason: ${context || 'None'}\n\nPlease generate the full official letter.`;
+        
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "llama-3.3-70b-versatile",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: prompt }
+                ],
+                max_tokens: 1500,
+                temperature: 0.7
+            })
+        });
+
+        if (!response.ok) {
+            const errBody = await response.text();
+            throw new Error(`Groq Error: ${response.status} - ${errBody}`);
+        }
+
+        const completion = await response.json();
+        const letter = completion.choices?.[0]?.message?.content || "Failed to generate letter.";
+        
+        res.json({ letter });
+    } catch (err) {
+        console.error("Error generating letter:", err);
+        res.status(500).json({ message: "Server error generating letter" });
+    }
+};
+
 module.exports = {
     listStudents, getTempPasswords, getStudentDetail, addStudent, editStudent, removeStudent,
     getApplications, acceptApplication, approveApplication, rejectApplication,
-    listModules, getLecturers, addModule, deleteModule, assignModule, removeModuleAssignment
+    listModules, getLecturers, addModule, deleteModule, assignModule, removeModuleAssignment,
+    generateLetter
 };
