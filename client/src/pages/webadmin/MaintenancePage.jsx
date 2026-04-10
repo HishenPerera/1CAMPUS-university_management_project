@@ -71,7 +71,7 @@ const MaintenancePage = () => {
                     <button className="al-refresh-btn" onClick={fetchBackups}>
                         <i className="bi bi-arrow-clockwise" /> Refresh
                     </button>
-                    <button className="al-refresh-btn" style={{ background: "var(--color-primary)", color: "#fff", border: "none" }} onClick={handleBackup} disabled={loading}>
+                    <button className="al-refresh-btn" style={{ background: "var(--brand-primary)", color: "#fff", border: "none" }} onClick={handleBackup} disabled={loading}>
                         {loading ? <><div className="al-spinner" style={{ width: 14, height: 14, margin: 0 }} /> Creating...</> : <><i className="bi bi-database-add" /> Create Backup</>}
                     </button>
                 </div>
