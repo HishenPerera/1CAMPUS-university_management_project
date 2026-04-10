@@ -245,6 +245,130 @@ const deleteWebAdmin = async (req, res) => {
     }
 };
 
+/* ── Database Management ─────────────────────────────────────────────── */
+
+// WHITELIST of tables the web admin is allowed to inspect / modify
+const ALLOWED_TABLES = [
+    'users', 'students', 'student_applications', 'modules',
+    'lecturer_modules', 'module_materials', 'quizzes', 'quiz_questions',
+    'quiz_submissions', 'activity_logs', 'tickets'
+];
+
+// GET /api/webadmin/db/tables — list all permitted tables with row counts
+const listTables = async (req, res) => {
+    try {
+        const counts = await Promise.all(
+            ALLOWED_TABLES.map(async (table) => {
+                try {
+                    const r = await pool.query(`SELECT COUNT(*) FROM "${table}"`);
+                    return { name: table, rows: parseInt(r.rows[0].count, 10) };
+                } catch {
+                    return { name: table, rows: 0 };
+                }
+            })
+        );
+        res.json(counts);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error listing tables' });
+    }
+};
+
+// GET /api/webadmin/db/tables/:table — paginated, filtered, sorted rows
+const getTableData = async (req, res) => {
+    const { table } = req.params;
+    if (!ALLOWED_TABLES.includes(table)) {
+        return res.status(403).json({ message: 'Access to this table is not permitted' });
+    }
+
+    const page = Math.max(1, parseInt(req.query.page || '1', 10));
+    const pageSize = Math.min(100, Math.max(1, parseInt(req.query.limit || '20', 10)));
+    const offset = (page - 1) * pageSize;
+    const search = (req.query.search || '').trim();
+    const sortCol = req.query.sort || 'id';
+    const sortDir = req.query.dir === 'desc' ? 'DESC' : 'ASC';
+
+    try {
+        // Fetch column names to build safe sort / search
+        const colRes = await pool.query(
+            `SELECT column_name FROM information_schema.columns
+             WHERE table_schema = 'public' AND table_name = $1
+             ORDER BY ordinal_position`, [table]
+        );
+        const columns = colRes.rows.map(r => r.column_name);
+        const safeSort = columns.includes(sortCol) ? sortCol : (columns.includes('id') ? 'id' : columns[0]);
+
+        let whereClause = '';
+        const params = [];
+        if (search) {
+            // Cast every column to text and search
+            const conditions = columns.map((col, i) => {
+                params.push(`%${search}%`);
+                return `CAST("${col}" AS TEXT) ILIKE $${i + 1}`;
+            });
+            whereClause = `WHERE ${conditions.join(' OR ')}`;
+        }
+
+        const dataRes = await pool.query(
+            `SELECT * FROM "${table}" ${whereClause}
+             ORDER BY "${safeSort}" ${sortDir}
+             LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+            [...params, pageSize, offset]
+        );
+
+        const countRes = await pool.query(
+            `SELECT COUNT(*) FROM "${table}" ${whereClause}`, params
+        );
+
+        res.json({
+            columns,
+            rows: dataRes.rows,
+            total: parseInt(countRes.rows[0].count, 10),
+            page,
+            pageSize,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: `Server error reading table: ${err.message}` });
+    }
+};
+
+// DELETE /api/webadmin/db/tables/:table/:id — delete a single row by primary key
+const deleteTableRow = async (req, res) => {
+    const { table, id } = req.params;
+    if (!ALLOWED_TABLES.includes(table)) {
+        return res.status(403).json({ message: 'Access to this table is not permitted' });
+    }
+    // Protect critical system records
+    if (table === 'users' && Number(id) === req.user.id) {
+        return res.status(400).json({ message: 'You cannot delete your own account' });
+    }
+
+    try {
+        // Find primary key column for this table
+        const pkRes = await pool.query(
+            `SELECT kcu.column_name FROM information_schema.table_constraints tc
+             JOIN information_schema.key_column_usage kcu
+               ON tc.constraint_name = kcu.constraint_name AND tc.table_schema = kcu.table_schema
+             WHERE tc.constraint_type = 'PRIMARY KEY' AND tc.table_name = $1
+             LIMIT 1`, [table]
+        );
+        const pk = pkRes.rows[0]?.column_name || 'id';
+
+        const result = await pool.query(
+            `DELETE FROM "${table}" WHERE "${pk}" = $1 RETURNING *`, [id]
+        );
+        if (result.rowCount === 0) {
+            return res.status(404).json({ message: 'Row not found' });
+        }
+        await logActivity(req.user.id, 'DB_DELETE_ROW', `Deleted row ${pk}=${id} from table ${table}`);
+        res.json({ message: `Row deleted from ${table}`, deleted: result.rows[0] });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: `Server error deleting row: ${err.message}` });
+    }
+};
+
 module.exports = {
     getAuditLogs,
     getStaff,
@@ -256,6 +380,7 @@ module.exports = {
     deleteWebAdmin,
     createBackup,
     getBackups,
-    downloadBackup,
-    deleteBackup
+    listTables,
+    getTableData,
+    deleteTableRow,
 };

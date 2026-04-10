@@ -6,6 +6,7 @@ const {
 } = require("../models/studentModel");
 const { createUser } = require("../models/userModel");
 const logActivity = require("../utils/logger");
+const { sendEnrollmentEmail } = require("../utils/emailService");
 
 /* Generate 3 random temp passwords */
 const generateTempPasswords = () => {
@@ -57,6 +58,7 @@ const addStudent = async (req, res) => {
     try {
         const {
             first_name, last_name, email,
+            personal_email,           // student's personal/contact email — receives welcome email
             registration_number, degree_program, studying_year, semester,
             nic_number, phone_number, address, enrolled_date,
             chosen_password, intake,
@@ -82,7 +84,33 @@ const addStudent = async (req, res) => {
         });
 
         await logActivity(req.user.id, "CREATE_STUDENT", `Created student profile/login for ${email} (${registration_number})`);
-        res.status(201).json({ message: "Student created successfully", student });
+
+        // Send enrollment email to the student's personal/contact email (if provided)
+        const emailTarget = personal_email || null;
+        let emailSent = false;
+        if (emailTarget) {
+            try {
+                await sendEnrollmentEmail({
+                    toEmail: emailTarget,
+                    studentName: `${first_name} ${last_name}`,
+                    portalEmail: email,
+                    tempPassword: chosen_password,
+                    regNumber: registration_number,
+                    degreeProgram: degree_program,
+                });
+                emailSent = true;
+                console.log(`[EMAIL] Enrollment credentials sent to ${emailTarget}`);
+            } catch (emailErr) {
+                console.error(`[EMAIL] Failed to send enrollment email to ${emailTarget}:`, emailErr.message);
+            }
+        }
+
+        res.status(201).json({
+            message: "Student created successfully",
+            student,
+            email_sent: emailSent,
+            email_recipient: emailTarget,
+        });
     } catch (err) {
         console.error(err);
         if (err.code === "23505") {
@@ -212,11 +240,31 @@ const approveApplication = async (req, res) => {
 
         await pool.query("COMMIT");
 
+        // Send enrollment email to the student's personal application email
+        let emailSent = false;
+        try {
+            await sendEnrollmentEmail({
+                toEmail: app.email,          // personal email from the application form
+                studentName: `${first_name} ${last_name}`,
+                portalEmail,
+                tempPassword,
+                regNumber,
+                degreeProgram: degree_program,
+            });
+            emailSent = true;
+            console.log(`[EMAIL] Enrollment credentials sent to ${app.email}`);
+        } catch (emailErr) {
+            // Non-fatal — log but don't fail the enrollment
+            console.error(`[EMAIL] Failed to send enrollment email to ${app.email}:`, emailErr.message);
+        }
+
         res.json({
             message: "Student Portal Account created successfully",
             temp_password: tempPassword,
             reg_number: regNumber,
-            portal_email: portalEmail
+            portal_email: portalEmail,
+            email_sent: emailSent,
+            email_recipient: app.email,
         });
     } catch (err) {
         await pool.query("ROLLBACK");
