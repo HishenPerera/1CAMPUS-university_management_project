@@ -1,0 +1,329 @@
+.mq-container {
+    padding: 24px;
+    animation: fadeIn 0.4s ease;
+}
+
+.mq-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.mq-header-icon {
+    font-size: 2.2rem;
+    color: var(--brand-primary);
+    background: var(--brand-glow);
+    height: 60px;
+    width: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+}
+
+.mq-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+}
+
+.mq-header p {
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.mq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+.mq-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    position: relative;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.mq-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--brand-primary);
+    box-shadow: var(--card-shadow);
+}
+
+.mq-card-badge {
+    background: var(--surface);
+    color: var(--brand-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 6px;
+    width: fit-content;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border);
+}
+
+.mq-card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+}
+
+.mq-card-topic {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    height: 2.8rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.mq-card-stats {
+    display: flex;
+    gap: 2rem;
+    padding: 1rem;
+    background: var(--bg);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.mq-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.mq-stat strong {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
+.mq-stat span {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mq-card-footer {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: auto;
+}
+
+.mq-btn-results {
+    flex: 1;
+    padding: 0.75rem;
+    background: var(--brand-primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.mq-btn-results:hover {
+    background: #0ea5e9;
+    box-shadow: 0 4px 12px rgba(26, 127, 232, 0.3);
+}
+
+.mq-btn-delete {
+    width: 44px;
+    height: 44px;
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error-color);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mq-btn-delete:hover {
+    background: var(--error-color);
+    color: white;
+}
+
+/* Modal Results */
+.mq-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.mq-modal {
+    background: var(--bg-card);
+    width: 100%;
+    max-width: 800px;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--border);
+    animation: slideUp 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+.mq-modal-header {
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--border);
+}
+
+.mq-modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+}
+
+.mq-modal-header span {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.mq-btn-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.mq-btn-close:hover {
+    color: var(--error-color);
+}
+
+.mq-modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.mq-table-wrapper {
+    overflow-x: auto;
+}
+
+.mq-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.mq-table th {
+    padding: 1rem;
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border);
+}
+
+.mq-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.mq-score-text {
+    font-weight: 700;
+    color: var(--brand-primary);
+}
+
+.mq-badge-completed {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.mq-badge-abandoned {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error-color);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.mq-modal-footer {
+    padding: 1.5rem 2rem;
+    background: var(--bg-hover);
+    border-top: 1px solid var(--border);
+}
+
+.mq-btn-pdf {
+    width: 100%;
+    padding: 0.85rem;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.mq-btn-pdf:hover:not(:disabled) {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.mq-btn-pdf:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.mq-empty, .mq-modal-empty {
+    text-align: center;
+    padding: 4rem;
+    color: var(--text-muted);
+}
+
+.mq-empty i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    display: block;
+}
