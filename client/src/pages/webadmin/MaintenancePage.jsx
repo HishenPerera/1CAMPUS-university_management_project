@@ -29,6 +29,33 @@ const MaintenancePage = () => {
         }
     };
 
+    const handleDownload = async (filename) => {
+        try {
+            const res = await axios.get(`/webadmin/backup/download/${filename}`, { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error("Failed to download backup", error);
+            alert("Failed to download backup.");
+        }
+    };
+
+    const handleDelete = async (filename) => {
+        if (!window.confirm(`Are you sure you want to delete ${filename}?`)) return;
+        try {
+            await axios.delete(`/webadmin/backup/${filename}`);
+            fetchBackups();
+        } catch (error) {
+            console.error("Failed to delete backup", error);
+            alert("Failed to delete backup.");
+        }
+    };
+
     useEffect(() => {
         fetchBackups();
     }, []);
@@ -57,6 +84,7 @@ const MaintenancePage = () => {
                             <th>File Name</th>
                             <th>Size</th>
                             <th>Creation Date</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -66,11 +94,19 @@ const MaintenancePage = () => {
                                     <td style={{ fontFamily: "monospace", color: "var(--color-primary)" }}>{b.name}</td>
                                     <td>{b.size}</td>
                                     <td className="al-time">{new Date(b.createdAt).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</td>
+                                    <td>
+                                        <button className="al-action-btn-outline" onClick={() => handleDownload(b.name)} title="Download Backup">
+                                            <i className="bi bi-download" /> Download
+                                        </button>
+                                        <button className="al-action-btn-danger" onClick={() => handleDelete(b.name)} title="Delete Backup">
+                                            <i className="bi bi-trash" /> Delete
+                                        </button>
+                                    </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="3" style={{ textAlign: "center", padding: "2rem" }}>No backups found.</td>
+                                <td colSpan="4" style={{ textAlign: "center", padding: "2rem" }}>No backups found.</td>
                             </tr>
                         )}
                     </tbody>

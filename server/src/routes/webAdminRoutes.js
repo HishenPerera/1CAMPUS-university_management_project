@@ -40,5 +40,7 @@ router.delete("/admins/:id", deleteWebAdmin);
 // Database Backup Routes
 router.post('/backup', webAdminController.createBackup);
 router.get('/backups', webAdminController.getBackups);
+router.get('/backup/download/:filename', webAdminController.downloadBackup);
+router.delete('/backup/:filename', webAdminController.deleteBackup);
 
 module.exports = router;

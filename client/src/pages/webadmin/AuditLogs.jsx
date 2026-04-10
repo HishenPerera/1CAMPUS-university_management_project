@@ -42,6 +42,38 @@ function AuditLogs() {
 
     const handleSearch = (e) => { setSearch(e.target.value); setPage(1); };
 
+    const handleDownloadReport = () => {
+        if (filtered.length === 0) return;
+
+        const headers = ["Timestamp", "User Role", "Action performed by", "Action Type", "Details"];
+        const csvRows = [headers.join(",")];
+
+        filtered.forEach(log => {
+            const timestamp = new Date(log.created_at).toLocaleString("en-GB", {
+                day: "2-digit", month: "short", year: "numeric",
+                hour: "2-digit", minute: "2-digit", second: "2-digit"
+            }).replace(/,/g, '');
+            const role = log.role ? log.role.replace("_", " ") : "System";
+            const user = log.email || "System automated event";
+            const action = log.action;
+            const details = `"${(log.details || "").replace(/"/g, '""')}"`;
+
+            csvRows.push([timestamp, role, user, action, details].join(","));
+        });
+
+        const csvString = csvRows.join("\n");
+        const blob = new Blob([csvString], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+        
+        const a = document.createElement("a");
+        a.setAttribute("hidden", "");
+        a.setAttribute("href", url);
+        a.setAttribute("download", `audit_logs_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
     const pageNums = () => {
         const nums = [];
         const start = Math.max(1, currentPage - 2);
@@ -57,9 +89,14 @@ function AuditLogs() {
                     <h2 className="al-title">System Audit Logs</h2>
                     <p className="al-subtitle">Track all system events, logins, and administrative actions.</p>
                 </div>
-                <button className="al-refresh-btn" onClick={fetchLogs} disabled={loading}>
-                    <i className="bi bi-arrow-clockwise" /> Refresh
-                </button>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button className="al-refresh-btn" onClick={handleDownloadReport} disabled={filtered.length === 0} style={{ backgroundColor: 'var(--primary)', color: 'white', border: 'none' }}>
+                        <i className="bi bi-download" /> Download Report
+                    </button>
+                    <button className="al-refresh-btn" onClick={fetchLogs} disabled={loading}>
+                        <i className="bi bi-arrow-clockwise" /> Refresh
+                    </button>
+                </div>
             </div>
 
             {error && <div className="al-error">{error}</div>}

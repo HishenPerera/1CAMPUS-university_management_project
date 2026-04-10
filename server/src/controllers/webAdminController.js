@@ -135,6 +135,43 @@ const getBackups = async (req, res) => {
     res.json(files);
 };
 
+const downloadBackup = (req, res) => {
+    const { filename } = req.params;
+    const backupDir = path.join(__dirname, '../../backups');
+    const filePath = path.join(backupDir, filename);
+
+    if (fs.existsSync(filePath)) {
+        res.download(filePath, filename, (err) => {
+            if (err) {
+                console.error("Download error:", err);
+                if (!res.headersSent) {
+                    res.status(500).json({ message: "Error downloading file" });
+                }
+            }
+        });
+    } else {
+        res.status(404).json({ message: "Backup file not found" });
+    }
+};
+
+const deleteBackup = (req, res) => {
+    const { filename } = req.params;
+    const backupDir = path.join(__dirname, '../../backups');
+    const filePath = path.join(backupDir, filename);
+
+    if (fs.existsSync(filePath)) {
+        try {
+            fs.unlinkSync(filePath);
+            res.status(200).json({ message: "Backup deleted successfully" });
+        } catch (err) {
+            console.error("Delete error:", err);
+            res.status(500).json({ message: "Error deleting backup" });
+        }
+    } else {
+        res.status(404).json({ message: "Backup file not found" });
+    }
+};
+
 // GET /api/webadmin/admins
 const getWebAdmins = async (req, res) => {
     try {
@@ -218,5 +255,7 @@ module.exports = {
     createWebAdmin,
     deleteWebAdmin,
     createBackup,
-    getBackups
+    getBackups,
+    downloadBackup,
+    deleteBackup
 };
