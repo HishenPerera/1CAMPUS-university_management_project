@@ -4,7 +4,8 @@ const {
     listStudents, getTempPasswords, getStudentDetail,
     addStudent, editStudent, removeStudent,
     getApplications, acceptApplication, approveApplication, rejectApplication,
-    listModules, getLecturers, addModule, deleteModule, assignModule, removeModuleAssignment
+    listModules, getLecturers, addModule, deleteModule, assignModule, removeModuleAssignment,
+    generateLetter
 } = require("../controllers/adminController");
 const verifyToken = require("../middleware/authMiddleware");
 
@@ -38,5 +39,8 @@ router.post("/modules", addModule);
 router.delete("/modules/:id", deleteModule);
 router.post("/modules/:id/assign", assignModule);
 router.delete("/modules/:id/assign/:lecturerId", removeModuleAssignment);
+
+/* ── AI Features ─────────────────────────────────────────────────────── */
+router.post("/generate-letter", generateLetter);
 
 module.exports = router;
