@@ -1,0 +1,100 @@
+const pool = require("../config/db");
+
+const getContacts = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const userRole = req.user.role; // typically "student" or "lecturer"
+
+        let query = "";
+        let queryParams = [];
+
+        if (userRole === 'student') {
+            // Students only see lecturers
+            query = `
+                SELECT id, full_name, email, role, profile_image
+                FROM users
+                WHERE role = 'lecturer'
+                ORDER BY full_name ASC
+            `;
+        } else if (userRole === 'lecturer') {
+            // Lecturers see only students who have an existing message history with them
+            query = `
+                SELECT DISTINCT u.id, u.full_name, u.email, u.role, u.profile_image
+                FROM users u
+                JOIN chat_messages cm ON (cm.sender_id = u.id OR cm.receiver_id = u.id)
+                WHERE u.role = 'student' 
+                  AND (cm.sender_id = $1 OR cm.receiver_id = $1)
+                  AND u.id != $1
+                ORDER BY u.full_name ASC
+            `;
+            queryParams = [userId];
+        } else {
+            // Admins see everyone
+            query = `
+                SELECT id, full_name, email, role, profile_image
+                FROM users
+                WHERE id != $1
+                ORDER BY full_name ASC
+            `;
+            queryParams = [userId];
+        }
+
+        const contactsResult = await pool.query(query, queryParams);
+        
+        // Also get unread counts for each contact
+        const unreadRows = await pool.query(
+            `SELECT sender_id, COUNT(*) as unread_count 
+             FROM chat_messages 
+             WHERE receiver_id = $1 AND is_read = FALSE 
+             GROUP BY sender_id`,
+            [userId]
+        );
+        
+        const unreadMap = {};
+        unreadRows.rows.forEach(r => {
+            unreadMap[r.sender_id] = parseInt(r.unread_count, 10);
+        });
+
+        const contacts = contactsResult.rows.map(contact => ({
+            ...contact,
+            unread_count: unreadMap[contact.id] || 0
+        }));
+
+        res.json(contacts);
+    } catch (err) {
+        console.error("Error fetching contacts:", err);
+        res.status(500).json({ message: "Server error fetching contacts" });
+    }
+};
+
+const getChatHistory = async (req, res) => {
+    try {
+        const userId = req.user.id; // me
+        const { contactId } = req.params; // them
+
+        const result = await pool.query(
+            `SELECT id, sender_id, receiver_id, message, created_at, is_read
+             FROM chat_messages
+             WHERE (sender_id = $1 AND receiver_id = $2)
+                OR (sender_id = $2 AND receiver_id = $1)
+             ORDER BY created_at ASC`,
+            [userId, contactId]
+        );
+
+        // Mark as read immediately when history is fetched
+        await pool.query(
+            "UPDATE chat_messages SET is_read = TRUE WHERE sender_id = $1 AND receiver_id = $2 AND is_read = FALSE",
+            [contactId, userId]
+        );
+
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Error fetching chat history:", err);
+        res.status(500).json({ message: "Server error fetching chat history" });
+    }
+};
+
+module.exports = {
+    getContacts,
+    getChatHistory
+};

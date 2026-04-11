@@ -9,6 +9,7 @@ import StudentCourseMaterials from "./StudentCourseMaterials";
 import OnlineEbooks from "./OnlineEbooks";
 import StudentTickets from "./StudentTickets";
 import StudentQuizzes from "./StudentQuizzes";
+import ChatInterface from "../../components/chat/ChatInterface";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
     { id: "quizzes", label: "AI Quizzes", icon: "bi-cpu-fill" },
     { id: "ebooks", label: "E-Books", icon: "bi-book-half" },
     { id: "tickets", label: "Support Tickets", icon: "bi-ticket-detailed-fill" },
+    { id: "chat", label: "Messages", icon: "bi-chat-dots-fill" },
 ];
 
 function StudentDashboard() {
@@ -122,6 +124,13 @@ function StudentDashboard() {
                                         <div className="dash-card-sub">Request certificates or report issues</div>
                                     </div>
                                 </div>
+                                <div className="dash-card" onClick={() => setActiveNav("chat")}>
+                                    <i className="bi bi-chat-dots-fill dash-card-icon" style={{ color: "#3b82f6" }} />
+                                    <div>
+                                        <div className="dash-card-title">Messages</div>
+                                        <div className="dash-card-sub">Chat with lecturers and peers</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -131,6 +140,7 @@ function StudentDashboard() {
                     {activeNav === "tickets" && <StudentTickets />}
                     {activeNav === "profile" && <MyProfile />}
                     {activeNav === "course-materials" && <StudentCourseMaterials course={activeCourse} onBack={() => setActiveNav("modules")} />}
+                    {activeNav === "chat" && <ChatInterface />}
                 </main>
             </div>
             <FloatingAdvisor />
