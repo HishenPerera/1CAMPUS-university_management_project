@@ -6,18 +6,20 @@ import StudentPortalAccess from "../stdadmin/StudentPortalAccess";
 import StaffManagement from "./StaffManagement";
 import WebAdminManagement from "./WebAdminManagement";
 import AuditLogs from "./AuditLogs";
+import DatabaseManagement from "./DatabaseManagement";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
 import MaintenancePage from './MaintenancePage';
 
 const NAV_ITEMS = [
-    { id: "dashboard", label: "Dashboard", icon: "bi-grid-1x2-fill" },
-    { id: "students", label: "Manage Students", icon: "bi-mortarboard-fill" },
-    { id: "staff", label: "Manage Staff", icon: "bi-people-fill" },
-    { id: "webadmins", label: "Manage Web Admins", icon: "bi-person-badge-fill" },
-    { id: "logs", label: "Audit Logs", icon: "bi-journal-text" },
-    { id: 'maintenance', label: 'Database Maintenance', icon: "bi-database-fill-gear" },
+    { id: "dashboard",   label: "Dashboard",           icon: "bi-grid-1x2-fill" },
+    { id: "students",    label: "Manage Students",      icon: "bi-mortarboard-fill" },
+    { id: "staff",       label: "Manage Staff",         icon: "bi-people-fill" },
+    { id: "webadmins",   label: "Manage Web Admins",    icon: "bi-person-badge-fill" },
+    { id: "logs",        label: "Audit Logs",           icon: "bi-journal-text" },
+    { id: "database",    label: "Database Management",  icon: "bi-database-fill-gear" },
+    { id: "maintenance", label: "DB Maintenance",       icon: "bi-tools" },
 ];
 
 function WebAdminDashboard() {
@@ -101,6 +103,7 @@ function WebAdminDashboard() {
                     {activeNav === "staff" && <StaffManagement />}
                     {activeNav === "webadmins" && <WebAdminManagement />}
                     {activeNav === "logs" && <AuditLogs />}
+                    {activeNav === "database" && <DatabaseManagement />}
                     {activeNav === "maintenance" && <MaintenancePage />}
                 </main>
             </div>

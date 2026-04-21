@@ -169,8 +169,13 @@ function mapDegreeToTopics(degree) {
     return (
         <div className="ebooks-container">
             <div className="ebooks-header">
-                <h2><i className="bi bi-book-half" style={{ marginRight: '10px', color: '#818cf8' }}></i> Online E-Books Library</h2>
-                <p>Search and read thousands of free online e-books.</p>
+                <div className="ebooks-header-icon">
+                    <i className="bi bi-book-half"></i>
+                </div>
+                <div>
+                    <h2>Online E-Books Library</h2>
+                    <p>Search and read thousands of free online e-books.</p>
+                </div>
             </div>
 
             <div className="ebooks-search-box">

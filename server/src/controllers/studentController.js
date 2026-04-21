@@ -326,7 +326,7 @@ const getAvailableQuizzes = async (req, res) => {
         const params = [st.degree_program, st.studying_year, st.semester];
         let intakeFilter = '';
         if (st.intake) {
-            intakeFilter = ' AND m.intake = $4';
+            intakeFilter = ' AND m.intake = $5';  // $1=studentId, $2=degree, $3=year, $4=semester, $5=intake
             params.push(st.intake);
         }
 

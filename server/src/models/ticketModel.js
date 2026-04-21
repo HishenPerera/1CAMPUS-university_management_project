@@ -38,9 +38,28 @@ const updateTicketStatus = async (id, status, adminComment) => {
     return result.rows[0];
 };
 
+// Delete a ticket (student-owned, pending only) and record the reason
+const deleteTicket = async (ticketId, studentId, reason) => {
+    // First verify ownership and that the ticket is still pending
+    const check = await pool.query(
+        "SELECT * FROM tickets WHERE id = $1 AND student_id = $2",
+        [ticketId, studentId]
+    );
+    if (check.rows.length === 0) return { error: "not_found" };
+    const ticket = check.rows[0];
+    if (ticket.status.toLowerCase() !== "pending") return { error: "not_pending" };
+
+    await pool.query(
+        "DELETE FROM tickets WHERE id = $1",
+        [ticketId]
+    );
+    return { deleted: true, ticket, reason };
+};
+
 module.exports = {
     createTicket,
     getTicketsByStudent,
     getAllTickets,
     updateTicketStatus,
+    deleteTicket,
 };

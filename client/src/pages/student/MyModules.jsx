@@ -87,6 +87,7 @@ function MyModules({ onNavigate }) {
                         <div key={mod.id} className="module-card">
                             <div className="module-card-top">
                                 <span className="module-code">{mod.module_code}</span>
+                                <i className="bi bi-journal-code module-icon" />
                             </div>
                             <div className="module-card-body">
                                 <h4 className="module-name">{mod.module_name}</h4>
@@ -98,15 +99,12 @@ function MyModules({ onNavigate }) {
                                         <span className="module-lect-tba">Lecturer TBA</span>
                                     )}
                                 </div>
-                                <div style={{ marginTop: '1.25rem' }}>
-                                    <button 
-                                        className="btn btn-primary w-100" 
-                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: 'var(--brand-primary)', color: 'white', border: 'none', padding: '0.6rem', borderRadius: '8px', fontWeight: '500', transition: 'all 0.2s', cursor: 'pointer' }}
-                                        onClick={() => onNavigate && onNavigate("course-materials", mod)}
-                                    >
-                                        <i className="bi bi-folder2-open" /> View Materials
-                                    </button>
-                                </div>
+                                <button
+                                    className="module-materials-btn"
+                                    onClick={() => onNavigate && onNavigate("course-materials", mod)}
+                                >
+                                    <i className="bi bi-folder2-open" /> View Materials
+                                </button>
                             </div>
                         </div>
                     ))}

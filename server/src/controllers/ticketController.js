@@ -69,9 +69,37 @@ const updateTicketStatus = async (req, res) => {
     }
 };
 
+// Student: Delete own pending ticket with a reason
+const deleteTicket = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { reason } = req.body;
+        const studentId = req.user.id;
+
+        if (!reason || !reason.trim()) {
+            return res.status(400).json({ message: "A reason is required to delete a ticket." });
+        }
+
+        const result = await ticketModel.deleteTicket(id, studentId, reason.trim());
+
+        if (result.error === "not_found") {
+            return res.status(404).json({ message: "Ticket not found or you don't have permission." });
+        }
+        if (result.error === "not_pending") {
+            return res.status(400).json({ message: "Only tickets with 'Pending' status can be deleted." });
+        }
+
+        res.status(200).json({ message: "Ticket deleted successfully." });
+    } catch (error) {
+        console.error("Error deleting ticket:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
 module.exports = {
     raiseTicket,
     getMyTickets,
     getAllTickets,
     updateTicketStatus,
+    deleteTicket,
 };
