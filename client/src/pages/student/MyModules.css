@@ -1,28 +1,48 @@
-/* ── My Modules page ──────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════════════
+   My Modules — Professional UI
+   All colours via project design tokens for dark/light mode.
+════════════════════════════════════════════════════════════════ */
 
-/* Loading */
+/* ── Page wrapper ─────────────────────────────────────────────── */
+.modules-page {
+    padding: 2rem;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    animation: mm-fadein 0.4s ease-out;
+}
+
+@keyframes mm-fadein {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Loading ──────────────────────────────────────────────────── */
 .modules-loading {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 40vh;
+    height: 50vh;
     gap: 1rem;
     color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
 .modules-spinner {
-    font-size: 2.2rem;
-    color: var(--brand-primary);
-    animation: spin 1s linear infinite;
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--brand-primary);
+    border-radius: 50%;
+    animation: mm-spin 0.7s linear infinite;
+    display: inline-block;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
+@keyframes mm-spin { to { transform: rotate(360deg); } }
 
-/* Error */
+/* ── Error ────────────────────────────────────────────────────── */
 .modules-error {
     display: flex;
     flex-direction: column;
@@ -30,106 +50,102 @@
     justify-content: center;
     height: 40vh;
     gap: 0.75rem;
-    color: var(--error-color);
+    color: #ef4444;
     font-size: 0.9rem;
     text-align: center;
+    padding: 2rem;
 }
 
-.modules-error i {
-    font-size: 2.5rem;
-}
+.modules-error i { font-size: 2.5rem; opacity: 0.7; }
 
-/* ── Page wrapper ── */
-.modules-page {
-    max-width: 1000px;
-}
-
-/* ── Enrollment banner ── */
+/* ══════════════════════════════════════════════════════════════
+   BANNER
+══════════════════════════════════════════════════════════════ */
 .modules-banner {
     display: flex;
-    align-items: flex-start;
-    gap: 1.25rem;
-    background: linear-gradient(135deg, rgba(0, 58, 153, 0.18), rgba(26, 127, 232, 0.1));
-    border: 1px solid rgba(26, 127, 232, 0.25);
-    border-radius: 18px;
-    padding: 1.5rem 1.75rem;
-    margin-bottom: 2rem;
+    align-items: center;
+    gap: 1.5rem;
+    background: linear-gradient(135deg, rgba(0,58,153,0.14), rgba(26,127,232,0.08));
+    border: 1px solid rgba(26,127,232,0.22);
+    border-radius: 22px;
+    padding: 1.75rem 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative glow streak */
+.modules-banner::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--brand-deep, #003a99), var(--brand-primary, #1a7fe8), #38bdf8);
+    border-radius: 22px 22px 0 0;
 }
 
 .modules-banner-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, var(--brand-deep), var(--brand-primary));
+    width: 62px;
+    height: 62px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--brand-deep, #003a99), var(--brand-primary, #1a7fe8));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.7rem;
     color: #fff;
     flex-shrink: 0;
-    box-shadow: 0 4px 14px rgba(26, 127, 232, 0.4);
+    box-shadow: 0 6px 20px rgba(26,127,232,0.4);
 }
 
-.modules-banner-info {
-    flex: 1;
-    min-width: 0;
-}
+.modules-banner-info { flex: 1; min-width: 0; }
 
 .modules-banner-title {
-    margin: 0 0 0.65rem;
-    font-size: 1.1rem;
+    margin: 0 0 0.7rem;
+    font-size: 1.35rem;
     font-weight: 800;
     color: var(--text-primary);
-    line-height: 1.3;
+    line-height: 1.2;
 }
 
 .modules-banner-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem;
+    gap: 0.55rem;
 }
 
 .modules-pill {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    background: rgba(26, 127, 232, 0.12);
-    border: 1px solid rgba(26, 127, 232, 0.22);
+    gap: 0.38rem;
+    background: rgba(26,127,232,0.1);
+    border: 1.5px solid rgba(26,127,232,0.2);
     border-radius: 50px;
-    padding: 0.3rem 0.85rem;
-    font-size: 0.78rem;
+    padding: 0.32rem 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--brand-primary);
 }
 
-[data-theme="light"] .modules-pill {
-    background: rgba(26, 127, 232, 0.09);
-}
-
-/* Intake pill - distinct teal accent */
 .modules-pill--intake {
-    background: rgba(16, 185, 129, 0.12);
-    border-color: rgba(16, 185, 129, 0.3);
-    color: #059669;
+    background: rgba(16,185,129,0.1);
+    border-color: rgba(16,185,129,0.25);
+    color: #10b981;
 }
 
-[data-theme="dark"] .modules-pill--intake {
-    background: rgba(16, 185, 129, 0.15);
-    color: #34d399;
-}
-
-/* ── Section header ── */
+/* ══════════════════════════════════════════════════════════════
+   SECTION HEADER
+══════════════════════════════════════════════════════════════ */
 .modules-section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.25rem;
+    gap: 1rem;
 }
 
 .modules-section-title {
     margin: 0;
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 1.05rem;
+    font-weight: 800;
     color: var(--text-primary);
     display: flex;
     align-items: center;
@@ -142,91 +158,83 @@
 }
 
 .modules-count {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 0.22rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--brand-primary);
+    background: rgba(26,127,232,0.1);
+    border: 1.5px solid rgba(26,127,232,0.2);
+    border-radius: 50px;
+    padding: 0.28rem 0.8rem;
 }
 
-/* ── Empty state ── */
-.modules-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 3.5rem 2rem;
-    gap: 0.75rem;
-    text-align: center;
-    border: 1px dashed var(--border);
-    border-radius: 18px;
-    color: var(--text-secondary);
-}
-
-.modules-empty-icon {
-    font-size: 3rem;
-    color: var(--text-muted);
-}
-
-.modules-empty p {
-    margin: 0;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.modules-empty span {
-    font-size: 0.82rem;
-}
-
-/* ── Module card grid ── */
+/* ══════════════════════════════════════════════════════════════
+   MODULE CARD GRID
+══════════════════════════════════════════════════════════════ */
 .modules-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.25rem;
 }
 
+/* ── Card ─────────────────────────────────────────────────────── */
 .module-card {
-    background: var(--bg-card);
+    background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 20px;
     overflow: hidden;
-    transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
-    box-shadow: 0 2px 8px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    box-shadow: var(--card-shadow);
+    position: relative;
 }
 
 .module-card:hover {
-    border-color: var(--brand-primary);
-    transform: translateY(-3px);
-    box-shadow: 0 10px 28px rgba(26, 127, 232, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 16px 40px rgba(26,127,232,0.16);
+    border-color: rgba(26,127,232,0.35);
 }
 
+/* Coloured header strip */
 .module-card-top {
-    background: linear-gradient(135deg, var(--brand-deep), var(--brand-primary));
-    padding: 0.85rem 1.1rem;
+    background: linear-gradient(135deg, var(--brand-deep, #003a99), var(--brand-primary, #1a7fe8));
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
 }
 
 .module-code {
-    font-family: 'Inter', monospace;
-    font-size: 0.78rem;
+    font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+    font-size: 0.76rem;
     font-weight: 800;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.92);
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.22);
+    color: rgba(255,255,255,0.95);
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.24);
     border-radius: 6px;
-    padding: 0.2rem 0.55rem;
+    padding: 0.22rem 0.6rem;
 }
 
+.module-card-top .module-icon {
+    font-size: 1.3rem;
+    color: rgba(255,255,255,0.5);
+}
+
+/* Card body */
 .module-card-body {
-    padding: 1.1rem 1.2rem;
+    padding: 1.25rem 1.35rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
 }
 
 .module-name {
-    margin: 0 0 0.75rem;
-    font-size: 0.95rem;
+    margin: 0;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--text-primary);
     line-height: 1.4;
@@ -235,19 +243,96 @@
 .module-lecturers {
     display: flex;
     align-items: flex-start;
-    gap: 0.5rem;
-    font-size: 0.8rem;
+    gap: 0.45rem;
+    font-size: 0.82rem;
     color: var(--text-secondary);
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 .module-lect-icon {
     color: var(--brand-primary);
     flex-shrink: 0;
-    margin-top: 0.1rem;
+    margin-top: 0.15rem;
+    font-size: 0.95rem;
 }
 
 .module-lect-tba {
     color: var(--text-muted);
     font-style: italic;
+}
+
+/* View Materials button */
+.module-materials-btn {
+    margin-top: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.72rem 1rem;
+    background: rgba(26,127,232,0.08);
+    color: var(--brand-primary);
+    border: 1.5px solid rgba(26,127,232,0.2);
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.22s;
+}
+
+.module-materials-btn:hover {
+    background: var(--brand-primary);
+    color: #fff;
+    border-color: var(--brand-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(26,127,232,0.32);
+}
+
+/* ── Empty state ──────────────────────────────────────────────── */
+.modules-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: center;
+    padding: 5rem 2rem;
+    border: 1.5px dashed var(--border);
+    border-radius: 22px;
+    background: var(--surface);
+    color: var(--text-secondary);
+}
+
+.modules-empty-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(26,127,232,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    color: var(--brand-primary);
+    opacity: 0.55;
+    margin-bottom: 0.5rem;
+}
+
+.modules-empty p {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.modules-empty span {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    max-width: 340px;
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .modules-page   { padding: 1rem; gap: 1.25rem; }
+    .modules-banner { padding: 1.25rem; flex-wrap: wrap; }
+    .modules-grid   { grid-template-columns: 1fr; }
 }

@@ -1,13 +1,16 @@
 /* ── Shared Dashboard Layout ─────────────────────────────────────────
-   Used by StdAdmin, Lecturer, and WebAdmin dashboards.
-   Import this INSTEAD of duplicating layout CSS in each dashboard.
+   Used by Student, StdAdmin, Lecturer, and WebAdmin dashboards.
 ──────────────────────────────────────────────────────────────────── */
 
 :root {
     --sidebar-w: 240px;
+    --sidebar-collapsed-w: 68px;
     --topbar-h: 64px;
 }
 
+/* ══════════════════════════════════════════════════════════════
+   OUTER SHELL
+══════════════════════════════════════════════════════════════ */
 .dash-layout {
     display: flex;
     min-height: 100vh;
@@ -15,7 +18,9 @@
     color: var(--text-primary);
 }
 
-/* ── Sidebar ──────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════════════════════════ */
 .dash-sidebar {
     width: var(--sidebar-w);
     min-width: var(--sidebar-w);
@@ -28,50 +33,114 @@
     left: 0;
     bottom: 0;
     z-index: 200;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
+    /* Smooth expand / collapse */
+    transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+        min-width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.dash-layout.sidebar-closed .dash-sidebar {
-    transform: translateX(-100%);
+/* ── Collapsed (icon-only) ────────────────────────────────── */
+.dash-layout.sidebar-collapsed .dash-sidebar {
+    width: var(--sidebar-collapsed-w);
+    min-width: var(--sidebar-collapsed-w);
 }
 
+/* ── Logo area ────────────────────────────────────────────── */
 .sidebar-logo-wrap {
-    padding: 1.4rem 1rem 1.2rem;
+    padding: 1rem 1.1rem;
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    height: 72px;
+    overflow: hidden;
 }
 
 .sidebar-logo {
-    width: 210px;
-    height: 64px;
-    object-fit: cover;
-    object-position: 50% 50%;
-    filter: drop-shadow(0 2px 10px rgba(26, 127, 232, 0.5));
+    /* Fill sidebar width but stay within it */
+    width: 180px;
+    height: 120px;
+    object-fit: contain;
+    object-position: center center;
+    filter: drop-shadow(0 2px 10px rgba(26, 127, 232, 0.45));
+    flex-shrink: 0;
+    /* Smooth hide on collapse */
+    transition: opacity 0.22s ease, max-width 0.28s ease, width 0.28s ease;
 }
 
 [data-theme="light"] .sidebar-logo {
-    filter: drop-shadow(0 2px 10px rgba(0, 58, 153, 0.25));
+    filter: drop-shadow(0 2px 8px rgba(0, 58, 153, 0.22));
 }
 
-/* Nav */
+/* Fade out logo when sidebar collapses */
+.dash-layout.sidebar-collapsed .sidebar-logo {
+    opacity: 0;
+    width: 0;
+    pointer-events: none;
+}
+
+
+/* ── Nav ──────────────────────────────────────────────────── */
 .sidebar-nav {
     flex: 1;
-    padding: 1rem 0.75rem;
+    padding: 0.6rem 0.55rem;
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 0;
     overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
 }
 
+.sidebar-nav::-webkit-scrollbar {
+    display: none;
+}
+
+/* ── Group ────────────────────────────────────────────────── */
+.sidebar-nav-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.08rem;
+    padding-top: 1rem;
+}
+
+.sidebar-nav-group:first-child {
+    padding-top: 0.2rem;
+}
+
+/* Group label */
+.sidebar-nav-group-label {
+    font-size: 0.62rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    padding: 0 0.85rem 0.3rem;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: opacity 0.18s, max-height 0.2s;
+    max-height: 30px;
+    opacity: 1;
+    user-select: none;
+}
+
+/* Hide group label when collapsed */
+.dash-layout.sidebar-collapsed .sidebar-nav-group-label {
+    opacity: 0;
+    max-height: 0;
+    padding-bottom: 0;
+    pointer-events: none;
+}
+
+/* ── Nav item ─────────────────────────────────────────────── */
 .sidebar-nav-item {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.7rem 0.9rem;
+    padding: 0.68rem 0.85rem;
     border-radius: 10px;
     border: none;
     background: transparent;
@@ -79,11 +148,12 @@
     font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.15s, color 0.15s, padding 0.28s;
     width: 100%;
     text-align: left;
     font-family: inherit;
     white-space: nowrap;
+    position: relative;
 }
 
 .sidebar-nav-item:hover {
@@ -97,28 +167,83 @@
     box-shadow: inset 3px 0 0 var(--brand-primary);
 }
 
+/* Collapsed: centre the icon */
+.dash-layout.sidebar-collapsed .sidebar-nav-item {
+    justify-content: center;
+    padding: 0.68rem 0;
+}
+
+.dash-layout.sidebar-collapsed .sidebar-nav-item.active {
+    box-shadow: none;
+    border-radius: 10px;
+}
+
+/* ── Label fade ───────────────────────────────────────────── */
 .nav-icon {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     flex-shrink: 0;
+    transition: font-size 0.28s;
+}
+
+.dash-layout.sidebar-collapsed .nav-icon {
+    font-size: 1.25rem;
 }
 
 .nav-label {
     overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: opacity 0.15s, max-width 0.28s;
+    max-width: 160px;
+    opacity: 1;
 }
 
-/* Footer */
+/* Hide text label when collapsed */
+.dash-layout.sidebar-collapsed .nav-label {
+    opacity: 0;
+    max-width: 0;
+    pointer-events: none;
+}
+
+/* ── Tooltip (collapsed hover) ────────────────────────────── */
+.dash-layout.sidebar-collapsed .sidebar-nav-item::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: calc(100% + 14px);
+    top: 50%;
+    transform: translateY(-50%) scale(0.9);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 0.38rem 0.85rem;
+    border-radius: 9px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s, transform 0.15s;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+    z-index: 9999;
+}
+
+.dash-layout.sidebar-collapsed .sidebar-nav-item:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}
+
+/* ── Footer ───────────────────────────────────────────────── */
 .sidebar-footer {
-    padding: 0.75rem;
+    padding: 0.65rem 0.55rem;
     border-top: 1px solid var(--border);
     flex-shrink: 0;
+    overflow: hidden;
 }
 
 .sidebar-logout {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    padding: 0.65rem 0.9rem;
+    padding: 0.65rem 0.85rem;
     width: 100%;
     border-radius: 10px;
     border: none;
@@ -127,29 +252,79 @@
     font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background 0.15s, padding 0.28s;
     font-family: inherit;
+    white-space: nowrap;
 }
 
 .sidebar-logout:hover {
     background: rgba(239, 68, 68, 0.1);
 }
 
-/* ── Main panel ──────────────────────────────────────────────────── */
+.sidebar-logout span {
+    overflow: hidden;
+    white-space: nowrap;
+    transition: opacity 0.15s, max-width 0.28s;
+    max-width: 140px;
+    opacity: 1;
+}
+
+/* Collapsed logout: icon only + tooltip */
+.dash-layout.sidebar-collapsed .sidebar-logout {
+    justify-content: center;
+    padding: 0.65rem 0;
+    position: relative;
+}
+
+.dash-layout.sidebar-collapsed .sidebar-logout span {
+    opacity: 0;
+    max-width: 0;
+    pointer-events: none;
+}
+
+.dash-layout.sidebar-collapsed .sidebar-logout::after {
+    content: "Logout";
+    position: absolute;
+    left: calc(100% + 14px);
+    top: 50%;
+    transform: translateY(-50%) scale(0.9);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: #f87171;
+    padding: 0.38rem 0.85rem;
+    border-radius: 9px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s, transform 0.15s;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+    z-index: 9999;
+}
+
+.dash-layout.sidebar-collapsed .sidebar-logout:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MAIN PANEL
+══════════════════════════════════════════════════════════════ */
 .dash-main {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     margin-left: var(--sidebar-w);
-    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.dash-layout.sidebar-closed .dash-main {
-    margin-left: 0;
+.dash-layout.sidebar-collapsed .dash-main {
+    margin-left: var(--sidebar-collapsed-w);
 }
 
-/* ── Top bar ─────────────────────────────────────────────────────── */
+/* ── Top bar ──────────────────────────────────────────────── */
 .dash-topbar {
     height: var(--topbar-h);
     background: var(--surface);
@@ -206,16 +381,17 @@
     color: var(--text-secondary);
 }
 
-/* ── Content area ────────────────────────────────────────────────── */
+/* ── Content area ─────────────────────────────────────────── */
 .dash-content {
     flex: 1;
     padding: 2rem;
     overflow-y: auto;
 }
 
-/* ── Home quick-cards ────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   HOME QUICK-CARDS
+══════════════════════════════════════════════════════════════ */
 .dash-home {
-    /* Removed max-width to allow cards to fit full screen */
     width: 100%;
 }
 
@@ -259,6 +435,7 @@
 
 .dash-card-icon {
     font-size: 2rem;
+    color: var(--brand-primary);
 }
 
 .dash-card-title {
@@ -273,7 +450,9 @@
     color: var(--text-secondary);
 }
 
-/* ── Coming-soon placeholder ─────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   COMING SOON PLACEHOLDER
+══════════════════════════════════════════════════════════════ */
 .coming-soon {
     display: flex;
     flex-direction: column;
@@ -299,4 +478,34 @@
 .coming-soon p {
     margin: 0;
     font-size: 0.875rem;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MOBILE — sidebar becomes full overlay drawer
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .dash-sidebar {
+        transform: translateX(0);
+        width: var(--sidebar-w) !important;
+        min-width: var(--sidebar-w) !important;
+    }
+
+    /* On mobile, "collapsed" means hidden off-screen */
+    .dash-layout.sidebar-collapsed .dash-sidebar {
+        transform: translateX(-100%);
+    }
+
+    .dash-layout.sidebar-collapsed .dash-main,
+    .dash-main {
+        margin-left: 0 !important;
+    }
+
+    /* Overlay backdrop (shown when sidebar open on mobile) */
+    .dash-layout:not(.sidebar-collapsed) .dash-sidebar-backdrop {
+        display: block;
+    }
+
+    .dash-content {
+        padding: 1rem;
+    }
 }
