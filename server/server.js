@@ -33,32 +33,32 @@ const connectedUsers = new Map();
 
 io.on("connection", (socket) => {
     const userId = socket.user.id;
-    
+
     // Track connection
     connectedUsers.set(userId, socket.id);
     io.emit("users_online", Array.from(connectedUsers.keys()));
 
-    // Listen for incoming messages
+    /* ─── Send message ─────────────────────────────────────────── */
     socket.on("send_message", async (data) => {
         try {
-            const { receiverId, message } = data;
-            
-            // Save to database
+            const { receiverId, message, replyToId } = data;
+
             const result = await pool.query(
-                `INSERT INTO chat_messages (sender_id, receiver_id, message)
-                 VALUES ($1, $2, $3) RETURNING id, sender_id, receiver_id, message, created_at, is_read`,
-                [userId, receiverId, message]
+                `INSERT INTO chat_messages (sender_id, receiver_id, message, reply_to_id)
+                 VALUES ($1, $2, $3, $4)
+                 RETURNING id, sender_id, receiver_id, message, reply_to_id, created_at, is_read, is_edited`,
+                [userId, receiverId, message, replyToId || null]
             );
-            
+
             const savedMessage = result.rows[0];
 
-            // Send to receiver if online
+            // Deliver to receiver if online
             const receiverSocketId = connectedUsers.get(Number(receiverId));
             if (receiverSocketId) {
                 io.to(receiverSocketId).emit("receive_message", savedMessage);
             }
 
-            // Send acknowledgment back to sender
+            // Acknowledge sender
             socket.emit("message_sent", savedMessage);
         } catch (err) {
             console.error("Socket error processing message:", err);
@@ -66,14 +66,85 @@ io.on("connection", (socket) => {
         }
     });
 
+    /* ─── Delete message (soft delete) ────────────────────────── */
+    socket.on("delete_message", async (data) => {
+        try {
+            const { messageId } = data;
+
+            const result = await pool.query(
+                "UPDATE chat_messages SET is_deleted = TRUE WHERE id = $1 AND sender_id = $2 RETURNING receiver_id",
+                [messageId, userId]
+            );
+
+            if (result.rowCount > 0) {
+                const receiverId = result.rows[0].receiver_id;
+                const notification = { messageId, senderId: userId, receiverId };
+
+                socket.emit("message_deleted", notification);
+
+                const receiverSocketId = connectedUsers.get(Number(receiverId));
+                if (receiverSocketId) {
+                    io.to(receiverSocketId).emit("message_deleted", notification);
+                }
+            }
+        } catch (err) {
+            console.error("Socket error deleting message:", err);
+        }
+    });
+
+    /* ─── Edit message ─────────────────────────────────────────── */
+    socket.on("edit_message", async (data) => {
+        try {
+            const { messageId, newText } = data;
+
+            if (!newText || !newText.trim()) {
+                socket.emit("message_error", { error: "Message cannot be empty." });
+                return;
+            }
+
+            // Only sender can edit, and only non-deleted messages
+            const result = await pool.query(
+                `UPDATE chat_messages
+                 SET message = $1, is_edited = TRUE
+                 WHERE id = $2 AND sender_id = $3 AND is_deleted = FALSE
+                 RETURNING id, sender_id, receiver_id, message, is_edited, created_at, is_read, reply_to_id`,
+                [newText.trim(), messageId, userId]
+            );
+
+            if (result.rowCount > 0) {
+                const updatedMessage = result.rows[0];
+                const receiverId = updatedMessage.receiver_id;
+                const payload = {
+                    messageId,
+                    newText: updatedMessage.message,
+                    senderId: userId,
+                    receiverId,
+                };
+
+                socket.emit("message_edited", payload);
+
+                const receiverSocketId = connectedUsers.get(Number(receiverId));
+                if (receiverSocketId) {
+                    io.to(receiverSocketId).emit("message_edited", payload);
+                }
+            } else {
+                socket.emit("message_error", { error: "Cannot edit this message." });
+            }
+        } catch (err) {
+            console.error("Socket error editing message:", err);
+            socket.emit("message_error", { error: "Failed to edit message." });
+        }
+    });
+
+    /* ─── Mark messages as read ────────────────────────────────── */
     socket.on("mark_read", async (data) => {
         try {
-            const { senderId } = data; // The user who sent the messages being read
+            const { senderId } = data;
             await pool.query(
                 "UPDATE chat_messages SET is_read = TRUE WHERE sender_id = $1 AND receiver_id = $2 AND is_read = FALSE",
                 [senderId, userId]
             );
-            // Notify sender that their messages were read
+            // Notify the original sender that their messages were read
             const senderSocketId = connectedUsers.get(Number(senderId));
             if (senderSocketId) {
                 io.to(senderSocketId).emit("messages_read_by_receiver", { readerId: userId });
@@ -83,6 +154,7 @@ io.on("connection", (socket) => {
         }
     });
 
+    /* ─── Disconnect ───────────────────────────────────────────── */
     socket.on("disconnect", () => {
         connectedUsers.delete(userId);
         io.emit("users_online", Array.from(connectedUsers.keys()));

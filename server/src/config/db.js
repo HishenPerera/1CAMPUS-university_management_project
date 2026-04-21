@@ -23,7 +23,26 @@ const initDb = async () => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
-        console.log("DB: chat_messages table verified.");
+        
+        // Safely add reply_to_id if it doesn't exist
+        await pool.query(`
+            ALTER TABLE chat_messages 
+            ADD COLUMN IF NOT EXISTS reply_to_id INT REFERENCES chat_messages(id) ON DELETE SET NULL;
+        `);
+
+        // Safely add is_deleted if it doesn't exist
+        await pool.query(`
+            ALTER TABLE chat_messages 
+            ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE;
+        `);
+
+        // Safely add is_edited if it doesn't exist
+        await pool.query(`
+            ALTER TABLE chat_messages 
+            ADD COLUMN IF NOT EXISTS is_edited BOOLEAN DEFAULT FALSE;
+        `);
+
+        console.log("DB: chat_messages table verified, including replies and edit support.");
     } catch (err) {
         console.error("DB Init Error:", err);
     }

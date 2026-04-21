@@ -73,11 +73,14 @@ const getChatHistory = async (req, res) => {
         const { contactId } = req.params; // them
 
         const result = await pool.query(
-            `SELECT id, sender_id, receiver_id, message, created_at, is_read
-             FROM chat_messages
-             WHERE (sender_id = $1 AND receiver_id = $2)
-                OR (sender_id = $2 AND receiver_id = $1)
-             ORDER BY created_at ASC`,
+            `SELECT cm1.id, cm1.sender_id, cm1.receiver_id, cm1.message, cm1.created_at,
+                    cm1.is_read, cm1.reply_to_id, cm1.is_deleted, cm1.is_edited,
+                    cm2.message AS reply_message_text, cm2.is_deleted AS reply_is_deleted
+             FROM chat_messages cm1
+             LEFT JOIN chat_messages cm2 ON cm1.reply_to_id = cm2.id
+             WHERE (cm1.sender_id = $1 AND cm1.receiver_id = $2)
+                OR (cm1.sender_id = $2 AND cm1.receiver_id = $1)
+             ORDER BY cm1.created_at ASC`,
             [userId, contactId]
         );
 
