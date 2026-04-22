@@ -349,6 +349,225 @@ const deleteQuiz = async (req, res) => {
     }
 };
 
+// POST /api/lecturer/modules/:id/attendance — create a new named attendance session
+const postAttendanceSession = async (req, res) => {
+    const { id: moduleId } = req.params;
+    const lecturerId = req.user.id;
+    const { title, year, month, week_label } = req.body;
+
+    if (!title || year === undefined || month === undefined || !week_label) {
+        return res.status(400).json({ message: "title, year, month, and week_label are required." });
+    }
+
+    try {
+        const authCheck = await pool.query(
+            "SELECT 1 FROM lecturer_modules WHERE module_id = $1 AND lecturer_id = $2",
+            [moduleId, lecturerId]
+        );
+        if (authCheck.rowCount === 0) {
+            return res.status(403).json({ message: "Not authorized for this module." });
+        }
+
+        const result = await pool.query(`
+            INSERT INTO attendance_sessions (module_id, lecturer_id, title, year, month, week_label, is_open)
+            VALUES ($1, $2, $3, $4, $5, $6, true)
+            RETURNING *
+        `, [moduleId, lecturerId, title.trim(), year, month, week_label]);
+
+        res.status(201).json({ message: "Attendance session created and opened.", session: result.rows[0] });
+    } catch (err) {
+        console.error("Error creating attendance session:", err);
+        res.status(500).json({ message: "Server error creating attendance session." });
+    }
+};
+
+// PATCH /api/lecturer/attendance/:session_id/toggle — open or close a specific session
+const toggleAttendanceSession = async (req, res) => {
+    const { session_id } = req.params;
+    const lecturerId = req.user.id;
+
+    try {
+        const sessionCheck = await pool.query(
+            "SELECT * FROM attendance_sessions WHERE id = $1 AND lecturer_id = $2",
+            [session_id, lecturerId]
+        );
+        if (sessionCheck.rowCount === 0) {
+            return res.status(403).json({ message: "Session not found or unauthorized." });
+        }
+
+        const current = sessionCheck.rows[0];
+        const result = await pool.query(
+            "UPDATE attendance_sessions SET is_open = $1 WHERE id = $2 RETURNING *",
+            [!current.is_open, session_id]
+        );
+
+        const updated = result.rows[0];
+        res.json({
+            message: updated.is_open ? "Attendance session reopened." : "Attendance session closed.",
+            session: updated
+        });
+    } catch (err) {
+        console.error("Error toggling attendance session:", err);
+        res.status(500).json({ message: "Server error toggling session." });
+    }
+};
+
+// DELETE /api/lecturer/attendance/:session_id — delete a session
+const deleteAttendanceSession = async (req, res) => {
+    const { session_id } = req.params;
+    const lecturerId = req.user.id;
+
+    try {
+        const result = await pool.query(
+            "DELETE FROM attendance_sessions WHERE id = $1 AND lecturer_id = $2 RETURNING id",
+            [session_id, lecturerId]
+        );
+        if (result.rowCount === 0) {
+            return res.status(404).json({ message: "Session not found or unauthorized." });
+        }
+        res.json({ message: "Attendance session deleted." });
+    } catch (err) {
+        console.error("Error deleting attendance session:", err);
+        res.status(500).json({ message: "Server error deleting session." });
+    }
+};
+
+// GET /api/lecturer/modules/:id/attendance — get all attendance sessions for a module+year
+const getAttendanceSessions = async (req, res) => {
+    const { id: moduleId } = req.params;
+    const lecturerId = req.user.id;
+    const { year } = req.query;
+
+    try {
+        const authCheck = await pool.query(
+            "SELECT 1 FROM lecturer_modules WHERE module_id = $1 AND lecturer_id = $2",
+            [moduleId, lecturerId]
+        );
+        if (authCheck.rowCount === 0) {
+            return res.status(403).json({ message: "Not authorized for this module." });
+        }
+
+        let query = `
+            SELECT att.*,
+                   (SELECT COUNT(*) FROM attendance_records ar WHERE ar.session_id = att.id) AS total_present
+            FROM attendance_sessions att
+            WHERE att.module_id = $1
+        `;
+        const params = [moduleId];
+        if (year) {
+            query += " AND att.year = $2";
+            params.push(year);
+        }
+        query += " ORDER BY att.month ASC, att.week_label ASC, att.created_at ASC";
+
+        const result = await pool.query(query, params);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Error fetching attendance sessions:", err);
+        res.status(500).json({ message: "Server error fetching attendance sessions." });
+    }
+};
+
+// GET /api/lecturer/attendance/:session_id/records — view who attended
+const getAttendanceRecords = async (req, res) => {
+    const { session_id } = req.params;
+    const lecturerId = req.user.id;
+
+    try {
+        const sessionCheck = await pool.query(
+            "SELECT * FROM attendance_sessions WHERE id = $1 AND lecturer_id = $2",
+            [session_id, lecturerId]
+        );
+        if (sessionCheck.rowCount === 0) {
+            return res.status(403).json({ message: "Not authorized to view this session." });
+        }
+
+        const result = await pool.query(`
+            SELECT ar.*, u.full_name as student_name, s.registration_number, s.degree_program, s.studying_year
+            FROM attendance_records ar
+            JOIN users u ON ar.student_id = u.id
+            LEFT JOIN students s ON u.email = s.email
+            WHERE ar.session_id = $1
+            ORDER BY ar.marked_at ASC
+        `, [session_id]);
+
+        res.json({ session: sessionCheck.rows[0], records: result.rows });
+    } catch (err) {
+        console.error("Error fetching attendance records:", err);
+        res.status(500).json({ message: "Server error fetching records." });
+    }
+};
+
+// GET /api/lecturer/attendance/:session_id/download — download CSV report
+const downloadAttendanceReport = async (req, res) => {
+    const { session_id } = req.params;
+    const lecturerId = req.user.id;
+
+    try {
+        const sessionCheck = await pool.query(
+            `SELECT att.*, m.module_name, m.module_code
+             FROM attendance_sessions att
+             JOIN modules m ON att.module_id = m.id
+             WHERE att.id = $1 AND att.lecturer_id = $2`,
+            [session_id, lecturerId]
+        );
+        if (sessionCheck.rowCount === 0) {
+            return res.status(403).json({ message: "Not authorized to download this report." });
+        }
+
+        const session = sessionCheck.rows[0];
+
+        const result = await pool.query(`
+            SELECT u.full_name as student_name, s.registration_number,
+                   s.degree_program, s.studying_year, s.semester,
+                   ar.marked_at
+            FROM attendance_records ar
+            JOIN users u ON ar.student_id = u.id
+            LEFT JOIN students s ON u.email = s.email
+            WHERE ar.session_id = $1
+            ORDER BY ar.marked_at ASC
+        `, [session_id]);
+
+        const records = result.rows;
+
+        // Build CSV
+        const header = ["No.", "Student Name", "Registration Number", "Degree Program", "Year", "Semester", "Marked At"];
+        const rows = records.map((r, i) => [
+            i + 1,
+            r.student_name || "",
+            r.registration_number || "",
+            r.degree_program || "",
+            r.studying_year || "",
+            r.semester || "",
+            r.marked_at ? new Date(r.marked_at).toLocaleString() : ""
+        ]);
+
+        const csvLines = [
+            `Attendance Report`,
+            `Module: ${session.module_name} (${session.module_code})`,
+            `Session: ${session.title}`,
+            `Week: ${session.week_label}`,
+            `Status: ${session.is_open ? "Open" : "Closed"}`,
+            `Total Present: ${records.length}`,
+            `Generated: ${new Date().toLocaleString()}`,
+            ``,
+            header.map(h => `"${h}"`).join(","),
+            ...rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
+        ];
+
+        const csvContent = csvLines.join("\r\n");
+        const safeTitle = session.title.replace(/[^a-z0-9]/gi, "_");
+        const filename = `attendance_${session.module_code}_${safeTitle}.csv`;
+
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+        res.send(csvContent);
+    } catch (err) {
+        console.error("Error generating attendance report:", err);
+        res.status(500).json({ message: "Server error generating report." });
+    }
+};
+
 module.exports = {
     getMyModules,
     getModuleMaterials,
@@ -358,5 +577,12 @@ module.exports = {
     publishQuiz,
     getPublishedQuizzes,
     getQuizSubmissions,
-    deleteQuiz
+    deleteQuiz,
+    postAttendanceSession,
+    toggleAttendanceSession,
+    deleteAttendanceSession,
+    getAttendanceSessions,
+    getAttendanceRecords,
+    downloadAttendanceReport
 };
+
