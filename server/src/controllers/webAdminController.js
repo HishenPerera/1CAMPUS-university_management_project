@@ -369,6 +369,101 @@ const deleteTableRow = async (req, res) => {
     }
 };
 
+// GET /api/webadmin/system-insights
+const getSystemInsights = async (req, res) => {
+    try {
+        const query = `
+            SELECT created_at 
+            FROM activity_logs 
+            WHERE action = 'LOGIN' AND created_at >= NOW() - INTERVAL '7 days'
+        `;
+        const result = await pool.query(query);
+
+        const now = new Date();
+        now.setMinutes(0, 0, 0);
+
+        const hourlyCounts = new Array(168).fill(0);
+        const startOf7DaysAgo = new Date(now.getTime() - 167 * 60 * 60 * 1000); 
+
+        result.rows.forEach(row => {
+            const rowDate = new Date(row.created_at);
+            const hourDiff = Math.floor((rowDate.getTime() - startOf7DaysAgo.getTime()) / (60 * 60 * 1000));
+            if (hourDiff >= 0 && hourDiff < 168) {
+                hourlyCounts[hourDiff]++;
+            }
+        });
+
+        const hourOfDayTotals = new Array(24).fill(0);
+        const hourOfDayCounts = new Array(24).fill(0);
+
+        for (let i = 0; i < 168; i++) {
+            const d = new Date(startOf7DaysAgo.getTime() + i * 60 * 60 * 1000);
+            const h = d.getHours();
+            hourOfDayTotals[h] += hourlyCounts[i];
+            hourOfDayCounts[h]++;
+        }
+
+        const hourlyAverages = hourOfDayTotals.map((total, idx) => {
+            const count = hourOfDayCounts[idx] || 1;
+            return total / count;
+        });
+
+        const overallTotal = hourOfDayTotals.reduce((a, b) => a + b, 0);
+        const overallAverage = overallTotal / 168;
+
+        const chartData = [];
+
+        // Last 24 hours of actual data
+        for (let i = 144; i < 168; i++) {
+            const d = new Date(startOf7DaysAgo.getTime() + i * 60 * 60 * 1000);
+            chartData.push({
+                timestamp: d.toISOString(),
+                actualUsage: hourlyCounts[i],
+                predictedUsage: null 
+            });
+        }
+
+        let maxPredicted = 0;
+        let peakHour = null;
+
+        for (let i = 168; i < 192; i++) {
+            const d = new Date(startOf7DaysAgo.getTime() + i * 60 * 60 * 1000);
+            const h = d.getHours();
+            const predicted = Math.round(hourlyAverages[h] * 1.05); // slight AI trend factor
+            
+            if (predicted > maxPredicted) {
+                maxPredicted = predicted;
+                peakHour = d;
+            }
+
+            chartData.push({
+                timestamp: d.toISOString(),
+                actualUsage: null,
+                predictedUsage: predicted
+            });
+        }
+        
+        // Connect the actual line to the predicted line
+        chartData[23].predictedUsage = chartData[23].actualUsage;
+
+        let advisoryMessage = null;
+        if (maxPredicted > overallAverage * 1.2 && peakHour) {
+            const timeString = peakHour.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            advisoryMessage = `Warning: High traffic predicted around ${timeString}. Please optimize server resources.`;
+        }
+
+        res.json({
+            data: chartData,
+            advisoryMessage,
+            overallAverage: Math.round(overallAverage)
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error fetching system insights" });
+    }
+};
+
 module.exports = {
     getAuditLogs,
     getStaff,
@@ -385,4 +480,5 @@ module.exports = {
     listTables,
     getTableData,
     deleteTableRow,
+    getSystemInsights,
 };
