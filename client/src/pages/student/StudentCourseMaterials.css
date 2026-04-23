@@ -126,7 +126,10 @@
     border-bottom: 1px solid var(--border);
     background: rgba(0, 0, 0, 0.02);
     display: flex;
+    justify-content: space-between;
     align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
 [data-theme="dark"] .scm-week-header {
@@ -217,6 +220,202 @@
     font-weight: 500;
 }
 
+/* Attendance Section UI */
+.scm-att-section {
+    margin-bottom: 1.5rem;
+    background: rgba(0, 0, 0, 0.01);
+    border-radius: 10px;
+    padding: 1rem;
+    border: 1px dashed var(--border);
+    display: block; /* Ensure it's block for the list */
+}
+
+[data-theme="dark"] .scm-att-section {
+    background: rgba(255, 255, 255, 0.01);
+}
+
+.scm-att-section-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.scm-att-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.scm-att-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.scm-att-item--open {
+    border-left: 4px solid var(--brand-primary);
+}
+
+.scm-att-item--marked {
+    border-left: 4px solid #10b981;
+    background: rgba(16, 185, 129, 0.02);
+}
+
+.scm-att-item--closed {
+    border-left: 4px solid #64748b;
+    opacity: 0.8;
+}
+
+.scm-att-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.scm-att-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.scm-att-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.scm-att-status-chip {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+}
+
+.scm-att-status-chip.open {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--brand-primary);
+}
+
+.scm-att-status-chip.closed {
+    background: rgba(100, 116, 139, 0.1);
+    color: #64748b;
+}
+
+.scm-att-status-chip.marked {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.scm-att-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.75rem;
+    color: #10b981;
+    font-weight: 600;
+}
+
+.scm-att-pulse {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+    animation: scmPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes scmPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.4); }
+}
+
+.scm-att-actions {
+    display: flex;
+    align-items: center;
+}
+
+.scm-att-mark-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.9rem;
+    background: var(--brand-primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.scm-att-mark-btn:hover:not(:disabled) {
+    background: var(--brand-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.scm-att-marked-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.scm-att-closed-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    background: rgba(100, 116, 139, 0.08);
+    color: #64748b;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+/* Toast */
+.scm-att-toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 99999;
+    padding: 0.85rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    animation: scmSlideUp 0.3s ease;
+}
+.scm-toast-success { background: #10b981; color: white; }
+.scm-toast-error { background: #ef4444; color: white; }
+
+@keyframes scmSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Spinner */
 .scm-spinner {
     border: 3px solid rgba(0,0,0,0.1);
     border-top: 3px solid var(--brand-primary);
@@ -225,6 +424,16 @@
     width: 30px;
     height: 30px;
     margin-bottom: 1rem;
+}
+
+.scm-spinner-sm {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
 }
 
 .scm-loading {

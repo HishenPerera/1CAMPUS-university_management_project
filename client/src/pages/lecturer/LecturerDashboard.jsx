@@ -6,6 +6,7 @@ import LecturerCourses from "./LecturerCourses";
 import LecturerCourseMaterials from "./LecturerCourseMaterials";
 import AIAssessment from "./AIAssessment";
 import ManageQuizzes from "./ManageQuizzes";
+import ChatInterface from "../../components/chat/ChatInterface";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
     { id: "manage-quizzes", label: "Manage Quizzes", icon: "bi-journal-check" },
     { id: "timetable", label: "Timetable", icon: "bi-calendar3" },
     { id: "grades", label: "Grade Entry", icon: "bi-pencil-square" },
+    { id: "chat", label: "Messages", icon: "bi-chat-dots-fill" },
 ];
 
 function LecturerDashboard() {
@@ -92,6 +94,7 @@ function LecturerDashboard() {
                                             <div className="dash-card-sub">
                                                 {item.id === "manage-quizzes" ? "View results & export PDF" : 
                                                  item.id === "ai-assessment" ? "Generate assessments" : 
+                                                 item.id === "chat" ? "Chat with students and staff" :
                                                  "Manage your " + item.label.toLowerCase()}
                                             </div>
                                         </div>
@@ -104,7 +107,8 @@ function LecturerDashboard() {
                     {activeNav === "course-materials" && <LecturerCourseMaterials course={activeCourse} onBack={() => setActiveNav("courses")} />}
                     {activeNav === "ai-assessment" && <AIAssessment />}
                     {activeNav === "manage-quizzes" && <ManageQuizzes />}
-                    {activeNav !== "dashboard" && activeNav !== "courses" && activeNav !== "course-materials" && activeNav !== "ai-assessment" && activeNav !== "manage-quizzes" && (
+                    {activeNav === "chat" && <ChatInterface />}
+                    {activeNav !== "dashboard" && activeNav !== "courses" && activeNav !== "course-materials" && activeNav !== "ai-assessment" && activeNav !== "manage-quizzes" && activeNav !== "chat" && (
                         <div className="coming-soon">
                             <i className={`bi ${NAV_ITEMS.find(i => i.id === activeNav)?.icon || 'bi-cone-striped'} coming-soon-icon`} />
                             <h3>{NAV_ITEMS.find(i => i.id === activeNav)?.label || 'Under Construction'}</h3>

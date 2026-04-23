@@ -6,6 +6,7 @@ import StudentPortalAccess from "./StudentPortalAccess";
 import ApplicationManagement from "./ApplicationManagement";
 import LecturerManagement from "./LecturerManagement";
 import TicketManagement from "./TicketManagement";
+import AILetterGenerator from "./AILetterGenerator";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
@@ -16,6 +17,7 @@ const NAV_ITEMS = [
     { id: "students", label: "Student Portal Access", icon: "bi-people-fill" },
     { id: "lecturers", label: "Lecturer & Module Mgmt", icon: "bi-person-video3" },
     { id: "tickets", label: "Ticket Management", icon: "bi-ticket-perforated-fill" },
+    { id: "ai_letters", label: "AI Letter Generator", icon: "bi-magic" },
 ];
 
 function StdAdminDashboard() {
@@ -110,6 +112,13 @@ function StdAdminDashboard() {
                                         <div className="dash-card-sub">Handle student requests & issues</div>
                                     </div>
                                 </div>
+                                <div className="dash-card" onClick={() => setActiveNav("ai_letters")}>
+                                    <i className="bi bi-magic dash-card-icon" style={{ color: "#ec4899" }} />
+                                    <div>
+                                        <div className="dash-card-title">AI Letter Generator</div>
+                                        <div className="dash-card-sub">Draft official documents instantly</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -117,6 +126,7 @@ function StdAdminDashboard() {
                     {activeNav === "students" && <StudentPortalAccess />}
                     {activeNav === "lecturers" && <LecturerManagement />}
                     {activeNav === "tickets" && <TicketManagement />}
+                    {activeNav === "ai_letters" && <AILetterGenerator />}
                 </main>
             </div>
         </div>

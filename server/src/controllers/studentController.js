@@ -326,7 +326,7 @@ const getAvailableQuizzes = async (req, res) => {
         const params = [st.degree_program, st.studying_year, st.semester];
         let intakeFilter = '';
         if (st.intake) {
-            intakeFilter = ' AND m.intake = $4';
+            intakeFilter = ' AND m.intake = $5';  // $1=studentId, $2=degree, $3=year, $4=semester, $5=intake
             params.push(st.intake);
         }
 
@@ -479,6 +479,99 @@ const submitQuizAttempt = async (req, res) => {
     }
 };
 
+// GET /api/student/modules/:id/attendance — get attendance sessions for this module (for the student)
+const getStudentAttendanceSessions = async (req, res) => {
+    try {
+        const { id: moduleId } = req.params;
+        const { year } = req.query;
+        const studentId = req.user.id;
+
+        // Verify student is enrolled in this module
+        const userResult = await pool.query("SELECT email FROM users WHERE id = $1", [studentId]);
+        const email = userResult.rows[0]?.email;
+        const studentResult = await pool.query(
+            "SELECT degree_program, studying_year, semester, intake FROM students WHERE email = $1",
+            [email]
+        );
+        if (!studentResult.rows[0]) return res.status(404).json({ message: "Student record not found" });
+        const st = studentResult.rows[0];
+
+        const enrollParams = [moduleId, st.degree_program, st.studying_year, st.semester];
+        let intakeFilter = '';
+        if (st.intake) { intakeFilter = ' AND intake = $5'; enrollParams.push(st.intake); }
+        const moduleCheck = await pool.query(
+            `SELECT 1 FROM modules WHERE id = $1 AND degree_program = $2 AND studying_year = $3 AND semester = $4${intakeFilter}`,
+            enrollParams
+        );
+        if (moduleCheck.rowCount === 0) return res.status(403).json({ message: "Not enrolled in this module." });
+
+        let query = `
+            SELECT att.*,
+                   (SELECT COUNT(*) FROM attendance_records ar WHERE ar.session_id = att.id) AS total_present,
+                   (SELECT 1 FROM attendance_records ar WHERE ar.session_id = att.id AND ar.student_id = $2) AS my_record
+            FROM attendance_sessions att
+            WHERE att.module_id = $1
+        `;
+        const params = [moduleId, studentId];
+        if (year) { query += " AND att.year = $3"; params.push(year); }
+        query += " ORDER BY att.year DESC, att.month ASC, att.week_label ASC";
+
+        const result = await pool.query(query, params);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Error fetching student attendance sessions:", err);
+        res.status(500).json({ message: "Server error." });
+    }
+};
+
+// POST /api/student/attendance/:session_id/mark — mark own attendance
+const markAttendance = async (req, res) => {
+    try {
+        const { session_id } = req.params;
+        const studentId = req.user.id;
+
+        // Get session & verify it's open
+        const sessionResult = await pool.query(
+            "SELECT * FROM attendance_sessions WHERE id = $1",
+            [session_id]
+        );
+        if (sessionResult.rowCount === 0) return res.status(404).json({ message: "Attendance session not found." });
+        const session = sessionResult.rows[0];
+        if (!session.is_open) return res.status(400).json({ message: "This attendance session is closed." });
+
+        // Verify student is enrolled in the module
+        const userResult = await pool.query("SELECT email FROM users WHERE id = $1", [studentId]);
+        const email = userResult.rows[0]?.email;
+        const studentResult = await pool.query(
+            "SELECT degree_program, studying_year, semester, intake FROM students WHERE email = $1",
+            [email]
+        );
+        if (!studentResult.rows[0]) return res.status(404).json({ message: "Student record not found." });
+        const st = studentResult.rows[0];
+
+        const enrollParams = [session.module_id, st.degree_program, st.studying_year, st.semester];
+        let intakeFilter = '';
+        if (st.intake) { intakeFilter = ' AND intake = $5'; enrollParams.push(st.intake); }
+        const moduleCheck = await pool.query(
+            `SELECT 1 FROM modules WHERE id = $1 AND degree_program = $2 AND studying_year = $3 AND semester = $4${intakeFilter}`,
+            enrollParams
+        );
+        if (moduleCheck.rowCount === 0) return res.status(403).json({ message: "Not enrolled in this module." });
+
+        // Insert attendance (ON CONFLICT ignore duplicates)
+        await pool.query(`
+            INSERT INTO attendance_records (session_id, student_id)
+            VALUES ($1, $2)
+            ON CONFLICT (session_id, student_id) DO NOTHING
+        `, [session_id, studentId]);
+
+        res.json({ message: "Attendance marked successfully!" });
+    } catch (err) {
+        console.error("Error marking attendance:", err);
+        res.status(500).json({ message: "Server error marking attendance." });
+    }
+};
+
 module.exports = { 
     getMyProfile, 
     updateMyProfile, 
@@ -488,5 +581,7 @@ module.exports = {
     getAvailableQuizzes,
     getQuizQuestions,
     startQuizAttempt,
-    submitQuizAttempt
+    submitQuizAttempt,
+    getStudentAttendanceSessions,
+    markAttendance
 };

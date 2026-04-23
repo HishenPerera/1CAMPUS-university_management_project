@@ -8,6 +8,7 @@ const webAdminRoutes = require("./routes/webAdminRoutes");
 const publicRoutes = require("./routes/publicRoutes");
 const lecturerRoutes = require("./routes/lecturerRoutes");
 const ticketRoutes = require("./routes/ticketRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 
 const app = express();
 
@@ -24,5 +25,6 @@ app.use("/api/student", studentRoutes);
 app.use("/api/webadmin", webAdminRoutes);
 app.use("/api/lecturer", lecturerRoutes);
 app.use("/api/tickets", ticketRoutes);
+app.use("/api/chat", chatRoutes);
 
 module.exports = app;
