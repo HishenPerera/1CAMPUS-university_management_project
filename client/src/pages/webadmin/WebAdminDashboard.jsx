@@ -11,6 +11,7 @@ import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
 import MaintenancePage from './MaintenancePage';
+import SystemInsights from './SystemInsights';
 
 const NAV_ITEMS = [
     { id: "dashboard",   label: "Dashboard",           icon: "bi-grid-1x2-fill" },
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
     { id: "logs",        label: "Audit Logs",           icon: "bi-journal-text" },
     { id: "database",    label: "Database Management",  icon: "bi-database-fill-gear" },
     { id: "maintenance", label: "DB Maintenance",       icon: "bi-tools" },
+    { id: "insights",    label: "System Insights",      icon: "bi-graph-up-arrow" },
 ];
 
 function WebAdminDashboard() {
@@ -105,6 +107,7 @@ function WebAdminDashboard() {
                     {activeNav === "logs" && <AuditLogs />}
                     {activeNav === "database" && <DatabaseManagement />}
                     {activeNav === "maintenance" && <MaintenancePage />}
+                    {activeNav === "insights" && <SystemInsights />}
                 </main>
             </div>
         </div>
