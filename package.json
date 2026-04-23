@@ -1,0 +1,24 @@
+{
+  "name": "1campus-university_management_project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test:lecturer": "playwright test tests/api/lecturer.spec.js --project=chromium"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HishenPerera/1CAMPUS-university_management_project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HishenPerera/1CAMPUS-university_management_project/issues"
+  },
+  "homepage": "https://github.com/HishenPerera/1CAMPUS-university_management_project#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^25.6.0"
+  }
+}
