@@ -9,6 +9,7 @@ import StudentCourseMaterials from "./StudentCourseMaterials";
 import OnlineEbooks from "./OnlineEbooks";
 import StudentTickets from "./StudentTickets";
 import StudentQuizzes from "./StudentQuizzes";
+import CampusNotices from "./CampusNotices";
 import ChatInterface from "../../components/chat/ChatInterface";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
@@ -34,6 +35,7 @@ const NAV_GROUPS = [
         label: "Communication",
         items: [
             { id: "chat",    label: "Messages",        icon: "bi-chat-dots-fill" },
+            { id: "notices", label: "Campus Notices",  icon: "bi-megaphone-fill" },
             { id: "tickets", label: "Support Tickets", icon: "bi-ticket-detailed-fill" },
         ],
     },
@@ -170,6 +172,13 @@ function StudentDashboard() {
                                         <div className="dash-card-sub">Chat with lecturers and peers</div>
                                     </div>
                                 </div>
+                                <div className="dash-card" onClick={() => setActiveNav("notices")}>
+                                    <i className="bi bi-megaphone-fill dash-card-icon" style={{ color: "#8b5cf6" }} />
+                                    <div>
+                                        <div className="dash-card-title">Campus Notices</div>
+                                        <div className="dash-card-sub">Stay updated with latest news</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -179,6 +188,7 @@ function StudentDashboard() {
                     {activeNav === "tickets"  && <StudentTickets />}
                     {activeNav === "profile"  && <MyProfile />}
                     {activeNav === "course-materials" && <StudentCourseMaterials course={activeCourse} onBack={() => setActiveNav("modules")} />}
+                    {activeNav === "notices"  && <CampusNotices />}
                     {activeNav === "chat"     && <ChatInterface />}
                 </main>
             </div>

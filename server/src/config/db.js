@@ -88,6 +88,19 @@ const initDb = async () => {
         `);
 
         console.log("DB: attendance_sessions and attendance_records tables verified.");
+        
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS notices (
+                id SERIAL PRIMARY KEY,
+                title TEXT NOT NULL,
+                content TEXT NOT NULL,
+                lecturer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                file_path TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log("DB: notices table verified.");
     } catch (err) {
         console.error("DB Init Error:", err);
     }
