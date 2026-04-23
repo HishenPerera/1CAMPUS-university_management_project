@@ -5,6 +5,8 @@ import UserAvatar from "../../components/UserAvatar";
 import StudentPortalAccess from "./StudentPortalAccess";
 import ApplicationManagement from "./ApplicationManagement";
 import LecturerManagement from "./LecturerManagement";
+import TicketManagement from "./TicketManagement";
+import AILetterGenerator from "./AILetterGenerator";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
@@ -14,6 +16,8 @@ const NAV_ITEMS = [
     { id: "applications", label: "Student Applications", icon: "bi-envelope-paper-fill" },
     { id: "students", label: "Student Portal Access", icon: "bi-people-fill" },
     { id: "lecturers", label: "Lecturer & Module Mgmt", icon: "bi-person-video3" },
+    { id: "tickets", label: "Ticket Management", icon: "bi-ticket-perforated-fill" },
+    { id: "ai_letters", label: "AI Letter Generator", icon: "bi-magic" },
 ];
 
 function StdAdminDashboard() {
@@ -95,10 +99,24 @@ function StdAdminDashboard() {
                                     </div>
                                 </div>
                                 <div className="dash-card" onClick={() => setActiveNav("lecturers")}>
-                                    <i className="bi bi-person-video3 dash-card-icon" />
+                                    <i className="bi bi-person-video3 dash-card-icon" style={{ color: "#8b5cf6" }} />
                                     <div>
-                                        <div className="dash-card-title">Lecturer & Module Mgmt</div>
+                                        <div className="dash-card-title">Lecturer & Module Management</div>
                                         <div className="dash-card-sub">Assign subjects & lecturers</div>
+                                    </div>
+                                </div>
+                                <div className="dash-card" onClick={() => setActiveNav("tickets")}>
+                                    <i className="bi bi-ticket-perforated-fill dash-card-icon" style={{ color: "#ef4444" }} />
+                                    <div>
+                                        <div className="dash-card-title">Ticket Management</div>
+                                        <div className="dash-card-sub">Handle student requests & issues</div>
+                                    </div>
+                                </div>
+                                <div className="dash-card" onClick={() => setActiveNav("ai_letters")}>
+                                    <i className="bi bi-magic dash-card-icon" style={{ color: "#ec4899" }} />
+                                    <div>
+                                        <div className="dash-card-title">AI Letter Generator</div>
+                                        <div className="dash-card-sub">Draft official documents instantly</div>
                                     </div>
                                 </div>
                             </div>
@@ -107,6 +125,8 @@ function StdAdminDashboard() {
                     {activeNav === "applications" && <ApplicationManagement />}
                     {activeNav === "students" && <StudentPortalAccess />}
                     {activeNav === "lecturers" && <LecturerManagement />}
+                    {activeNav === "tickets" && <TicketManagement />}
+                    {activeNav === "ai_letters" && <AILetterGenerator />}
                 </main>
             </div>
         </div>

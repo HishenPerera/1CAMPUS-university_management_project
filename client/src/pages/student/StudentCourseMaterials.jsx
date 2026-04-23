@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import "./StudentCourseMaterials.css";
 
@@ -10,7 +10,7 @@ function getWeeksInMonth(year, monthIndex) {
     const weeks = [];
     let current = new Date(year, monthIndex, 1);
     let dayOfWeek = current.getDay();
-    let diff = current.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); 
+    let diff = current.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
     current = new Date(current.setDate(diff));
 
     while (true) {
@@ -36,10 +36,9 @@ function StudentCourseMaterials({ course, onBack }) {
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth();
 
-    // Determine which months are relevant for this course's intake
     const intake = course?.intake || null;
-    const janMonths = [0, 1, 2, 3, 4, 5];    // Jan–Jun
-    const julMonths = [6, 7, 8, 9, 10, 11];   // Jul–Dec
+    const janMonths = [0, 1, 2, 3, 4, 5];
+    const julMonths = [6, 7, 8, 9, 10, 11];
     const allowedMonths = intake === 'Jan-Jun' ? janMonths : intake === 'Jul-Dec' ? julMonths : null;
     const defaultMonth = intake === 'Jan-Jun' ? 0 : intake === 'Jul-Dec' ? 6 : currentMonth;
 
@@ -49,7 +48,17 @@ function StudentCourseMaterials({ course, onBack }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const fetchMaterials = async () => {
+    // Attendance state
+    const [attendanceSessions, setAttendanceSessions] = useState([]);
+    const [markingLoading, setMarkingLoading] = useState({});
+    const [toast, setToast] = useState({ msg: "", type: "" });
+
+    const showToast = (msg, type = "success") => {
+        setToast({ msg, type });
+        setTimeout(() => setToast({ msg: "", type: "" }), 3500);
+    };
+
+    const fetchMaterials = useCallback(async () => {
         if (!course) return;
         setLoading(true);
         setError("");
@@ -61,13 +70,40 @@ function StudentCourseMaterials({ course, onBack }) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [course, year]);
+
+    const fetchAttendanceSessions = useCallback(async () => {
+        if (!course) return;
+        try {
+            const res = await axiosInstance.get(`/student/modules/${course.id}/attendance?year=${year}`);
+            setAttendanceSessions(res.data);
+        } catch (err) {
+            console.error("Failed to fetch attendance sessions", err);
+        }
+    }, [course, year]);
 
     useEffect(() => {
         fetchMaterials();
-    }, [course, year]);
+        fetchAttendanceSessions();
+    }, [fetchMaterials, fetchAttendanceSessions]);
 
     const weeks = getWeeksInMonth(year, activeMonth);
+
+    const getSessionsForWeek = (weekLabel) =>
+        attendanceSessions.filter(s => s.month === activeMonth && s.week_label === weekLabel);
+
+    const handleMarkAttendance = async (session) => {
+        setMarkingLoading(prev => ({ ...prev, [session.id]: true }));
+        try {
+            const res = await axiosInstance.post(`/student/attendance/${session.id}/mark`);
+            showToast(res.data.message);
+            await fetchAttendanceSessions();
+        } catch (err) {
+            showToast(err.response?.data?.message || "Failed to mark attendance.", "error");
+        } finally {
+            setMarkingLoading(prev => ({ ...prev, [session.id]: false }));
+        }
+    };
 
     const getFileIcon = (fileUrl, fileType) => {
         if (fileType === "link") return "bi-link-45deg";
@@ -82,6 +118,12 @@ function StudentCourseMaterials({ course, onBack }) {
 
     return (
         <div className="scm-page">
+            {toast.msg && (
+                <div className={`scm-att-toast ${toast.type === 'error' ? 'scm-toast-error' : 'scm-toast-success'}`}>
+                    {toast.type === 'error' ? '❌' : '✅'} {toast.msg}
+                </div>
+            )}
+
             <div className="scm-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <button className="scm-back-btn" onClick={onBack}>
@@ -106,8 +148,8 @@ function StudentCourseMaterials({ course, onBack }) {
                 {SHORT_MONTHS.map((m, idx) => {
                     const isDisabled = allowedMonths && !allowedMonths.includes(idx);
                     return (
-                        <button 
-                            key={m} 
+                        <button
+                            key={m}
                             className={`scm-month-tab ${activeMonth === idx ? "scm-month-tab--active" : ""} ${isDisabled ? "scm-month-tab--disabled" : ""}`}
                             onClick={() => !isDisabled && setActiveMonth(idx)}
                             disabled={isDisabled}
@@ -127,34 +169,98 @@ function StudentCourseMaterials({ course, onBack }) {
                 <div className="scm-weeks-container">
                     {weeks.map(weekLabel => {
                         const weekMaterials = materials.filter(m => m.month === activeMonth && m.week_label === weekLabel);
-                        
+                        const weekSessions = getSessionsForWeek(weekLabel);
+
                         return (
                             <div key={weekLabel} className="scm-week-card">
                                 <div className="scm-week-header">
                                     <h4 className="scm-week-title"><i className="bi bi-calendar2-week" /> {weekLabel}</h4>
                                 </div>
                                 <div className="scm-week-body">
-                                    {weekMaterials.length === 0 ? (
-                                        <div className="scm-week-empty">No materials uploaded for this week yet.</div>
-                                    ) : (
-                                        <ul className="scm-materials-list">
-                                            {weekMaterials.map(mat => (
-                                                <li key={mat.id} className="scm-material-item">
-                                                    <div className="scm-material-info">
-                                                        <i className={`bi ${getFileIcon(mat.file_url, mat.file_type)} scm-material-icon`} />
-                                                        <a 
-                                                            href={mat.file_type === 'link' ? mat.file_url : `${SERVER_BASE}${mat.file_url}`} 
-                                                            target="_blank" 
-                                                            rel="noopener noreferrer"
-                                                            className="scm-material-link"
-                                                        >
-                                                            {mat.material_name || mat.file_name}
-                                                        </a>
-                                                    </div>
-                                                </li>
-                                            ))}
-                                        </ul>
+                                    {/* Attendance Sessions */}
+                                    {weekSessions.length > 0 && (
+                                        <div className="scm-att-section">
+                                            <div className="scm-att-section-label">
+                                                <i className="bi bi-person-check-fill" /> Attendance
+                                            </div>
+                                            <ul className="scm-att-list">
+                                                {weekSessions.map(session => {
+                                                    const alreadyMarked = !!session.my_record;
+                                                    const isMarking = !!markingLoading[session.id];
+
+                                                    return (
+                                                        <li key={session.id} className={`scm-att-item ${alreadyMarked ? 'scm-att-item--marked' : session.is_open ? 'scm-att-item--open' : 'scm-att-item--closed'}`}>
+                                                            <div className="scm-att-info">
+                                                                <div className="scm-att-title">{session.title}</div>
+                                                                <div className="scm-att-meta">
+                                                                    <span className={`scm-att-status-chip ${alreadyMarked ? 'marked' : session.is_open ? 'open' : 'closed'}`}>
+                                                                        {alreadyMarked ? 'Marked Present' : session.is_open ? 'Open' : 'Closed'}
+                                                                    </span>
+                                                                    {session.is_open && !alreadyMarked && (
+                                                                        <span className="scm-att-indicator">
+                                                                            <span className="scm-att-pulse" />
+                                                                            Mark your attendance now
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="scm-att-actions">
+                                                                {alreadyMarked ? (
+                                                                    <div className="scm-att-marked-badge">
+                                                                        <i className="bi bi-patch-check-fill" /> Present
+                                                                    </div>
+                                                                ) : session.is_open ? (
+                                                                    <button
+                                                                        className="scm-att-mark-btn"
+                                                                        onClick={() => handleMarkAttendance(session)}
+                                                                        disabled={isMarking}
+                                                                        id={`mark-attendance-${session.id}`}
+                                                                    >
+                                                                        {isMarking ? (
+                                                                            <><span className="scm-spinner-sm" /> Marking...</>
+                                                                        ) : (
+                                                                            <><i className="bi bi-hand-thumbs-up-fill" /> Mark Attendance</>
+                                                                        )}
+                                                                    </button>
+                                                                ) : (
+                                                                    <div className="scm-att-closed-badge">
+                                                                        <i className="bi bi-door-closed-fill" /> Closed
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </li>
+                                                    );
+                                                })}
+                                            </ul>
+                                        </div>
                                     )}
+
+                                    {/* materials list */}
+                                    {weekMaterials.length === 0 && weekSessions.length === 0 ? (
+                                        <div className="scm-week-empty">No contents for this week.</div>
+                                    ) : weekMaterials.length > 0 ? (
+                                        <div className="scm-materials-section">
+                                            {weekSessions.length > 0 && <div className="scm-att-section-label" style={{marginTop: '1rem'}}><i className="bi bi-folder2-open" /> Materials</div>}
+                                            <ul className="scm-materials-list">
+                                                {weekMaterials.map(mat => (
+                                                    <li key={mat.id} className="scm-material-item">
+                                                        <div className="scm-material-info">
+                                                            <i className={`bi ${getFileIcon(mat.file_url, mat.file_type)} scm-material-icon`} />
+                                                            <a
+                                                                href={mat.file_type === 'link' ? mat.file_url : `${SERVER_BASE}${mat.file_url}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="scm-material-link"
+                                                            >
+                                                                {mat.material_name || mat.file_name}
+                                                            </a>
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ) : null}
                                 </div>
                             </div>
                         );

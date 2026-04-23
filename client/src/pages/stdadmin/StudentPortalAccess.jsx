@@ -64,6 +64,7 @@ function StudentPortalAccess() {
     const [pwdLoading, setPwdLoading] = useState(false);
     const [form, setForm] = useState({
         first_name: "", last_name: "", email: "",
+        personal_email: "",
         registration_number: "", degree_program: DEGREES[0], studying_year: 1,
         semester: 1, nic_number: "", phone_number: "",
         address: "", enrolled_date: new Date().toISOString().split("T")[0],
@@ -112,7 +113,7 @@ function StudentPortalAccess() {
     // ── Add modal ────────────────────────────────────────────────────
     const openAddModal = async () => {
         setForm({
-            first_name: "", last_name: "", email: "", registration_number: "",
+            first_name: "", last_name: "", email: "", personal_email: "", registration_number: "",
             degree_program: DEGREES[0], studying_year: 1, semester: 1,
             nic_number: "", phone_number: "", address: "",
             enrolled_date: new Date().toISOString().split("T")[0],
@@ -396,8 +397,12 @@ function StudentPortalAccess() {
                                 <div className="form-group"><label>Last Name *</label><input name="last_name" value={form.last_name} onChange={handleFormChange} required placeholder="Johnson" /></div>
                             </div>
                             <div className="spa-form-row">
-                                <div className="form-group"><label>Email Address *</label><input name="email" type="email" value={form.email} onChange={handleFormChange} required placeholder="student@uni.edu" /></div>
+                                <div className="form-group"><label>Email Address * <span className="sm-label-hint">(portal login email)</span></label><input name="email" type="email" value={form.email} onChange={handleFormChange} required placeholder="cs26001@1campus.edu" /></div>
                                 <div className="form-group"><label>Registration No. *</label><input name="registration_number" value={form.registration_number} onChange={handleFormChange} required placeholder="CS/2024/001" /></div>
+                            </div>
+                            <div className="form-group">
+                                <label>Personal Email <span className="sm-label-hint">(student's contact email — enrollment details will be sent here)</span></label>
+                                <input name="personal_email" type="email" value={form.personal_email} onChange={handleFormChange} placeholder="student@gmail.com" />
                             </div>
                             <div className="form-group"><label>Degree Program *</label><select name="degree_program" value={form.degree_program} onChange={handleFormChange} required>{DEGREES.map(d => <option key={d} value={d}>{d}</option>)}</select></div>
                             <div className="spa-form-row">

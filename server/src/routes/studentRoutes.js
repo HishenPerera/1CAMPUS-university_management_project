@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const verifyToken = require("../middleware/authMiddleware");
-const { getMyProfile, updateMyProfile, getMyModules, getStudentModuleMaterials, aiAdvisor } = require("../controllers/studentController");
+const { getMyProfile, updateMyProfile, getMyModules, getStudentModuleMaterials, aiAdvisor, getAvailableQuizzes, getQuizQuestions, startQuizAttempt, submitQuizAttempt, getStudentAttendanceSessions, markAttendance } = require("../controllers/studentController");
 
 // Only accessible by the logged-in student (any authenticated user can call,
 // controller fetches data based on token id so no cross-user access possible)
@@ -12,5 +12,15 @@ router.put("/profile", updateMyProfile);
 router.get("/modules", getMyModules);
 router.get("/modules/:id/materials", getStudentModuleMaterials);
 router.post("/ai-advisor", aiAdvisor);
+
+// Quiz Routes
+router.get("/quizzes", getAvailableQuizzes);
+router.get("/quizzes/:id", getQuizQuestions);
+router.post("/quizzes/:id/start", startQuizAttempt);
+router.post("/quizzes/:id/submit", submitQuizAttempt);
+
+// Attendance Routes
+router.get("/modules/:id/attendance", getStudentAttendanceSessions);
+router.post("/attendance/:session_id/mark", markAttendance);
 
 module.exports = router;

@@ -128,10 +128,201 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
 }
 
 [data-theme="dark"] .lcm-week-header {
     background: rgba(255, 255, 255, 0.02);
+}
+
+.lcm-week-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* Attendance Management UI */
+.lcm-att-post-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.lcm-att-post-btn:hover {
+    background: #10b981;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.lcm-att-section {
+    margin-bottom: 1.5rem;
+    background: rgba(0, 0, 0, 0.01);
+    border-radius: 10px;
+    padding: 1rem;
+    border: 1px dashed var(--border);
+}
+
+[data-theme="dark"] .lcm-att-section {
+    background: rgba(255, 255, 255, 0.01);
+}
+
+.lcm-att-section-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.lcm-att-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.lcm-att-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.lcm-att-item--open {
+    border-left: 4px solid #10b981;
+}
+
+.lcm-att-item--closed {
+    border-left: 4px solid #ef4444;
+    opacity: 0.8;
+}
+
+.lcm-att-item-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.lcm-att-item-icon {
+    font-size: 1.2rem;
+}
+
+.lcm-att-item--open .lcm-att-item-icon { color: #10b981; }
+.lcm-att-item--closed .lcm-att-item-icon { color: #ef4444; }
+
+.lcm-att-item-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.lcm-att-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.15rem;
+}
+
+.lcm-att-status-chip {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+}
+
+.lcm-att-status-chip.open {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.lcm-att-status-chip.closed {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.lcm-att-count, .lcm-att-date {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.lcm-att-item-actions {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.lcm-att-action-btn {
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.2s;
+}
+
+.lcm-att-action-btn:hover {
+    background: var(--bg);
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+}
+
+.lcm-att-action-btn--delete:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.lcm-att-action-btn i {
+    font-size: 0.9rem;
+}
+
+/* Toast notification */
+.lcm-attendance-toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 99999;
+    padding: 0.85rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    animation: slideUp 0.3s ease;
+}
+.lcm-toast-success {
+    background: #10b981;
+    color: white;
+}
+.lcm-toast-error {
+    background: #ef4444;
+    color: white;
 }
 
 .lcm-week-title {
@@ -413,4 +604,97 @@
 @keyframes slideUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* Attendance Records Modal */
+.lcm-modal--wide {
+    max-width: 640px !important;
+}
+
+.lcm-att-status-badge {
+    display: inline-block;
+    margin-left: 0.75rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    vertical-align: middle;
+}
+.lcm-att-status-badge.open {
+    background: rgba(16,185,129,0.15);
+    color: #10b981;
+}
+.lcm-att-status-badge.closed {
+    background: rgba(239,68,68,0.12);
+    color: #ef4444;
+}
+
+.lcm-records-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 0;
+    color: var(--text-secondary);
+}
+
+.lcm-records-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 2rem 0;
+    color: var(--text-secondary);
+    font-size: 0.98rem;
+}
+.lcm-records-empty i {
+    font-size: 2rem;
+    opacity: 0.4;
+}
+
+.lcm-records-table-wrap {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+.lcm-records-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+.lcm-records-table th {
+    background: var(--bg);
+    color: var(--text-secondary);
+    font-weight: 700;
+    padding: 0.6rem 1rem;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.lcm-records-table td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+}
+.lcm-records-table tr:last-child td { border-bottom: none; }
+.lcm-records-table tr:hover td { background: var(--bg); }
+
+.lcm-reg-badge {
+    display: inline-block;
+    background: rgba(99,102,241,0.1);
+    color: var(--brand-primary);
+    border-radius: 4px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.lcm-records-total {
+    margin-top: 1rem;
+    text-align: right;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
 }

@@ -4,17 +4,39 @@ import ThemeToggle from "../../components/ThemeToggle";
 import UserAvatar from "../../components/UserAvatar";
 import MyProfile from "./MyProfile";
 import MyModules from "./MyModules";
-import AcademicAdvisor from "./AcademicAdvisor";
+import FloatingAdvisor from "./FloatingAdvisor";
 import StudentCourseMaterials from "./StudentCourseMaterials";
+import OnlineEbooks from "./OnlineEbooks";
+import StudentTickets from "./StudentTickets";
+import StudentQuizzes from "./StudentQuizzes";
+import ChatInterface from "../../components/chat/ChatInterface";
 import darkLogo from "../../assets/darkLogo.png";
 import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
 
-const NAV_ITEMS = [
-    { id: "dashboard", label: "Dashboard", icon: "bi-grid-1x2-fill" },
-    { id: "modules", label: "My Modules", icon: "bi-journal-bookmark-fill" },
-    { id: "advisor", label: "AI Advisor", icon: "bi-robot" },
-    { id: "profile", label: "My Profile", icon: "bi-person-circle" },
+const NAV_GROUPS = [
+    {
+        label: "Overview",
+        items: [
+            { id: "dashboard", label: "Dashboard",  icon: "bi-grid-1x2-fill" },
+            { id: "profile",   label: "My Profile", icon: "bi-person-circle" },
+        ],
+    },
+    {
+        label: "Academics",
+        items: [
+            { id: "modules",  label: "My Modules", icon: "bi-journal-bookmark-fill" },
+            { id: "quizzes",  label: "AI Quizzes", icon: "bi-cpu-fill" },
+            { id: "ebooks",   label: "E-Books",    icon: "bi-book-half" },
+        ],
+    },
+    {
+        label: "Communication",
+        items: [
+            { id: "chat",    label: "Messages",        icon: "bi-chat-dots-fill" },
+            { id: "tickets", label: "Support Tickets", icon: "bi-ticket-detailed-fill" },
+        ],
+    },
 ];
 
 function StudentDashboard() {
@@ -22,9 +44,10 @@ function StudentDashboard() {
     const logo = theme === "light" ? lightLogo : darkLogo;
     const userName = localStorage.getItem("user_name") || "";
     const [profileImage, setProfileImage] = useState(localStorage.getItem("profile_image") || "");
-    const [activeNav, setActiveNav] = useState("dashboard");
-    const [activeCourse, setActiveCourse] = useState(null);
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [activeNav,       setActiveNav]       = useState("dashboard");
+    const [activeCourse,    setActiveCourse]    = useState(null);
+    // false = expanded, true = collapsed (icon-only)
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
     const handleAvatarUpload = (url) => {
         setProfileImage(url);
@@ -37,33 +60,54 @@ function StudentDashboard() {
     };
 
     return (
-        <div className={`dash-layout ${sidebarOpen ? "" : "sidebar-closed"}`}>
+        <div className={`dash-layout ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+
+            {/* ── Sidebar ── */}
             <aside className="dash-sidebar">
+
+                {/* Logo */}
                 <div className="sidebar-logo-wrap">
                     <img src={logo} alt="1CAMPUS" className="sidebar-logo" />
                 </div>
+
+                {/* Nav groups */}
                 <nav className="sidebar-nav">
-                    {NAV_ITEMS.map(item => (
-                        <button
-                            key={item.id}
-                            className={`sidebar-nav-item ${activeNav === item.id ? "active" : ""}`}
-                            onClick={() => setActiveNav(item.id)}
-                        >
-                            <i className={`bi ${item.icon} nav-icon`} />
-                            <span className="nav-label">{item.label}</span>
-                        </button>
+                    {NAV_GROUPS.map(group => (
+                        <div key={group.label} className="sidebar-nav-group">
+                            <span className="sidebar-nav-group-label">{group.label}</span>
+                            {group.items.map(item => (
+                                <button
+                                    key={item.id}
+                                    className={`sidebar-nav-item ${activeNav === item.id ? "active" : ""}`}
+                                    onClick={() => setActiveNav(item.id)}
+                                    data-tooltip={item.label}
+                                >
+                                    <i className={`bi ${item.icon} nav-icon`} />
+                                    <span className="nav-label">{item.label}</span>
+                                </button>
+                            ))}
+                        </div>
                     ))}
                 </nav>
+
+                {/* Footer */}
                 <div className="sidebar-footer">
-                    <button className="sidebar-logout" onClick={handleLogout}>
-                        <i className="bi bi-box-arrow-left" /> Logout
+                    <button className="sidebar-logout" onClick={handleLogout} data-tooltip="Logout">
+                        <i className="bi bi-box-arrow-left" />
+                        <span>Logout</span>
                     </button>
                 </div>
             </aside>
 
+            {/* ── Main panel ── */}
             <div className="dash-main">
                 <header className="dash-topbar">
-                    <button className="sidebar-toggle" onClick={() => setSidebarOpen(o => !o)}>
+                    {/* Hamburger — on mobile this toggles sidebar open/closed */}
+                    <button
+                        className="sidebar-toggle"
+                        onClick={() => setSidebarCollapsed(c => !c)}
+                        title="Toggle sidebar"
+                    >
                         <i className="bi bi-list" />
                     </button>
                     <div className="topbar-right">
@@ -79,14 +123,23 @@ function StudentDashboard() {
                 <main className="dash-content">
                     {activeNav === "dashboard" && (
                         <div className="dash-home">
-                            <h1 className="dash-greeting">Welcome{userName ? `, ${userName.split(" ")[0]}` : ""} <i className="bi bi-hand-wave-fill" /></h1>
+                            <h1 className="dash-greeting">
+                                Welcome{userName ? `, ${userName.split(" ")[0]}` : ""} <i className="bi bi-hand-wave-fill" />
+                            </h1>
                             <p className="dash-desc">Your student portal is ready. Use the sidebar to navigate.</p>
                             <div className="dash-cards">
-                                <div className="dash-card" onClick={() => setActiveNav("advisor")}>
-                                    <i className="bi bi-robot dash-card-icon" style={{ color: "#818cf8" }} />
+                                <div className="dash-card" onClick={() => setActiveNav("profile")}>
+                                    <i className="bi bi-person-circle dash-card-icon" />
                                     <div>
-                                        <div className="dash-card-title">AI Advisor</div>
-                                        <div className="dash-card-sub">Get personalised academic guidance</div>
+                                        <div className="dash-card-title">My Profile</div>
+                                        <div className="dash-card-sub">View and update your details</div>
+                                    </div>
+                                </div>
+                                <div className="dash-card" onClick={() => setActiveNav("quizzes")}>
+                                    <i className="bi bi-cpu-fill dash-card-icon" style={{ color: "#10b981" }} />
+                                    <div>
+                                        <div className="dash-card-title">AI Quizzes</div>
+                                        <div className="dash-card-sub">Test your knowledge with AI</div>
                                     </div>
                                 </div>
                                 <div className="dash-card" onClick={() => setActiveNav("modules")}>
@@ -96,22 +149,41 @@ function StudentDashboard() {
                                         <div className="dash-card-sub">View your enrolled modules</div>
                                     </div>
                                 </div>
-                                <div className="dash-card" onClick={() => setActiveNav("profile")}>
-                                    <i className="bi bi-person-circle dash-card-icon" />
+                                <div className="dash-card" onClick={() => setActiveNav("ebooks")}>
+                                    <i className="bi bi-book-half dash-card-icon" style={{ color: "#f59e0b" }} />
                                     <div>
-                                        <div className="dash-card-title">My Profile</div>
-                                        <div className="dash-card-sub">View and update your details</div>
+                                        <div className="dash-card-title">E-Books</div>
+                                        <div className="dash-card-sub">Search and read online e-books</div>
+                                    </div>
+                                </div>
+                                <div className="dash-card" onClick={() => setActiveNav("tickets")}>
+                                    <i className="bi bi-ticket-detailed-fill dash-card-icon" style={{ color: "#ec4899" }} />
+                                    <div>
+                                        <div className="dash-card-title">Support Tickets</div>
+                                        <div className="dash-card-sub">Request certificates or report issues</div>
+                                    </div>
+                                </div>
+                                <div className="dash-card" onClick={() => setActiveNav("chat")}>
+                                    <i className="bi bi-chat-dots-fill dash-card-icon" style={{ color: "#3b82f6" }} />
+                                    <div>
+                                        <div className="dash-card-title">Messages</div>
+                                        <div className="dash-card-sub">Chat with lecturers and peers</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     )}
-                    {activeNav === "modules" && <MyModules onNavigate={(nav, course) => { setActiveNav(nav); setActiveCourse(course); }} />}
-                    {activeNav === "advisor" && <AcademicAdvisor />}
-                    {activeNav === "profile" && <MyProfile />}
+                    {activeNav === "modules"  && <MyModules onNavigate={(nav, course) => { setActiveNav(nav); setActiveCourse(course); }} />}
+                    {activeNav === "quizzes"  && <StudentQuizzes />}
+                    {activeNav === "ebooks"   && <OnlineEbooks />}
+                    {activeNav === "tickets"  && <StudentTickets />}
+                    {activeNav === "profile"  && <MyProfile />}
                     {activeNav === "course-materials" && <StudentCourseMaterials course={activeCourse} onBack={() => setActiveNav("modules")} />}
+                    {activeNav === "chat"     && <ChatInterface />}
                 </main>
             </div>
+
+            <FloatingAdvisor />
         </div>
     );
 }
