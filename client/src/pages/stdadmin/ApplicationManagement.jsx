@@ -24,6 +24,7 @@ function ApplicationManagement() {
         address: "", degree_program: "", studying_year: 1, semester: 1, intake: "Jan-Jun"
     });
 
+    // Load applicant data into the approval form when admin opens the enrollment modal
     const openApproveModal = (app) => {
         setApproveForm({
             first_name: app.first_name || "",
@@ -39,6 +40,7 @@ function ApplicationManagement() {
         setSelectedApp(app);
     };
 
+    // Fetch all student applications from the backend including applicant details (name, email, NIC, degree, etc.)
     const fetchApplications = async () => {
         setLoading(true);
         try {
@@ -49,9 +51,11 @@ function ApplicationManagement() {
         } finally { setLoading(false); }
     };
 
+    // Fetch all applications when the component mounts on initial load
     useEffect(() => { fetchApplications(); }, []);
 
-    // ── Filtering & Pagination ────────────────────────────────────────────────
+    // Filter applications by status and search terms (applicant name, email, NIC, degree program)
+    // Returns a filtered list that respects both the status filter and text search across student data fields
     const filtered = useMemo(() => {
         let result = applications;
 
@@ -79,7 +83,8 @@ function ApplicationManagement() {
     const handleSearch = (e) => { setSearch(e.target.value); setPage(1); };
     const handleFilter = (e) => { setStatusFilter(e.target.value); setPage(1); };
 
-    // ── Action Handlers ───────────────────────────────────────────────────────
+    // Accept a pending application and transition it to 'accepted' status
+    // This is the first step before approval; it allows the admin to review before creating portal account
     const handleAccept = async (id) => {
         setProcessingId(id); setError("");
         try {
@@ -90,6 +95,9 @@ function ApplicationManagement() {
         } finally { setProcessingId(null); }
     };
 
+    // Final approval step: create the portal account with auto-generated credentials
+    // Backend generates registration number, portal email, and temporary password
+    // Display credentials to admin in a success modal; student receives email with login info
     const handleApproveSubmit = async (e) => {
         e.preventDefault();
         setProcessingId(selectedApp.id); setError("");
@@ -106,6 +114,8 @@ function ApplicationManagement() {
         } finally { setProcessingId(null); }
     };
 
+    // Reject a pending application with confirmation step
+    // Logs the rejection and updates the application status in the database
     const handleReject = async (id) => {
         if (!window.confirm("Are you sure you want to reject this application?")) return;
         setProcessingId(id); setError("");
@@ -292,7 +302,8 @@ function ApplicationManagement() {
                 </>
             )}
 
-            {/* Password Generated Modal — rendered at body level via portal */}
+            {/* Success/Credentials Modal — displayed after approval to show auto-generated portal access
+                 Contains registration number, portal email, and temporary password for the student */}
             {showPasswordModal && createPortal(
                 <div className="am-modal-backdrop" onClick={() => setShowPasswordModal(false)}>
                     <div className="am-modal" onClick={e => e.stopPropagation()}>
@@ -324,7 +335,8 @@ function ApplicationManagement() {
                 document.body
             )}
 
-            {/* Approve Form Modal — rendered at body level via portal */}
+            {/* Enrollment Form Modal — collects admin confirmation of student details and enrollment parameters
+                 Admin fills in studying year, semester, and intake period before account creation */}
             {selectedApp && createPortal(
                 <div className="popup-overlay" onClick={() => setSelectedApp(null)}>
                     <div className="popup-window" onClick={e => e.stopPropagation()}>
