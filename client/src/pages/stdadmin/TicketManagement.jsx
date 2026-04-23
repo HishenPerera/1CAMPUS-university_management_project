@@ -2,13 +2,20 @@ import { useState, useEffect } from "react";
 import "./TicketManagement.css";
 
 const TicketManagement = () => {
+    // State to store the list of all tickets fetched from the API
     const [tickets, setTickets] = useState([]);
+    // State to manage loading indicator while fetching tickets
     const [loading, setLoading] = useState(true);
+    // State to track the currently selected ticket for the update modal
     const [selectedTicket, setSelectedTicket] = useState(null);
+    // State to hold the new status value for ticket updates
     const [updateStatus, setUpdateStatus] = useState("");
+    // State to hold the admin comment for ticket updates
     const [adminComment, setAdminComment] = useState("");
+    // State to manage the current filter selection for ticket status
     const [filter, setFilter] = useState("All");
 
+    // Function to fetch all tickets from the admin API endpoint and update local state
     const fetchAllTickets = async () => {
         try {
             const token = localStorage.getItem("token");
@@ -24,10 +31,12 @@ const TicketManagement = () => {
         }
     };
 
+    // Effect to fetch initial ticket data when the component mounts
     useEffect(() => {
         fetchAllTickets();
     }, []);
 
+    // Function to handle ticket status updates via API call and refresh the ticket list
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
@@ -53,6 +62,7 @@ const TicketManagement = () => {
         }
     };
 
+    // Logic to filter tickets based on the selected status filter; shows all if "All" is selected
     const filteredTickets = filter === "All" 
         ? tickets 
         : tickets.filter(t => t.status === filter);
@@ -83,6 +93,7 @@ const TicketManagement = () => {
                 </div>
             </div>
 
+            // Show loading spinner while tickets are being fetched from the API
             {loading ? (
                 <p>Loading tickets...</p>
             ) : (
@@ -99,6 +110,7 @@ const TicketManagement = () => {
                             </tr>
                         </thead>
                         <tbody>
+                            // Render table rows for each filtered ticket after loading completes
                             {filteredTickets.map(ticket => (
                                 <tr key={ticket.id}>
                                     <td>{new Date(ticket.created_at).toLocaleDateString()}</td>
@@ -131,6 +143,7 @@ const TicketManagement = () => {
                 </div>
             )}
 
+            // Render update modal only when a ticket is selected for management
             {selectedTicket && (
                 <div className="modal-overlay">
                     <div className="modal-content">
