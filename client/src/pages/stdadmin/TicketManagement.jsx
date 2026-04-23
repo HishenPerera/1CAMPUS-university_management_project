@@ -93,7 +93,6 @@ const TicketManagement = () => {
                 </div>
             </div>
 
-            // Show loading spinner while tickets are being fetched from the API
             {loading ? (
                 <p>Loading tickets...</p>
             ) : (
@@ -110,7 +109,6 @@ const TicketManagement = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            // Render table rows for each filtered ticket after loading completes
                             {filteredTickets.map(ticket => (
                                 <tr key={ticket.id}>
                                     <td>{new Date(ticket.created_at).toLocaleDateString()}</td>
@@ -143,7 +141,6 @@ const TicketManagement = () => {
                 </div>
             )}
 
-            // Render update modal only when a ticket is selected for management
             {selectedTicket && (
                 <div className="modal-overlay">
                     <div className="modal-content">
