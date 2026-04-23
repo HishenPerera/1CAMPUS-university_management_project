@@ -380,6 +380,8 @@ module.exports = {
     deleteWebAdmin,
     createBackup,
     getBackups,
+    downloadBackup,
+    deleteBackup,
     listTables,
     getTableData,
     deleteTableRow,

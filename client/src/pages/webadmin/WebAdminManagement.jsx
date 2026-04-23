@@ -153,8 +153,8 @@ function WebAdminManagement() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                         Show:
-                        <select 
-                            value={pageSize} 
+                        <select
+                            value={pageSize}
                             onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
                             style={{ padding: '0.25rem 0.5rem', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-primary)', outline: 'none', cursor: 'pointer' }}
                         >
@@ -294,7 +294,7 @@ function WebAdminManagement() {
                         </form>
                     </div>
                 </div>
-            , document.body)}
+                , document.body)}
 
             {/* Delete Confirmation */}
             {deleteId && createPortal(
@@ -307,7 +307,7 @@ function WebAdminManagement() {
                         <p className="sm-confirm-text">
                             Are you sure you want to permanently delete this web administrator's account? They will lose all access to the system.
                         </p>
-                        {deleteError && <div className="sm-error sm-error--add" style={{margin: '0 2rem'}}>{deleteError}</div>}
+                        {deleteError && <div className="sm-error sm-error--add" style={{ margin: '0 2rem' }}>{deleteError}</div>}
                         <div className="sm-modal-actions">
                             <button className="sm-cancel-btn" onClick={() => setDeleteId(null)}>Cancel</button>
                             <button className="sm-delete-btn" onClick={() => handleDelete(deleteId)} disabled={deleting}>
@@ -316,7 +316,7 @@ function WebAdminManagement() {
                         </div>
                     </div>
                 </div>
-            , document.body)}
+                , document.body)}
         </div>
     );
 }
