@@ -20,6 +20,13 @@ const generateSingleTempPassword = () => {
     return Array.from({ length: 10 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
 };
 
+/**
+ * Retrieve the list of all student profiles.
+ *
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>} JSON array of student profiles or error response.
+ */
 // GET /api/admin/students
 const listStudents = async (req, res) => {
     try {
@@ -31,6 +38,13 @@ const listStudents = async (req, res) => {
     }
 };
 
+/**
+ * Generate a set of temporary passwords for admin use.
+ *
+ * @param {object} _req - Express request object (unused).
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>} JSON object containing generated temporary passwords.
+ */
 // GET /api/admin/temp-passwords
 const getTempPasswords = async (_req, res) => {
     try {
@@ -40,6 +54,15 @@ const getTempPasswords = async (_req, res) => {
     }
 };
 
+/**
+ * Retrieve details for a single student by ID.
+ *
+ * @param {object} req - Express request object.
+ * @param {object} req.params - Route parameters.
+ * @param {string} req.params.id - Student identifier.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>} JSON student record or error response.
+ */
 // GET /api/admin/students/:id
 const getStudentDetail = async (req, res) => {
     try {
@@ -52,6 +75,31 @@ const getStudentDetail = async (req, res) => {
     }
 };
 
+/**
+ * Create a new student portal user and student profile.
+ *
+ * This endpoint creates both a user account for portal login and a
+ * student record, logs the creation event, and optionally sends a welcome email.
+ *
+ * @param {object} req - Express request object.
+ * @param {object} req.body - Request payload.
+ * @param {string} req.body.first_name - Student first name.
+ * @param {string} req.body.last_name - Student last name.
+ * @param {string} req.body.email - Portal email address.
+ * @param {string} [req.body.personal_email] - Personal email for enrollment notifications.
+ * @param {string} req.body.registration_number - Student registration number.
+ * @param {string} req.body.degree_program - Degree program name.
+ * @param {number} req.body.studying_year - Student year of study.
+ * @param {number} req.body.semester - Current semester.
+ * @param {string} req.body.chosen_password - Initial password for portal login.
+ * @param {string} [req.body.nic_number] - Student NIC number.
+ * @param {string} [req.body.phone_number] - Contact phone number.
+ * @param {string} [req.body.address] - Postal address.
+ * @param {string} [req.body.enrolled_date] - Enrollment date.
+ * @param {string} [req.body.intake] - Academic intake period.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>} JSON response with created student and email status.
+ */
 // POST /api/admin/students
 // Creates both a users entry (portal login) AND a students record
 const addStudent = async (req, res) => {
@@ -120,6 +168,16 @@ const addStudent = async (req, res) => {
     }
 };
 
+/**
+ * Update an existing student record with provided details.
+ *
+ * @param {object} req - Express request object.
+ * @param {object} req.params - Route parameters.
+ * @param {string} req.params.id - Student identifier.
+ * @param {object} req.body - Fields to update on the student record.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>} JSON response with updated student or error response.
+ */
 // PUT /api/admin/students/:id
 const editStudent = async (req, res) => {
     try {
@@ -132,6 +190,15 @@ const editStudent = async (req, res) => {
     }
 };
 
+/**
+ * Delete a full student record from the system.
+ *
+ * @param {object} req - Express request object.
+ * @param {object} req.params - Route parameters.
+ * @param {string} req.params.id - Student identifier.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>} JSON confirmation or error response.
+ */
 // DELETE /api/admin/students/:id
 const removeStudent = async (req, res) => {
     try {
@@ -146,6 +213,13 @@ const removeStudent = async (req, res) => {
 
 /* ── Applications Pipeline ─────────────────────────────────────────────── */
 
+/**
+ * Retrieve all student applications and include approver names.
+ *
+ * @param {object} req - Express request object.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>} JSON array of applications or error response.
+ */
 const getApplications = async (req, res) => {
     try {
         const result = await pool.query(`
@@ -161,6 +235,17 @@ const getApplications = async (req, res) => {
     }
 };
 
+/**
+ * Mark a pending student application as accepted.
+ *
+ * @param {object} req - Express request object.
+ * @param {object} req.user - Authenticated user object.
+ * @param {string} req.user.id - ID of the approving admin.
+ * @param {object} req.params - Route parameters.
+ * @param {string} req.params.id - Application identifier.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>} JSON confirmation or error response.
+ */
 const acceptApplication = async (req, res) => {
     try {
         const result = await pool.query(
@@ -177,6 +262,28 @@ const acceptApplication = async (req, res) => {
     }
 };
 
+/**
+ * Approve an accepted student application by creating portal credentials and
+ * a student record, then finalizing enrollment.
+ *
+ * @param {object} req - Express request object.
+ * @param {object} req.user - Authenticated user object.
+ * @param {string} req.user.id - ID of the approving admin.
+ * @param {object} req.params - Route parameters.
+ * @param {string} req.params.id - Application identifier.
+ * @param {object} req.body - Request payload containing student details.
+ * @param {string} req.body.first_name - Student first name.
+ * @param {string} req.body.last_name - Student last name.
+ * @param {string} req.body.degree_program - Degree program name.
+ * @param {number} req.body.studying_year - Year of study.
+ * @param {number} req.body.semester - Current semester.
+ * @param {string} [req.body.nic_number] - Student NIC number.
+ * @param {string} [req.body.phone_number] - Contact phone number.
+ * @param {string} [req.body.address] - Postal address.
+ * @param {string} [req.body.intake] - Academic intake period.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>} JSON enrollment details or error response.
+ */
 const approveApplication = async (req, res) => {
     const { id } = req.params;
     const { first_name, last_name, nic_number, phone_number, address, degree_program, studying_year, semester, intake } = req.body;
@@ -226,13 +333,14 @@ const approveApplication = async (req, res) => {
         const regNumber = `${prefixYear}${String(nextNum).padStart(4, '0')}`;
         const portalEmail = `${regNumber.toLowerCase()}@1campus.edu`;
 
-        // 3. Begin transaction
+        // Begin database transaction to ensure application approval and student creation succeed together.
+        // If any step fails, the transaction is rolled back to keep data consistent.
         await pool.query("BEGIN");
 
-        // - Update application status
+        // - Update application status to enrolled
         await pool.query("UPDATE student_applications SET status = 'enrolled' WHERE id = $1", [id]);
 
-        // - Create User record
+        // - Create User record for portal login with temporary credentials
         const newUserQuery = await pool.query(
             "INSERT INTO users (full_name, email, password, role, is_temp_password) VALUES ($1, $2, $3, 'student', true) RETURNING id",
             [`${first_name} ${last_name}`, portalEmail, hashedPassword]
@@ -253,6 +361,7 @@ const approveApplication = async (req, res) => {
 
         await logActivity(req.user.id, "APPROVE_APPLICATION", `Created student portal account for ${portalEmail} (${regNumber})`);
 
+        // Commit the transaction now that both the application update and student creation have succeeded.
         await pool.query("COMMIT");
 
         // Send enrollment email to the student's personal application email
@@ -291,6 +400,15 @@ const approveApplication = async (req, res) => {
     }
 };
 
+/**
+ * Reject a pending student application.
+ *
+ * @param {object} req - Express request object.
+ * @param {object} req.params - Route parameters.
+ * @param {string} req.params.id - Application identifier.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>} JSON confirmation or error response.
+ */
 const rejectApplication = async (req, res) => {
     try {
         const result = await pool.query(
@@ -407,6 +525,17 @@ const removeModuleAssignment = async (req, res) => {
     }
 };
 
+/**
+ * Generate an official university letter using the Groq AI completion API.
+ *
+ * @param {object} req - Express request object.
+ * @param {object} req.body - Request payload.
+ * @param {string} [req.body.studentId] - Optional student identifier to include student details.
+ * @param {string} req.body.letterType - Type of letter to generate (e.g. acceptance, confirmation).
+ * @param {string} [req.body.context] - Additional context or reason for the letter.
+ * @param {object} res - Express response object.
+ * @returns {Promise<void>} JSON object containing the generated letter or error response.
+ */
 const generateLetter = async (req, res) => {
     try {
         const { studentId, letterType, context } = req.body;
@@ -423,10 +552,14 @@ const generateLetter = async (req, res) => {
             }
         }
 
+        // Build a formal AI prompt that instructs the model to generate a fully formed letter.
+        // Includes optional student details, letter type, and any supplemental context.
         const systemPrompt = `You are a highly professional university administrator at 1CAMPUS University. Your task is to generate official university letters based on the provided details. Use formal, professional, and empathetic tone when required. Format the response clearly with paragraphs. Do not use placeholders that the user must fill; invent reasonable generic details or rely entirely on the provided context. Ensure the letter is ready to be printed or emailed immediately. Sign the letter as '1CAMPUS Administration'.`;
         
         const prompt = `Generate a ${letterType} letter. \n${studentInfo}\nAdditional Context/Reason: ${context || 'None'}\n\nPlease generate the full official letter.`;
         
+        // Call the Groq chat completions endpoint with the assembled prompt.
+        // The response should contain the generated letter text in the first completion choice.
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
