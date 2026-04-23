@@ -3,26 +3,26 @@ import { test, expect } from '@playwright/test';
 test.describe('Web Admin Module Tests', () => {
   const baseURL = 'http://localhost:5173';
 
-  // Hama test ekakatama kalin login wenna
+  // login test
   test.beforeEach(async ({ page }) => {
     await page.goto(`${baseURL}/login`);
 
-    // Oyaage Login.jsx eke thiyena placeholders use kirima
+    // test Login.jsx 
     await page.fill('input#email', 'kushmi.j@1campus.edu');
     await page.fill('input#password', 'Kushmi@123');
 
-    // Login button eka click kirima
+    // Login button test
     await page.click('button:has-text("Sign In")');
 
-    // Dashboard ekata yana thuru bala sitima
+    // Dashboard navigation test
     await expect(page).toHaveURL(new RegExp(`${baseURL}/webadmin`), { timeout: 15000 });
   });
 
   test('should check UI consistency for headings', async ({ page }) => {
-    // Staff Management page ekata yama
+    // Staff Management page navigation test
     await page.click('button:has-text("Manage Staff")');
 
-    // Assignment Requirement: Capitalization of labels check [cite: 23]
+    // Assignment Requirement: Capitalization of labels check 
     const heading = page.locator('h2');
     await expect(heading).toContainText('Staff Management');
   });
@@ -30,11 +30,11 @@ test.describe('Web Admin Module Tests', () => {
   test('should successfully open the Add Staff modal', async ({ page }) => {
     await page.click('button:has-text("Manage Staff")');
 
-    // "Add Staff Member" button eka click kirima
+    // "Add Staff Member" button test
     const addBtn = page.locator('button:has-text("Add Staff Member")');
     await addBtn.click();
 
-    // Modal eka open una bawa verify kirima
+    // Modal eka open test
     await expect(page.locator('text=Add New Staff Member')).toBeVisible();
   });
 
@@ -42,7 +42,7 @@ test.describe('Web Admin Module Tests', () => {
     await page.click('button:has-text("Manage Staff")');
     await page.click('button:has-text("Add Staff Member")');
 
-    // Empty fields ekka submit kirima [cite: 15, 22]
+    // Empty fields ekka submit test
     await page.click('button:has-text("Create Staff Account")');
 
     // Browser validation check
@@ -53,7 +53,7 @@ test.describe('Web Admin Module Tests', () => {
 
   test('should successfully navigate to Audit Logs', async ({ page }) => {
     await page.click('button:has-text("Audit Logs")');
-    // Audit logs component h2 eka check kirima
+    // Audit logs component test
     await expect(page.locator('h2')).toContainText('Audit Logs');
   });
 
