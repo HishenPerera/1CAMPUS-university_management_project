@@ -13,6 +13,22 @@ const pool = new Pool({
 
 const initDb = async () => {
     try {
+        // Create users table first (other tables depend on it)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                full_name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                role VARCHAR(50) NOT NULL DEFAULT 'student',
+                profile_image TEXT,
+                is_temp_password BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log("DB: users table verified.");
+
         await pool.query(`
             CREATE TABLE IF NOT EXISTS chat_messages (
                 id SERIAL PRIMARY KEY,
@@ -43,6 +59,17 @@ const initDb = async () => {
         `);
 
         console.log("DB: chat_messages table verified, including replies and edit support.");
+
+        // Create modules table (needed for attendance_sessions)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS modules (
+                id SERIAL PRIMARY KEY,
+                code VARCHAR(50) UNIQUE NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log("DB: modules table verified.");
 
         // Attendance system tables
         await pool.query(`
@@ -89,6 +116,13 @@ const initDb = async () => {
 
         console.log("DB: attendance_sessions and attendance_records tables verified.");
         
+        // Drop old notices table if it exists with wrong schema
+        try {
+            await pool.query(`DROP TABLE IF EXISTS notices CASCADE;`);
+        } catch (dropErr) {
+            console.warn("Could not drop notices table:", dropErr.message);
+        }
+
         await pool.query(`
             CREATE TABLE IF NOT EXISTS notices (
                 id SERIAL PRIMARY KEY,
