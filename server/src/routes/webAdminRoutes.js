@@ -51,6 +51,9 @@ router.get('/db/tables', listTables);
 router.get('/db/tables/:table', getTableData);
 router.delete('/db/tables/:table/:id', deleteTableRow);
 
+// System Insights Route
+router.get('/system-insights', webAdminController.getSystemInsights);
+
 // Email Test Route — POST /api/webadmin/test-email  { "to": "test@example.com" }
 router.post('/test-email', async (req, res) => {
     const { sendEnrollmentEmail } = require('../utils/emailService');
