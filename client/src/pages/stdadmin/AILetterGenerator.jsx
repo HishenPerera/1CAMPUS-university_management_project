@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import axios from "../../api/axiosInstance";
 import "./AILetterGenerator.css";
 
+// Predefined categories for letter types that guide the AI prompt generation
 const LETTER_TYPES = [
     "Certificate of Enrollment",
     "Recommendation Letter",
@@ -25,6 +26,7 @@ function AILetterGenerator() {
     const [error, setError] = useState("");
     const [copied, setCopied] = useState(false);
 
+    // Fetch student profiles from the backend to populate the selection dropdown
     useEffect(() => {
         const fetchStudents = async () => {
             try {
@@ -49,6 +51,7 @@ function AILetterGenerator() {
         );
     }, [students, searchStudent]);
 
+    // Send letter parameters to the backend AI controller and manage loading state during generation
     const handleGenerate = async (e) => {
         e.preventDefault();
         setError("");
@@ -70,12 +73,14 @@ function AILetterGenerator() {
         }
     };
 
+    // Copy the generated letter text to the user's clipboard for easy sharing
     const handleCopy = () => {
         navigator.clipboard.writeText(generatedLetter);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
 
+    // Format the AI-generated letter into an official university letterhead and open print dialog
     const handlePrint = () => {
         const printWindow = window.open('', '', 'height=800,width=800');
         printWindow.document.write('<html><head><title>Print Letter</title>');
