@@ -1,14 +1,10 @@
 import { useState } from "react";
-import { useTheme } from "../../context/ThemeContext";
-import ThemeToggle from "../../components/ThemeToggle";
-import UserAvatar from "../../components/UserAvatar";
+import DashboardHeader from "../../components/DashboardHeader";
 import LecturerCourses from "./LecturerCourses";
 import LecturerCourseMaterials from "./LecturerCourseMaterials";
 import AIAssessment from "./AIAssessment";
 import ManageQuizzes from "./ManageQuizzes";
 import ChatInterface from "../../components/chat/ChatInterface";
-import darkLogo from "../../assets/darkLogo.png";
-import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
 
 const NAV_ITEMS = [
@@ -22,8 +18,6 @@ const NAV_ITEMS = [
 ];
 
 function LecturerDashboard() {
-    const { theme } = useTheme();
-    const logo = theme === "light" ? lightLogo : darkLogo;
     const userName = localStorage.getItem("user_name") || "";
     const [profileImage, setProfileImage] = useState(localStorage.getItem("profile_image") || "");
     const [activeNav, setActiveNav] = useState("dashboard");
@@ -43,9 +37,6 @@ function LecturerDashboard() {
     return (
         <div className={`dash-layout ${sidebarOpen ? "" : "sidebar-closed"}`}>
             <aside className="dash-sidebar">
-                <div className="sidebar-logo-wrap">
-                    <img src={logo} alt="1CAMPUS" className="sidebar-logo" />
-                </div>
                 <nav className="sidebar-nav">
                     {NAV_ITEMS.map(item => (
                         <button
@@ -66,19 +57,14 @@ function LecturerDashboard() {
             </aside>
 
             <div className="dash-main">
-                <header className="dash-topbar">
-                    <button className="sidebar-toggle" onClick={() => setSidebarOpen(o => !o)}>
-                        <i className="bi bi-list" />
-                    </button>
-                    <div className="topbar-right">
-                        <ThemeToggle />
-                        <UserAvatar name={userName} imageUrl={profileImage || undefined} onUpload={handleAvatarUpload} />
-                        <div className="topbar-user">
-                            <span className="topbar-name">{userName || "Lecturer"}</span>
-                            <span className="topbar-role">Lecturer</span>
-                        </div>
-                    </div>
-                </header>
+                <DashboardHeader 
+                    sidebarCollapsed={!sidebarOpen}
+                    setSidebarCollapsed={(collapsed) => setSidebarOpen(!collapsed)}
+                    userName={userName}
+                    userRole="Lecturer"
+                    profileImage={profileImage}
+                    onAvatarUpload={handleAvatarUpload}
+                />
 
                 <main className="dash-content">
                     {activeNav === "dashboard" && (
