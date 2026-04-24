@@ -1,5 +1,7 @@
 import { useState } from "react";
-import DashboardHeader from "../../components/DashboardHeader";
+import { useTheme } from "../../context/ThemeContext";
+import ThemeToggle from "../../components/ThemeToggle";
+import UserAvatar from "../../components/UserAvatar";
 import MyProfile from "./MyProfile";
 import MyModules from "./MyModules";
 import FloatingAdvisor from "./FloatingAdvisor";
@@ -8,6 +10,8 @@ import OnlineEbooks from "./OnlineEbooks";
 import StudentTickets from "./StudentTickets";
 import StudentQuizzes from "./StudentQuizzes";
 import ChatInterface from "../../components/chat/ChatInterface";
+import darkLogo from "../../assets/darkLogo.png";
+import lightLogo from "../../assets/lightLogo.png";
 import "../../components/DashboardLayout.css";
 
 const NAV_GROUPS = [
@@ -36,6 +40,8 @@ const NAV_GROUPS = [
 ];
 
 function StudentDashboard() {
+    const { theme } = useTheme();
+    const logo = theme === "light" ? lightLogo : darkLogo;
     const userName = localStorage.getItem("user_name") || "";
     const [profileImage, setProfileImage] = useState(localStorage.getItem("profile_image") || "");
     const [activeNav,       setActiveNav]       = useState("dashboard");
@@ -58,6 +64,11 @@ function StudentDashboard() {
 
             {/* ── Sidebar ── */}
             <aside className="dash-sidebar">
+
+                {/* Logo */}
+                <div className="sidebar-logo-wrap">
+                    <img src={logo} alt="1CAMPUS" className="sidebar-logo" />
+                </div>
 
                 {/* Nav groups */}
                 <nav className="sidebar-nav">
@@ -90,14 +101,24 @@ function StudentDashboard() {
 
             {/* ── Main panel ── */}
             <div className="dash-main">
-                <DashboardHeader 
-                    sidebarCollapsed={sidebarCollapsed}
-                    setSidebarCollapsed={setSidebarCollapsed}
-                    userName={userName}
-                    userRole="Student"
-                    profileImage={profileImage}
-                    onAvatarUpload={handleAvatarUpload}
-                />
+                <header className="dash-topbar">
+                    {/* Hamburger — on mobile this toggles sidebar open/closed */}
+                    <button
+                        className="sidebar-toggle"
+                        onClick={() => setSidebarCollapsed(c => !c)}
+                        title="Toggle sidebar"
+                    >
+                        <i className="bi bi-list" />
+                    </button>
+                    <div className="topbar-right">
+                        <ThemeToggle />
+                        <UserAvatar name={userName} imageUrl={profileImage || undefined} onUpload={handleAvatarUpload} />
+                        <div className="topbar-user">
+                            <span className="topbar-name">{userName || "Student"}</span>
+                            <span className="topbar-role">Student</span>
+                        </div>
+                    </div>
+                </header>
 
                 <main className="dash-content">
                     {activeNav === "dashboard" && (
